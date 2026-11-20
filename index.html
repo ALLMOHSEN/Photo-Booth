@@ -8,14 +8,14 @@
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Arabic Fonts -->
+  <!-- Arabic Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&display=swap" rel="stylesheet" />
 
   <style>
-    /* Strict Kiosk Lock: prevent zoom, pan, bounce, selection, and callouts */
-    html, body {
+    /* Strict Kiosk Viewport & Touch Lock */
+    html, body, #app {
       width: 100%;
       height: 100dvh;
       min-height: 100vh;
@@ -37,17 +37,17 @@
       cursor: pointer;
     }
 
-    /* Ambient blurred live background on Screen 1 */
-    .ambient-video-blur {
-      filter: blur(14px) brightness(0.72);
+    /* Blurred live camera background on home screen */
+    .blurred-camera-bg {
+      filter: blur(14px) brightness(0.74);
       transform: scale(1.08);
     }
 
-    .ambient-video-blur.mirrored {
+    .blurred-camera-bg.mirrored {
       transform: scaleX(-1) scale(1.08);
     }
 
-    /* Clear live camera feed on Screen 2 */
+    /* Unblurred live camera feed during capture */
     .live-camera-feed {
       filter: blur(0px) brightness(1);
       transform: scale(1);
@@ -57,30 +57,30 @@
       transform: scaleX(-1);
     }
 
-    /* Subtle pulse for primary Kiosk start button */
-    @keyframes kioskPulse {
+    /* Gentle central button pulse */
+    @keyframes capturePulse {
       0%, 100% {
-        box-shadow: 0 0 35px rgba(99, 102, 241, 0.55), 0 0 75px rgba(236, 72, 153, 0.28);
+        box-shadow: 0 0 36px rgba(99, 102, 241, 0.55), 0 0 72px rgba(236, 72, 153, 0.28);
         transform: scale(1);
       }
       50% {
-        box-shadow: 0 0 50px rgba(99, 102, 241, 0.8), 0 0 100px rgba(236, 72, 153, 0.45);
+        box-shadow: 0 0 52px rgba(99, 102, 241, 0.8), 0 0 95px rgba(236, 72, 153, 0.45);
         transform: scale(1.02);
       }
     }
 
-    .start-btn-glow {
-      animation: kioskPulse 2.8s infinite ease-in-out;
+    .capture-btn-pulse {
+      animation: capturePulse 2.8s infinite ease-in-out;
     }
 
-    /* Camera flash overlay animation */
+    /* White camera flash animation */
     @keyframes flashBurst {
-      0% { opacity: 0.95; }
+      0% { opacity: 0.96; }
       100% { opacity: 0; }
     }
 
     .flash-burst {
-      animation: flashBurst 0.45s ease-out forwards;
+      animation: flashBurst 0.42s ease-out forwards;
     }
 
     /* Countdown number entrance */
@@ -92,52 +92,44 @@
     }
 
     .count-pop {
-      animation: countPop 0.9s ease-in-out forwards;
+      animation: countPop 0.92s ease-in-out forwards;
     }
 
     .glass-panel {
-      background: rgba(15, 23, 42, 0.78);
+      background: rgba(15, 23, 42, 0.8);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(255, 255, 255, 0.14);
     }
 
-    /* Print-only container hidden on screen */
+    /* Print-only container hidden during normal kiosk viewing */
     #printOnlyContainer {
       display: none;
     }
 
-    /* Compact one-tap theme pills that stay crisp and uncluttered */
-    .theme-pill-btn {
-      touch-action: manipulation;
-    }
-
-    .layout-pill-btn {
-      touch-action: manipulation;
-    }
-
-    /* Exact 100mm x 148mm / 4in x 6in borderless print stylesheet for Canon SELPHY */
+    /* Canon SELPHY 4x6 inch / 100mm x 148mm borderless print rules */
     @page {
-      size: 100mm 148mm;
+      size: 4in 6in;
       margin: 0;
     }
 
     @media print {
       @page {
-        size: 100mm 148mm;
+        size: 4in 6in;
         margin: 0 !important;
       }
 
-      html, body {
-        width: 100mm !important;
-        height: 148mm !important;
+      html, body, #app {
+        width: 4in !important;
+        height: 6in !important;
+        min-height: 6in !important;
         margin: 0 !important;
         padding: 0 !important;
         overflow: hidden !important;
         background: #ffffff !important;
       }
 
-      body > *:not(#printOnlyContainer) {
+      #app > *:not(#printOnlyContainer) {
         display: none !important;
       }
 
@@ -146,8 +138,8 @@
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
-        width: 100mm !important;
-        height: 148mm !important;
+        width: 4in !important;
+        height: 6in !important;
         margin: 0 !important;
         padding: 0 !important;
         background: #ffffff !important;
@@ -155,8 +147,8 @@
       }
 
       #printOnlyImg {
-        width: 100mm !important;
-        height: 148mm !important;
+        width: 4in !important;
+        height: 6in !important;
         max-width: none !important;
         max-height: none !important;
         object-fit: fill !important;
@@ -165,196 +157,197 @@
     }
   </style>
 </head>
-<body class="relative select-none overflow-hidden">
+<body>
+  <div id="app" class="relative w-full h-full overflow-hidden">
 
-  <!-- Full-screen flash overlay on photo capture -->
-  <div id="flashOverlay" class="fixed inset-0 bg-white pointer-events-none opacity-0 z-50"></div>
+    <!-- Full-screen flash overlay on photo capture -->
+    <div id="flashOverlay" class="fixed inset-0 bg-white pointer-events-none opacity-0 z-50"></div>
 
-  <!-- Print-only full-bleed 100mm x 148mm output -->
-  <div id="printOnlyContainer" aria-hidden="true">
-    <img id="printOnlyImg" alt="Canon SELPHY 4x6 Print" />
-  </div>
-
-  <!-- Toast notification banner -->
-  <div id="statusToast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-opacity duration-300 px-3 max-w-full">
-    <div id="statusToastText" class="px-5 py-2.5 rounded-2xl bg-slate-900/95 border border-emerald-400/40 text-white text-xs sm:text-sm font-extrabold shadow-2xl text-center"></div>
-  </div>
-
-  <!-- ===================================================================== -->
-  <!-- SCREEN 1: START KIOSK (Blurred Live Camera BG + Single Center CTA)   -->
-  <!-- ===================================================================== -->
-  <section id="screenStart" class="relative w-full h-full flex items-center justify-center p-4 sm:p-6 overflow-hidden">
-    <!-- Live Camera Background + Simulated Fallback Canvas -->
-    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-      <video id="bgVideo" autoplay playsinline muted class="w-full h-full object-cover ambient-video-blur mirrored hidden"></video>
-      <canvas id="bgSimCanvas" width="1280" height="720" class="w-full h-full object-cover ambient-video-blur"></canvas>
-      <!-- Dark vignette overlay -->
-      <div class="fixed inset-0 bg-gradient-to-b from-slate-950/55 via-slate-950/35 to-slate-950/65"></div>
+    <!-- Print-only full-bleed 4in x 6in (100mm x 148mm) output -->
+    <div id="printOnlyContainer" aria-hidden="true">
+      <img id="printOnlyImg" alt="Canon SELPHY 4x6 Print" />
     </div>
 
-    <!-- Subtle camera mode badge -->
-    <div id="startCameraBadge" class="fixed top-4 right-4 z-20 px-3.5 py-1.5 rounded-full bg-black/55 border border-white/15 text-[11px] sm:text-xs font-bold text-slate-200 pointer-events-none">
-      جاري فحص الكاميرا...
-    </div>
+    <!-- ===================================================================== -->
+    <!-- SCREEN 1: COMPLETELY CLEAN START SCREEN (ONLY BLURRED BG + 1 BUTTON)   -->
+    <!-- ===================================================================== -->
+    <section id="screenStart" class="relative w-full h-full flex items-center justify-center p-6 overflow-hidden">
+      <!-- Blurred Camera Background (<video> with automatic fallback to smooth animated canvas) -->
+      <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <video id="bgVideo" autoplay playsinline muted class="w-full h-full object-cover blurred-camera-bg mirrored hidden"></video>
+        <canvas id="bgSimCanvas" width="1280" height="720" class="w-full h-full object-cover blurred-camera-bg"></canvas>
+        <div class="fixed inset-0 bg-slate-950/35"></div>
+      </div>
 
-    <!-- Subtle top-left admin shot count toggle (3 or 4 shots) -->
-    <button
-      id="btnAdminShotCount"
-      type="button"
-      onclick="toggleAdminShotCount()"
-      title="تغيير عدد الصور (3 أو 4)"
-      class="fixed top-4 left-4 z-20 px-3 py-1.5 rounded-full bg-black/45 hover:bg-black/70 border border-white/15 text-[11px] sm:text-xs font-bold text-slate-300 transition"
-    >
-      <span id="adminShotCountLabel">3 لقطات</span>
-    </button>
-
-    <!-- Single Centered CTA Button -->
-    <div class="relative z-10 w-full max-w-xl flex items-center justify-center">
+      <!-- Single Centered Capture Button with Price -->
       <button
         id="btnStartBooth"
         type="button"
         onclick="handleStartBoothClick()"
-        class="start-btn-glow w-full sm:w-auto sm:min-w-[400px] px-8 py-9 sm:px-12 sm:py-11 rounded-[2.25rem] bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 active:scale-95 text-white border-2 border-white/25 transition-all duration-200 flex flex-col items-center justify-center gap-3"
+        class="capture-btn-pulse relative z-10 w-full max-w-md px-8 py-9 sm:px-12 sm:py-11 rounded-[2.25rem] bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 active:scale-95 text-white border-2 border-white/25 transition-all duration-200 flex flex-col items-center justify-center gap-3"
       >
-        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/15 flex items-center justify-center shadow-inner">
-          <svg class="w-9 h-9 sm:w-11 sm:h-11 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-            <circle cx="12" cy="13" r="3.5" />
-          </svg>
-        </div>
-        <span class="text-2xl sm:text-4xl font-black tracking-tight text-center leading-snug">
-          أخذ صورة ذكرى بسعر 5,000
+        <svg class="w-12 h-12 sm:w-14 sm:h-14 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+          <circle cx="12" cy="13" r="3.5" />
+        </svg>
+        <span class="text-2xl sm:text-3xl font-black tracking-tight text-center leading-snug">
+          أخذ صورة ذكرى بسعر 5,000 د.ع
         </span>
       </button>
-    </div>
-  </section>
+    </section>
 
-  <!-- ===================================================================== -->
-  <!-- SCREEN 3: SIMPLE DIVERSE THEMES + DUAL STRIP / POSTCARD + DIRECT PRINT -->
-  <!-- ===================================================================== -->
-  <section id="screenPrint" class="hidden relative w-full h-full p-3 sm:p-5 lg:p-6 flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch justify-center overflow-hidden">
-    <!-- Left / Right Preview Column: 4x6 Canon SELPHY Composition -->
-    <div class="lg:w-1/2 h-[42%] lg:h-full glass-panel rounded-3xl p-3 sm:p-5 flex flex-col items-center justify-center relative overflow-hidden">
-      <img
-        id="composedPreviewImg"
-        alt="معاينة الصورة النهائية 4x6"
-        class="max-h-full w-auto rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.85)] border-2 border-white/20 object-contain"
-      />
-      <span id="previewFormatBadge" class="absolute top-3 left-3 px-3 py-1 rounded-full bg-black/70 border border-emerald-400/35 text-[11px] font-extrabold text-emerald-300">
-        بوست كارد (4×6) • Canon SELPHY
-      </span>
-    </div>
+    <!-- ===================================================================== -->
+    <!-- SCREEN 2: FULL-SCREEN UNBLURRED CAPTURE (6s INITIAL -> 3s BETWEEN)   -->
+    <!-- ===================================================================== -->
+    <section id="screenCapture" class="hidden relative w-full h-full flex items-center justify-center bg-black overflow-hidden">
+      <video id="liveVideo" autoplay playsinline muted class="w-full h-full object-cover live-camera-feed mirrored hidden"></video>
+      <canvas id="liveSimCanvas" width="1280" height="720" class="w-full h-full object-cover live-camera-feed mirrored hidden"></canvas>
 
-    <!-- Controls Column: Simple Diverse Themes + Print Layout + Direct Print -->
-    <div class="lg:w-1/2 h-[58%] lg:h-full glass-panel rounded-3xl p-3.5 sm:p-5 lg:p-6 flex flex-col justify-between gap-2.5 overflow-hidden">
-      <div class="flex flex-col gap-2.5 overflow-y-auto pr-0.5">
-        <div class="flex items-center justify-between gap-2">
-          <h2 class="text-base sm:text-xl font-black text-white">اختر الثيم</h2>
+      <!-- Shot progress indicator (1/3, 2/3, 3/3) -->
+      <div class="fixed top-4 right-4 z-20 pointer-events-none">
+        <div id="captureShotCounter" class="px-4 py-2 rounded-2xl bg-slate-950/75 border border-white/20 text-sm sm:text-base font-black text-white shadow-lg">
+          1/3
+        </div>
+      </div>
 
-          <!-- Simple Layout Switcher: بوست كارد (4×6) / شريطين (2×6) -->
-          <div class="inline-flex rounded-xl bg-slate-900/90 p-1 border border-white/15 shrink-0" role="group" aria-label="قياس الطباعة">
+      <!-- Countdown Overlay -->
+      <div id="countdownOverlay" class="hidden fixed inset-0 z-20 flex flex-col items-center justify-center pointer-events-none bg-black/20">
+        <div id="countdownNumber" class="count-pop text-8xl sm:text-[9rem] font-black text-white drop-shadow-[0_10px_35px_rgba(0,0,0,0.85)] leading-none">
+          6
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- SCREEN 3: THEMES + DUAL STRIP / POSTCARD + DIRECT PRINT             -->
+    <!-- ===================================================================== -->
+    <section id="screenPrint" class="hidden relative w-full h-full p-3 sm:p-5 lg:p-6 flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch justify-center overflow-hidden">
+      <!-- Left / Top Preview Column: 4x6 Canon SELPHY Composition -->
+      <div class="lg:w-1/2 h-[42%] lg:h-full glass-panel rounded-3xl p-3 sm:p-5 flex items-center justify-center relative overflow-hidden">
+        <img
+          id="composedPreviewImg"
+          alt="معاينة الصورة النهائية"
+          class="max-h-full w-auto rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.85)] border-2 border-white/20 object-contain"
+        />
+      </div>
+
+      <!-- Controls Column: One-Tap Themes + Layout Toggle + Direct Print -->
+      <div class="lg:w-1/2 h-[58%] lg:h-full glass-panel rounded-3xl p-3.5 sm:p-5 lg:p-6 flex flex-col justify-between gap-2.5 overflow-hidden">
+        <div class="flex flex-col gap-2.5 overflow-y-auto pr-0.5">
+          <div class="flex items-center justify-between gap-2">
+            <h2 class="text-base sm:text-xl font-black text-white">الثيم</h2>
+
+            <!-- Layout Switcher: بوست كارد (4×6) / شريطين (2×6) -->
+            <div class="inline-flex rounded-xl bg-slate-900/90 p-1 border border-white/15 shrink-0" role="group" aria-label="قياس الطباعة">
+              <button
+                type="button"
+                data-layout="postcard"
+                onclick="selectPrintLayout('postcard')"
+                class="layout-pill-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black transition bg-indigo-600 text-white shadow"
+              >
+                بوست كارد (4×6)
+              </button>
+              <button
+                type="button"
+                data-layout="dual_strip"
+                onclick="selectPrintLayout('dual_strip')"
+                class="layout-pill-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black transition text-slate-300 hover:text-white"
+              >
+                شريطين (2×6)
+              </button>
+            </div>
+          </div>
+
+          <!-- Simple One-Tap Themes Grid -->
+          <div id="themesGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
             <button
               type="button"
-              data-layout="postcard"
-              onclick="selectPrintLayout('postcard')"
-              class="layout-pill-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black transition bg-indigo-600 text-white shadow"
+              data-theme="kids"
+              onclick="selectTheme('kids')"
+              class="theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-amber-500/25 border-amber-300 text-white shadow"
             >
-              بوست كارد (4×6)
+              <span class="w-5 h-5 rounded-full shrink-0 border border-white/40 bg-gradient-to-br from-amber-300 to-sky-400"></span>
+              <span class="text-xs sm:text-sm font-black leading-tight">أطفال</span>
             </button>
+
             <button
               type="button"
-              data-layout="dual_strip"
-              onclick="selectPrintLayout('dual_strip')"
-              class="layout-pill-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black transition text-slate-300 hover:text-white"
+              data-theme="girls"
+              onclick="selectTheme('girls')"
+              class="theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-slate-900/75 border-white/15 hover:border-pink-400/60 text-slate-200"
             >
-              شريطين (2×6)
+              <span class="w-5 h-5 rounded-full shrink-0 border border-white/40 bg-gradient-to-br from-pink-400 to-rose-500"></span>
+              <span class="text-xs sm:text-sm font-black leading-tight">بنات</span>
+            </button>
+
+            <button
+              type="button"
+              data-theme="boys"
+              onclick="selectTheme('boys')"
+              class="theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-slate-900/75 border-white/15 hover:border-cyan-400/60 text-slate-200"
+            >
+              <span class="w-5 h-5 rounded-full shrink-0 border border-white/40 bg-gradient-to-br from-cyan-400 to-blue-600"></span>
+              <span class="text-xs sm:text-sm font-black leading-tight">أولاد</span>
+            </button>
+
+            <button
+              type="button"
+              data-theme="adults"
+              onclick="selectTheme('adults')"
+              class="theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-slate-900/75 border-white/15 hover:border-yellow-400/60 text-slate-200"
+            >
+              <span class="w-5 h-5 rounded-full shrink-0 border border-white/40 bg-gradient-to-br from-neutral-900 to-amber-500"></span>
+              <span class="text-xs sm:text-sm font-black leading-tight">كبار</span>
+            </button>
+
+            <button
+              type="button"
+              data-theme="royal_white"
+              onclick="selectTheme('royal_white')"
+              class="theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-slate-900/75 border-white/15 hover:border-amber-200/70 text-slate-200"
+            >
+              <span class="w-5 h-5 rounded-full shrink-0 border border-slate-400 bg-gradient-to-br from-white to-amber-200"></span>
+              <span class="text-xs sm:text-sm font-black leading-tight">أبيض ملكي</span>
+            </button>
+
+            <button
+              type="button"
+              data-theme="pastel"
+              onclick="selectTheme('pastel')"
+              class="theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-slate-900/75 border-white/15 hover:border-teal-300/60 text-slate-200"
+            >
+              <span class="w-5 h-5 rounded-full shrink-0 border border-white/40 bg-gradient-to-br from-emerald-200 via-purple-200 to-rose-200"></span>
+              <span class="text-xs sm:text-sm font-black leading-tight">باستيل</span>
             </button>
           </div>
         </div>
 
-        <!-- Simple One-Tap Diverse Themes Grid -->
-        <div id="diverseThemesGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        <!-- Primary Print & Reset Actions -->
+        <div class="flex flex-col gap-2 pt-2 border-t border-white/10 shrink-0">
           <button
+            id="btnDirectPrint"
             type="button"
-            data-theme="kids"
-            onclick="selectTheme('kids')"
-            class="theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-amber-500/25 border-amber-300 text-white shadow"
+            onclick="triggerDirectPrint()"
+            class="w-full py-4 px-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 active:scale-[0.98] text-white font-black text-base sm:text-lg shadow-xl transition flex items-center justify-center gap-2"
           >
-            <span class="w-5 h-5 rounded-full shrink-0 border border-white/40 bg-gradient-to-br from-amber-300 to-sky-400"></span>
-            <span class="text-xs sm:text-sm font-black leading-tight">أطفال — مرح ونجوم</span>
+            <span>طباعة فورية — الاستلام من الكاشير</span>
           </button>
 
           <button
+            id="btnFinishReset"
             type="button"
-            data-theme="girls"
-            onclick="selectTheme('girls')"
-            class="theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-slate-900/75 border-white/15 hover:border-pink-400/60 text-slate-200"
+            onclick="resetToStartScreen()"
+            class="w-full py-3.5 px-5 rounded-2xl bg-slate-800 hover:bg-slate-700 active:scale-[0.98] border border-white/15 text-slate-100 font-extrabold text-sm sm:text-base transition flex items-center justify-center gap-2"
           >
-            <span class="w-5 h-5 rounded-full shrink-0 border border-white/40 bg-gradient-to-br from-pink-400 to-rose-500"></span>
-            <span class="text-xs sm:text-sm font-black leading-tight">بنات — وردي وأنيق</span>
-          </button>
-
-          <button
-            type="button"
-            data-theme="boys"
-            onclick="selectTheme('boys')"
-            class="theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-slate-900/75 border-white/15 hover:border-cyan-400/60 text-slate-200"
-          >
-            <span class="w-5 h-5 rounded-full shrink-0 border border-white/40 bg-gradient-to-br from-cyan-400 to-blue-600"></span>
-            <span class="text-xs sm:text-sm font-black leading-tight">أولاد — أزرق ونيون</span>
-          </button>
-
-          <button
-            type="button"
-            data-theme="adults"
-            onclick="selectTheme('adults')"
-            class="theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-slate-900/75 border-white/15 hover:border-yellow-400/60 text-slate-200"
-          >
-            <span class="w-5 h-5 rounded-full shrink-0 border border-white/40 bg-gradient-to-br from-neutral-900 to-amber-500"></span>
-            <span class="text-xs sm:text-sm font-black leading-tight">كبار — أسود وذهبي VIP</span>
-          </button>
-
-          <button
-            type="button"
-            data-theme="royal_white"
-            onclick="selectTheme('royal_white')"
-            class="theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-slate-900/75 border-white/15 hover:border-amber-200/70 text-slate-200"
-          >
-            <span class="w-5 h-5 rounded-full shrink-0 border border-slate-400 bg-gradient-to-br from-white to-amber-200"></span>
-            <span class="text-xs sm:text-sm font-black leading-tight">أبيض ملكي — كلاسيك</span>
-          </button>
-
-          <button
-            type="button"
-            data-theme="pastel_spring"
-            onclick="selectTheme('pastel_spring')"
-            class="theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-slate-900/75 border-white/15 hover:border-teal-300/60 text-slate-200"
-          >
-            <span class="w-5 h-5 rounded-full shrink-0 border border-white/40 bg-gradient-to-br from-emerald-200 via-purple-200 to-rose-200"></span>
-            <span class="text-xs sm:text-sm font-black leading-tight">ألوان الباستيل — ربيعي</span>
+            <span>إنهاء</span>
           </button>
         </div>
       </div>
+    </section>
 
-      <!-- Primary Print & Reset Actions -->
-      <div class="flex flex-col gap-2 pt-2 border-t border-white/10 shrink-0">
-          <span>طباعة فورية — الاستلام من الكاشير</span>
-        </button>
-
-        <button
-          id="btnFinishReset"
-          type="button"
-          onclick="resetToStartScreen()"
-          class="w-full py-3.5 px-5 rounded-2xl bg-slate-800 hover:bg-slate-700 active:scale-[0.98] border border-white/15 text-slate-100 font-extrabold text-sm sm:text-base transition flex items-center justify-center gap-2"
-        >
-          <span>إنهاء والعودة</span>
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <!-- High-resolution 1200x1800 px (300 DPI at 4x6 inch / 100x148 mm) offscreen print canvas -->
-  <canvas id="selphyCanvas" width="1200" height="1800" class="hidden"></canvas>
+    <!-- 1200x1800 px (100mm x 148mm / 4x6 inch at 300 DPI) Canon SELPHY Canvas -->
+    <canvas id="selphyCanvas" width="1200" height="1800" class="hidden"></canvas>
+  </div>
 
   <script>
     /**
@@ -362,29 +355,28 @@
      */
     const STATE = {
       screen: 'start',          // 'start' | 'capture' | 'print'
-      shotCount: 3,             // Default 3 photos (toggleable between 3 and 4)
-      initialCountdownSec: 6,   // 6s before first photo
-      betweenShotsSec: 3,       // 3s between subsequent photos
-      selectedTheme: 'kids',    // 'kids' | 'girls' | 'boys' | 'adults' | 'royal_white' | 'pastel_spring'
-      printLayout: 'postcard',  // 'postcard' (4x6) | 'dual_strip' (شريطين 2x6 x2 on 4x6 sheet)
+      shotCount: 3,             // 3 photos per session (1/3, 2/3, 3/3)
+      initialCountdownSec: 6,   // 6 seconds before Shot 1
+      betweenShotsSec: 3,       // 3 seconds between subsequent shots
+      selectedTheme: 'kids',    // 'kids' | 'girls' | 'boys' | 'adults' | 'royal_white' | 'pastel'
+      printLayout: 'postcard',  // 'postcard' (4x6) | 'dual_strip' (شريطين 2x6)
       mirrorCamera: true,
       stream: null,
       hasLiveVideoStream: false,
-      simulatedMode: false,
-      capturedPhotos: [],       // Data URLs for each captured frame
+      capturedPhotos: [],       // Captured frame Data URLs
       isCaptureRunning: false,
-      sessionId: 0,             // Incrementing token to cancel stale async loops on reset
-      simAnimFrame: null
+      sessionId: 0,             // Monotonic session token to cancel stale loops
+      simAnimFrame: null,
+      audioCtx: null
     };
 
     /**
-     * Diverse Themes definitions for 1200x1800 Canon SELPHY Canvas
+     * Theme Definitions for 1200x1800 (4x6 inch / 100mm x 148mm at 300 DPI) Print Canvas
      */
-    const DIVERSE_THEMES = {
+    const THEMES = {
       kids: {
         id: 'kids',
-        title: 'أطفال — مرح ونجوم',
-        subtitle: 'ذكرى مليئة بالمرح والنجوم ⭐🎈',
+        label: 'أطفال',
         bgTop: '#FFFBEB',
         bgBottom: '#E0F2FE',
         borderColor: '#F59E0B',
@@ -396,8 +388,7 @@
       },
       girls: {
         id: 'girls',
-        title: 'بنات — وردي وأنيق',
-        subtitle: 'لحظات وردية أنيقة ومشرقة 💖✨',
+        label: 'بنات',
         bgTop: '#FFF1F2',
         bgBottom: '#FCE7F3',
         borderColor: '#EC4899',
@@ -409,8 +400,7 @@
       },
       boys: {
         id: 'boys',
-        title: 'أولاد — أزرق ونيون',
-        subtitle: 'طاقة ونيون وحماس بلا حدود ⚡🔵',
+        label: 'أولاد',
         bgTop: '#061224',
         bgBottom: '#0F172A',
         borderColor: '#06B6D4',
@@ -422,8 +412,7 @@
       },
       adults: {
         id: 'adults',
-        title: 'كبار — أسود وذهبي VIP',
-        subtitle: 'أناقة خالدة وحضور VIP ✨🥂',
+        label: 'كبار',
         bgTop: '#09090B',
         bgBottom: '#18181B',
         borderColor: '#EAB308',
@@ -435,8 +424,7 @@
       },
       royal_white: {
         id: 'royal_white',
-        title: 'أبيض ملكي — كلاسيك',
-        subtitle: 'إطلالة كلاسيكية نقية بلمسة ذهبية 🤍',
+        label: 'أبيض ملكي',
         bgTop: '#FFFFFF',
         bgBottom: '#FAF8F5',
         borderColor: '#C5A059',
@@ -446,10 +434,9 @@
         stickerRight: '❖',
         pattern: 'classic'
       },
-      pastel_spring: {
-        id: 'pastel_spring',
-        title: 'ألوان الباستيل — ربيعي',
-        subtitle: 'نسائم ربيعية ناعمة بألوان الباستيل 🌸🌿',
+      pastel: {
+        id: 'pastel',
+        label: 'باستيل',
         bgTop: '#ECFDF5',
         bgBottom: '#F3E8FF',
         borderColor: '#A78BFA',
@@ -462,17 +449,7 @@
     };
 
     /**
-     * Toggle shot count between 3 and 4 from subtle top-left kiosk badge
-     */
-    function toggleAdminShotCount() {
-      if (STATE.isCaptureRunning) return;
-      STATE.shotCount = STATE.shotCount === 3 ? 4 : 3;
-      document.getElementById('adminShotCountLabel').textContent = `${STATE.shotCount} لقطات`;
-      showStatusToast(`تم ضبط عدد اللقطات على ${STATE.shotCount} صور`);
-    }
-
-    /**
-     * Lock viewport gestures (pinch zoom, multi-touch pan, double-tap zoom, context menu)
+     * Lock viewport against pinch-zoom, multi-touch pan, double-tap zoom, and context menus
      */
     function installViewportLocks() {
       document.addEventListener('contextmenu', (e) => {
@@ -508,12 +485,62 @@
     }
 
     /**
-     * Simulated live camera feed renderer when real camera is unavailable or denied
+     * Web Audio API Shutter Sound (no external audio files)
+     */
+    function playShutterSound() {
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+
+        if (!STATE.audioCtx) {
+          STATE.audioCtx = new AudioContextClass();
+        }
+        if (STATE.audioCtx.state === 'suspended') {
+          STATE.audioCtx.resume().catch(() => {});
+        }
+
+        const ctx = STATE.audioCtx;
+        const now = ctx.currentTime;
+
+        // Crisp mechanical shutter click burst
+        const bufferSize = Math.floor(ctx.sampleRate * 0.09);
+        const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.25));
+        }
+
+        const noise = ctx.createBufferSource();
+        noise.buffer = noiseBuffer;
+
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(1800, now);
+        filter.Q.setValueAtTime(1.2, now);
+
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.45, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.085);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+
+        noise.start(now);
+        noise.stop(now + 0.09);
+      } catch (err) {
+        // Ignore audio errors if restricted by browser policy
+      }
+    }
+
+    /**
+     * Smooth animated studio canvas fallback when camera stream is unavailable or blocked
      */
     function startSimulatedCameraLoop() {
       if (STATE.simAnimFrame) {
         cancelAnimationFrame(STATE.simAnimFrame);
       }
+
       const bgCanvas = document.getElementById('bgSimCanvas');
       const liveCanvas = document.getElementById('liveSimCanvas');
       const canvases = [bgCanvas, liveCanvas].filter(Boolean);
@@ -528,16 +555,15 @@
 
           const grad = ctx.createLinearGradient(0, 0, w, h);
           grad.addColorStop(0, '#1e1b4b');
-          grad.addColorStop(0.5, '#311042');
+          grad.addColorStop(0.5, '#3b0764');
           grad.addColorStop(1, '#0f172a');
           ctx.fillStyle = grad;
           ctx.fillRect(0, 0, w, h);
 
-          // Moving soft orbs to simulate live studio feed
           const orbs = [
-            { x: w * (0.3 + 0.12 * Math.sin(t * 0.9)), y: h * (0.4 + 0.1 * Math.cos(t * 0.7)), r: w * 0.22, color: 'rgba(99, 102, 241, 0.35)' },
-            { x: w * (0.72 + 0.1 * Math.cos(t * 0.8)), y: h * (0.55 + 0.12 * Math.sin(t * 0.6)), r: w * 0.24, color: 'rgba(236, 72, 153, 0.30)' },
-            { x: w * 0.5, y: h * 0.5, r: w * 0.15, color: 'rgba(56, 189, 248, 0.18)' }
+            { x: w * (0.3 + 0.12 * Math.sin(t * 0.85)), y: h * (0.4 + 0.1 * Math.cos(t * 0.65)), r: w * 0.24, color: 'rgba(99, 102, 241, 0.36)' },
+            { x: w * (0.72 + 0.1 * Math.cos(t * 0.75)), y: h * (0.55 + 0.12 * Math.sin(t * 0.6)), r: w * 0.25, color: 'rgba(236, 72, 153, 0.32)' },
+            { x: w * 0.5, y: h * 0.48, r: w * 0.16, color: 'rgba(56, 189, 248, 0.2)' }
           ];
 
           orbs.forEach((orb) => {
@@ -550,10 +576,18 @@
             ctx.fill();
           });
 
-          // Subtle studio framing guide
+          // Subtle studio portrait silhouette guide
+          ctx.save();
           ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
-          ctx.lineWidth = 4;
-          ctx.strokeRect(w * 0.12, h * 0.1, w * 0.76, h * 0.8);
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(w * 0.5, h * 0.4, h * 0.13, 0, Math.PI * 2);
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.ellipse(w * 0.5, h * 0.74, h * 0.22, h * 0.16, 0, Math.PI, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
         });
 
         STATE.simAnimFrame = requestAnimationFrame(renderFrame);
@@ -563,233 +597,139 @@
     }
 
     /**
-     * Screen 3: Select one of the diverse themes and immediately update 1200x1800 print canvas
+     * Switch between 'start' | 'capture' | 'print' screens
      */
-    async function selectTheme(themeKey) {
-      if (!DIVERSE_THEMES[themeKey]) return;
-      STATE.selectedTheme = themeKey;
+    function setActiveScreen(target) {
+      STATE.screen = target;
+      document.getElementById('screenStart').classList.toggle('hidden', target !== 'start');
+      document.getElementById('screenCapture').classList.toggle('hidden', target !== 'capture');
+      document.getElementById('screenPrint').classList.toggle('hidden', target !== 'print');
+      syncCameraVisualTargets();
+    }
 
-      const buttons = document.querySelectorAll('.theme-pill-btn');
-      buttons.forEach((btn) => {
-        const isSelected = btn.getAttribute('data-theme') === themeKey;
-        if (isSelected) {
-          btn.className = 'theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-indigo-600/40 border-amber-300 text-white shadow scale-[1.01]';
+    /**
+     * Synchronize <video> vs simulated <canvas> visibility across screens
+     */
+    function syncCameraVisualTargets() {
+      const bgVideo = document.getElementById('bgVideo');
+      const bgSim = document.getElementById('bgSimCanvas');
+      const liveVideo = document.getElementById('liveVideo');
+      const liveSim = document.getElementById('liveSimCanvas');
+
+      const useLiveVideo = Boolean(STATE.hasLiveVideoStream && STATE.stream);
+
+      [bgVideo, liveVideo].forEach((vid) => {
+        if (!vid) return;
+        if (useLiveVideo) {
+          if (vid.srcObject !== STATE.stream) {
+            vid.srcObject = STATE.stream;
+          }
+          vid.classList.toggle('mirrored', STATE.mirrorCamera);
+          vid.play().catch(() => {});
         } else {
-          btn.className = 'theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-slate-900/75 border-white/15 hover:border-white/35 text-slate-200';
+          vid.pause();
         }
       });
 
-      await renderSelphyComposition();
+      if (bgVideo) bgVideo.classList.toggle('hidden', !(STATE.screen === 'start' && useLiveVideo));
+      if (bgSim) bgSim.classList.toggle('hidden', !(STATE.screen === 'start' && !useLiveVideo));
+      if (liveVideo) liveVideo.classList.toggle('hidden', !(STATE.screen === 'capture' && useLiveVideo));
+      if (liveSim) liveSim.classList.toggle('hidden', !(STATE.screen === 'capture' && !useLiveVideo));
     }
 
     /**
-     * Screen 3: Switch between Postcard (4x6) and Dual Strip (شريطين 2x6)
+     * Request camera stream with clean fallback to animated canvas
      */
-    async function selectPrintLayout(layoutKey) {
-      if (layoutKey !== 'postcard' && layoutKey !== 'dual_strip') return;
-      STATE.printLayout = layoutKey;
-
-      const buttons = document.querySelectorAll('.layout-pill-btn');
-      buttons.forEach((btn) => {
-        const active = btn.getAttribute('data-layout') === layoutKey;
-        btn.className = active
-          ? 'layout-pill-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black transition bg-indigo-600 text-white shadow'
-          : 'layout-pill-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black transition text-slate-300 hover:text-white';
-      });
-
-      const badge = document.getElementById('previewFormatBadge');
-      badge.textContent = layoutKey === 'dual_strip'
-        ? 'شريطين (2×6 ×2) • Canon SELPHY 4×6"'
-        : 'بوست كارد (4×6) • Canon SELPHY 100×148mm';
-
-      await renderSelphyComposition();
-    }
-
-    /**
-     * Draw one photo strip column (used once for Postcard 4x6 or twice side-by-side for Dual Strip 2x6)
-     */
-    function drawSingleStripColumn(ctx, theme, loadedImgs, count, x, y, w, h, isCompactStrip) {
-      // Strip background
-      const grad = ctx.createLinearGradient(x, y, x, y + h);
-      grad.addColorStop(0, theme.bgTop);
-      grad.addColorStop(1, theme.bgBottom);
-      ctx.fillStyle = grad;
-      roundRectPath(ctx, x, y, w, h, isCompactStrip ? 20 : 32);
-      ctx.fill();
-
-      // Decorative dots inside strip
-      ctx.save();
-      roundRectPath(ctx, x, y, w, h, isCompactStrip ? 20 : 32);
-      ctx.clip();
-      ctx.globalAlpha = 0.14;
-      const dotCount = isCompactStrip ? 14 : 24;
-      for (let i = 0; i < dotCount; i++) {
-        const dx = x + (((i * 137) % Math.max(80, w - 60)) + 30);
-        const dy = y + (((i * 251) % Math.max(120, h - 80)) + 40);
-        const r = (isCompactStrip ? 6 : 10) + (i % 3) * (isCompactStrip ? 4 : 7);
-        ctx.fillStyle = i % 2 === 0 ? theme.borderColor : theme.accentColor;
-        ctx.beginPath();
-        ctx.arc(dx, dy, r, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.restore();
-
-      // Frame border
-      ctx.strokeStyle = theme.borderColor;
-      ctx.lineWidth = isCompactStrip ? 8 : 16;
-      roundRectPath(ctx, x + 8, y + 8, w - 16, h - 16, isCompactStrip ? 18 : 28);
-      ctx.stroke();
-
-      // Header title
-      const padX = isCompactStrip ? 22 : 64;
-      const headerY = y + (isCompactStrip ? 62 : 95);
-      const footerY = y + h - (isCompactStrip ? 64 : 105);
-      const photosTop = y + (isCompactStrip ? 105 : 155);
-      const photosBottom = y + h - (isCompactStrip ? 108 : 165);
-      const gap = isCompactStrip ? 16 : 24;
-      const slotW = w - padX * 2;
-      const slotH = Math.max(80, Math.floor((photosBottom - photosTop - gap * (count - 1)) / count));
-
-      ctx.fillStyle = theme.textColor;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.font = isCompactStrip ? '900 28px "Cairo", sans-serif' : '900 48px "Cairo", sans-serif';
-      ctx.fillText(theme.title, x + w / 2, headerY, w - 36);
-
-      for (let i = 0; i < count; i++) {
-        const py = photosTop + i * (slotH + gap);
-        const img = loadedImgs[i % loadedImgs.length];
-
-        ctx.save();
-        roundRectPath(ctx, x + padX, py, slotW, slotH, isCompactStrip ? 14 : 22);
-        ctx.clip();
-        if (img) {
-          drawCoverFit(ctx, img, img.naturalWidth || img.width, img.naturalHeight || img.height, x + padX, py, slotW, slotH);
-        } else {
-          ctx.fillStyle = '#334155';
-          ctx.fillRect(x + padX, py, slotW, slotH);
+    async function tryOpenCameraStream() {
+      if (STATE.hasLiveVideoStream && STATE.stream) {
+        const activeTracks = STATE.stream.getVideoTracks().filter((t) => t.readyState === 'live');
+        if (activeTracks.length > 0) {
+          syncCameraVisualTargets();
+          return true;
         }
-        ctx.restore();
-
-        ctx.strokeStyle = theme.borderColor;
-        ctx.lineWidth = isCompactStrip ? 4 : 6;
-        roundRectPath(ctx, x + padX, py, slotW, slotH, isCompactStrip ? 14 : 22);
-        ctx.stroke();
       }
 
-      // Footer text & stickers
-      ctx.fillStyle = theme.textColor;
-      ctx.font = isCompactStrip ? '800 22px "Cairo", sans-serif' : '800 38px "Cairo", sans-serif';
-      ctx.fillText(theme.subtitle, x + w / 2, footerY, w - (isCompactStrip ? 110 : 240));
+      if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== 'function') {
+        STATE.hasLiveVideoStream = false;
+        syncCameraVisualTargets();
+        return false;
+      }
 
-      ctx.font = isCompactStrip ? '700 28px sans-serif' : '700 52px sans-serif';
-      ctx.fillText(theme.stickerLeft, x + (isCompactStrip ? 36 : 110), footerY);
-      ctx.fillText(theme.stickerRight, x + w - (isCompactStrip ? 36 : 110), footerY);
+      const constraintsList = [
+        { video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false },
+        { video: true, audio: false }
+      ];
+
+      for (let i = 0; i < constraintsList.length; i++) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia(constraintsList[i]);
+          if (stream && stream.getVideoTracks().length > 0) {
+            STATE.stream = stream;
+            STATE.hasLiveVideoStream = true;
+
+            const bgVideo = document.getElementById('bgVideo');
+            const liveVideo = document.getElementById('liveVideo');
+            if (bgVideo) {
+              bgVideo.srcObject = stream;
+              await bgVideo.play().catch(() => {});
+            }
+            if (liveVideo) {
+              liveVideo.srcObject = stream;
+              await liveVideo.play().catch(() => {});
+            }
+
+            syncCameraVisualTargets();
+            return true;
+          }
+        } catch (err) {
+          // Try next fallback constraint or fall back to simulated canvas
+        }
+      }
+
+      STATE.stream = null;
+      STATE.hasLiveVideoStream = false;
+      syncCameraVisualTargets();
+      return false;
+    }
+
+    async function ensureCameraReady() {
+      const ok = await tryOpenCameraStream();
+      if (!ok) {
+        startSimulatedCameraLoop();
+      }
+      return ok;
     }
 
     /**
-     * Compose 1200x1800 px (300 DPI at 4x6 inch / 100x148 mm) print sheet
+     * Cover-fit helper for drawing media without distortion
      */
-    async function renderSelphyComposition() {
-      const canvas = document.getElementById('selphyCanvas');
-      const ctx = canvas.getContext('2d');
-      const W = 1200;
-      const H = 1800;
-      canvas.width = W;
-      canvas.height = H;
-
-      const theme = DIVERSE_THEMES[STATE.selectedTheme] || DIVERSE_THEMES.kids;
-      const count = Math.max(1, STATE.capturedPhotos.length || STATE.shotCount);
-      const loadedImgs = await Promise.all(
-        (STATE.capturedPhotos.length ? STATE.capturedPhotos : [createPlaceholderPhoto(theme)]).map(loadImageElement)
-      );
-
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, W, H);
-
-      if (STATE.printLayout === 'dual_strip') {
-        // Two 2x6 strips side-by-side on one 4x6 (1200x1800) Canon SELPHY sheet
-        const marginX = 24;
-        const centerGap = 24;
-        const stripW = Math.floor((W - marginX * 2 - centerGap) / 2);
-        const stripY = 20;
-        const stripH = H - 40;
-
-        drawSingleStripColumn(ctx, theme, loadedImgs, count, marginX, stripY, stripW, stripH, true);
-        drawSingleStripColumn(ctx, theme, loadedImgs, count, marginX + stripW + centerGap, stripY, stripW, stripH, true);
-
-        // Subtle center cut guide line
-        ctx.save();
-        ctx.setLineDash([12, 12]);
-        ctx.strokeStyle = 'rgba(100, 116, 139, 0.55)';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(W / 2, 24);
-        ctx.lineTo(W / 2, H - 24);
-        ctx.stroke();
-        ctx.restore();
-      } else {
-        // Full 4x6 Postcard layout (1200x1800)
-        drawSingleStripColumn(ctx, theme, loadedImgs, count, 20, 20, W - 40, H - 40, false);
-      }
-
-      const finalDataUrl = canvas.toDataURL('image/jpeg', 0.95);
-      document.getElementById('composedPreviewImg').src = finalDataUrl;
-      document.getElementById('printOnlyImg').src = finalDataUrl;
-    }
-
-    function createPlaceholderPhoto(theme) {
-      const c = document.createElement('canvas');
-      c.width = 900;
-      c.height = 600;
-      const ctx = c.getContext('2d');
-      ctx.fillStyle = theme.borderColor;
-      ctx.fillRect(0, 0, c.width, c.height);
-      return c.toDataURL('image/jpeg', 0.8);
-    }
-
-    function loadImageElement(src) {
-      return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => resolve(img);
-        img.onerror = () => resolve(null);
-        img.src = src;
-      });
-    }
-
     function drawCoverFit(ctx, source, srcW, srcH, dx, dy, dw, dh) {
-      if (!srcW || !srcH) return;
-      const srcRatio = srcW / srcH;
-      const dstRatio = dw / dh;
+      if (!srcW || !srcH || !dw || !dh) return;
+      const srcAspect = srcW / srcH;
+      const dstAspect = dw / dh;
+
       let sx = 0;
       let sy = 0;
-      let sw = srcW;
-      let sh = srcH;
+      let sWidth = srcW;
+      let sHeight = srcH;
 
-      if (srcRatio > dstRatio) {
-        sw = srcH * dstRatio;
-        sx = (srcW - sw) / 2;
+      if (srcAspect > dstAspect) {
+        sWidth = srcH * dstAspect;
+        sx = (srcW - sWidth) * 0.5;
       } else {
-        sh = srcW / dstRatio;
-        sy = (srcH - sh) / 2;
+        sHeight = srcW / dstAspect;
+        sy = (srcH - sHeight) * 0.5;
       }
 
-      ctx.drawImage(source, sx, sy, sw, sh, dx, dy, dw, dh);
+      ctx.drawImage(source, sx, sy, sWidth, sHeight, dx, dy, dw, dh);
     }
 
-    function roundRectPath(ctx, x, y, w, h, r) {
-      const radius = Math.min(r, w / 2, h / 2);
-      ctx.beginPath();
-      ctx.moveTo(x + radius, y);
-      ctx.lineTo(x + w - radius, y);
-      ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
-      ctx.lineTo(x + w, y + h - radius);
-      ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
-      ctx.lineTo(x + radius, y + h);
-      ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
-      ctx.lineTo(x, y + radius);
-      ctx.quadraticCurveTo(x, y, x + radius, y);
-      ctx.closePath();
+    function triggerCameraFlash() {
+      const flash = document.getElementById('flashOverlay');
+      if (!flash) return;
+      flash.classList.remove('flash-burst');
+      void flash.offsetWidth;
+      flash.classList.add('flash-burst');
     }
 
     function delayMs(ms, sessionToken) {
@@ -801,45 +741,437 @@
     }
 
     /**
-     * Direct print action for Canon SELPHY Wi-Fi / AirPrint (100mm x 148mm / 4x6 inch)
+     * Countdown runner (e.g., 6, 5, 4, 3, 2, 1 or 3, 2, 1)
      */
-    async function triggerDirectPrint() {
-      await renderSelphyComposition();
-      showStatusToast('جاري إرسال الصورة للطباعة • الاستلام من الكاشير');
-      setTimeout(() => {
-        try {
-          window.print();
-        } catch (err) {
-          showStatusToast('يرجى استخدام خيار الطباعة من المتصفح • الاستلام من الكاشير');
+    async function runCountdown(seconds, sessionToken) {
+      const overlay = document.getElementById('countdownOverlay');
+      const numEl = document.getElementById('countdownNumber');
+      if (!overlay || !numEl) return false;
+
+      overlay.classList.remove('hidden');
+
+      for (let s = seconds; s >= 1; s--) {
+        if (sessionToken !== STATE.sessionId) {
+          overlay.classList.add('hidden');
+          return false;
         }
-      }, 180);
+        numEl.textContent = String(s);
+        numEl.classList.remove('count-pop');
+        void numEl.offsetWidth;
+        numEl.classList.add('count-pop');
+
+        const ok = await delayMs(1000, sessionToken);
+        if (!ok) {
+          overlay.classList.add('hidden');
+          return false;
+        }
+      }
+
+      overlay.classList.add('hidden');
+      return true;
     }
 
     /**
-     * Reset cleanly back to Screen 1 (Start Kiosk)
+     * Capture a high-res photo frame from live video or simulated canvas
+     */
+    function captureFrameDataUrl() {
+      const snapCanvas = document.createElement('canvas');
+      snapCanvas.width = 1200;
+      snapCanvas.height = 800;
+      const ctx = snapCanvas.getContext('2d');
+
+      const useLiveVideo = Boolean(STATE.hasLiveVideoStream && STATE.stream);
+      const liveVideo = document.getElementById('liveVideo');
+      const liveSim = document.getElementById('liveSimCanvas');
+
+      ctx.save();
+      if (STATE.mirrorCamera) {
+        ctx.translate(snapCanvas.width, 0);
+        ctx.scale(-1, 1);
+      }
+
+      if (useLiveVideo && liveVideo && liveVideo.readyState >= 2 && liveVideo.videoWidth > 0) {
+        drawCoverFit(ctx, liveVideo, liveVideo.videoWidth, liveVideo.videoHeight, 0, 0, snapCanvas.width, snapCanvas.height);
+      } else if (liveSim) {
+        drawCoverFit(ctx, liveSim, liveSim.width, liveSim.height, 0, 0, snapCanvas.width, snapCanvas.height);
+      } else {
+        const bgSim = document.getElementById('bgSimCanvas');
+        if (bgSim) {
+          drawCoverFit(ctx, bgSim, bgSim.width, bgSim.height, 0, 0, snapCanvas.width, snapCanvas.height);
+        }
+      }
+
+      ctx.restore();
+      return snapCanvas.toDataURL('image/jpeg', 0.93);
+    }
+
+    /**
+     * Start capture flow: 6s initial countdown -> Shot 1 -> 3s wait -> Shot 2 -> 3s wait -> Shot 3
+     */
+    async function handleStartBoothClick() {
+      if (STATE.isCaptureRunning) return;
+
+      // Unlock AudioContext on user gesture
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass && !STATE.audioCtx) {
+          STATE.audioCtx = new AudioContextClass();
+        }
+        if (STATE.audioCtx && STATE.audioCtx.state === 'suspended') {
+          await STATE.audioCtx.resume().catch(() => {});
+        }
+      } catch (err) {}
+
+      STATE.sessionId += 1;
+      const sessionToken = STATE.sessionId;
+      STATE.isCaptureRunning = true;
+      STATE.capturedPhotos = [];
+
+      setActiveScreen('capture');
+      startSimulatedCameraLoop();
+      await tryOpenCameraStream();
+      syncCameraVisualTargets();
+
+      const counterEl = document.getElementById('captureShotCounter');
+
+      for (let i = 0; i < STATE.shotCount; i++) {
+        if (sessionToken !== STATE.sessionId) {
+          STATE.isCaptureRunning = false;
+          return;
+        }
+
+        if (counterEl) {
+          counterEl.textContent = `${i + 1}/${STATE.shotCount}`;
+        }
+
+        const waitSec = i === 0 ? STATE.initialCountdownSec : STATE.betweenShotsSec;
+        const completed = await runCountdown(waitSec, sessionToken);
+        if (!completed || sessionToken !== STATE.sessionId) {
+          STATE.isCaptureRunning = false;
+          return;
+        }
+
+        triggerCameraFlash();
+        playShutterSound();
+        const photoUrl = captureFrameDataUrl();
+        STATE.capturedPhotos.push(photoUrl);
+
+        if (i < STATE.shotCount - 1) {
+          const ok = await delayMs(200, sessionToken);
+          if (!ok || sessionToken !== STATE.sessionId) {
+            STATE.isCaptureRunning = false;
+            return;
+          }
+        }
+      }
+
+      if (sessionToken !== STATE.sessionId) {
+        STATE.isCaptureRunning = false;
+        return;
+      }
+
+      STATE.isCaptureRunning = false;
+      await renderSelphyComposition();
+      setActiveScreen('print');
+    }
+
+    /**
+     * Load image helper for canvas rendering
+     */
+    function loadImageElement(src) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
+      });
+    }
+
+    /**
+     * Draw rounded rectangle path on canvas
+     */
+    function roundRectPath(ctx, x, y, w, h, r) {
+      const radius = Math.min(r, w / 2, h / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.arcTo(x + w, y, x + w, y + h, radius);
+      ctx.arcTo(x + w, y + h, x, y + h, radius);
+      ctx.arcTo(x, y + h, x, y, radius);
+      ctx.arcTo(x, y, x + w, y, radius);
+      ctx.closePath();
+    }
+
+    /**
+     * Draw subtle decorative background accents for each theme on 1200x1800 canvas
+     */
+    function drawThemeBackground(ctx, theme, width, height) {
+      const grad = ctx.createLinearGradient(0, 0, 0, height);
+      grad.addColorStop(0, theme.bgTop);
+      grad.addColorStop(1, theme.bgBottom);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.save();
+      if (theme.pattern === 'neon') {
+        ctx.strokeStyle = 'rgba(6, 182, 212, 0.14)';
+        ctx.lineWidth = 2;
+        for (let x = 80; x < width; x += 120) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, height);
+          ctx.stroke();
+        }
+      } else if (theme.pattern === 'gold') {
+        ctx.strokeStyle = 'rgba(234, 179, 8, 0.14)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(48, 48, width - 96, height - 96);
+      } else if (theme.pattern === 'pastel') {
+        ctx.fillStyle = 'rgba(167, 139, 250, 0.12)';
+        ctx.beginPath();
+        ctx.arc(180, 220, 140, 0, Math.PI * 2);
+        ctx.arc(width - 180, height - 240, 160, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (theme.pattern === 'classic') {
+        ctx.strokeStyle = 'rgba(197, 160, 89, 0.28)';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(44, 44, width - 88, height - 88);
+      }
+      ctx.restore();
+
+      // Outer frame border
+      ctx.save();
+      ctx.strokeStyle = theme.borderColor;
+      ctx.lineWidth = 14;
+      roundRectPath(ctx, 24, 24, width - 48, height - 48, 36);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    /**
+     * Render single 2x6 photo strip (600x1800 px) for dual-strip (شريطين) mode
+     */
+    function renderSingleStrip(ctx, theme, images, stripX, stripY, stripW, stripH) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(stripX, stripY, stripW, stripH);
+      ctx.clip();
+
+      const grad = ctx.createLinearGradient(stripX, stripY, stripX, stripY + stripH);
+      grad.addColorStop(0, theme.bgTop);
+      grad.addColorStop(1, theme.bgBottom);
+      ctx.fillStyle = grad;
+      ctx.fillRect(stripX, stripY, stripW, stripH);
+
+      ctx.strokeStyle = theme.borderColor;
+      ctx.lineWidth = 8;
+      ctx.strokeRect(stripX + 10, stripY + 10, stripW - 20, stripH - 20);
+
+      const padX = 34;
+      const topPad = 40;
+      const bottomHeaderH = 140;
+      const gap = 24;
+      const count = images.length;
+      const availH = stripH - topPad - bottomHeaderH - gap * (count - 1);
+      const photoH = availH / count;
+      const photoW = stripW - padX * 2;
+
+      for (let i = 0; i < count; i++) {
+        const py = topPad + i * (photoH + gap);
+        ctx.save();
+        roundRectPath(ctx, stripX + padX, py, photoW, photoH, 18);
+        ctx.clip();
+        const img = images[i];
+        drawCoverFit(ctx, img, img.width, img.height, stripX + padX, py, photoW, photoH);
+        ctx.restore();
+
+        ctx.strokeStyle = theme.accentColor;
+        ctx.lineWidth = 4;
+        roundRectPath(ctx, stripX + padX, py, photoW, photoH, 18);
+        ctx.stroke();
+      }
+
+      // Strip footer label
+      ctx.fillStyle = theme.textColor;
+      ctx.font = '800 32px Cairo, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`${theme.stickerLeft} ${theme.label} ${theme.stickerRight}`, stripX + stripW / 2, stripY + stripH - 72);
+
+      ctx.restore();
+    }
+
+    /**
+     * Render 1200x1800 px (100mm x 148mm / 4x6 inch at 300 DPI) Canon SELPHY composition
+     */
+    async function renderSelphyComposition() {
+      const canvas = document.getElementById('selphyCanvas');
+      if (!canvas) return;
+      canvas.width = 1200;
+      canvas.height = 1800;
+
+      const ctx = canvas.getContext('2d');
+      const theme = THEMES[STATE.selectedTheme] || THEMES.kids;
+
+      const sources = STATE.capturedPhotos.length > 0
+        ? STATE.capturedPhotos
+        : [captureFrameDataUrl()];
+
+      const loadedImages = [];
+      for (let i = 0; i < sources.length; i++) {
+        try {
+          const img = await loadImageElement(sources[i]);
+          loadedImages.push(img);
+        } catch (err) {}
+      }
+
+      if (loadedImages.length === 0) {
+        const fallbackCanvas = document.createElement('canvas');
+        fallbackCanvas.width = 1200;
+        fallbackCanvas.height = 800;
+        const fctx = fallbackCanvas.getContext('2d');
+        fctx.fillStyle = '#1e293b';
+        fctx.fillRect(0, 0, 1200, 800);
+        const fallbackImg = await loadImageElement(fallbackCanvas.toDataURL('image/jpeg'));
+        loadedImages.push(fallbackImg);
+      }
+
+      const W = canvas.width;
+      const H = canvas.height;
+
+      if (STATE.printLayout === 'dual_strip') {
+        // Two 2x6 strips (600x1800 each) side-by-side on 1200x1800 4x6 sheet
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, W, H);
+
+        renderSingleStrip(ctx, theme, loadedImages, 0, 0, 600, H);
+        renderSingleStrip(ctx, theme, loadedImages, 600, 0, 600, H);
+
+        // Subtle center cut guide line
+        ctx.save();
+        ctx.setLineDash([12, 10]);
+        ctx.strokeStyle = 'rgba(100, 116, 139, 0.55)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(600, 20);
+        ctx.lineTo(600, H - 20);
+        ctx.stroke();
+        ctx.restore();
+      } else {
+        // Full 4x6 postcard layout (1200x1800 px)
+        drawThemeBackground(ctx, theme, W, H);
+
+        const headerHeight = 150;
+        const footerHeight = 130;
+        const sideMargin = 68;
+        const gap = 28;
+        const count = loadedImages.length;
+
+        // Top theme banner
+        ctx.fillStyle = theme.textColor;
+        ctx.font = '900 48px Cairo, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`${theme.stickerLeft}  ${theme.label}  ${theme.stickerRight}`, W / 2, 92);
+
+        const availH = H - headerHeight - footerHeight - gap * (count - 1);
+        const cellH = availH / count;
+        const cellW = W - sideMargin * 2;
+
+        for (let i = 0; i < count; i++) {
+          const y = headerHeight + i * (cellH + gap);
+          ctx.save();
+          roundRectPath(ctx, sideMargin, y, cellW, cellH, 24);
+          ctx.clip();
+          const img = loadedImages[i];
+          drawCoverFit(ctx, img, img.width, img.height, sideMargin, y, cellW, cellH);
+          ctx.restore();
+
+          ctx.strokeStyle = theme.accentColor;
+          ctx.lineWidth = 5;
+          roundRectPath(ctx, sideMargin, y, cellW, cellH, 24);
+          ctx.stroke();
+        }
+
+        // Bottom caption
+        ctx.fillStyle = theme.textColor;
+        ctx.font = '800 34px Cairo, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('ذكرى جميلة • 4×6', W / 2, H - 64);
+      }
+
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.96);
+      const previewImg = document.getElementById('composedPreviewImg');
+      const printImg = document.getElementById('printOnlyImg');
+      if (previewImg) previewImg.src = dataUrl;
+      if (printImg) printImg.src = dataUrl;
+    }
+
+    /**
+     * One-tap theme selection
+     */
+    async function selectTheme(themeId) {
+      if (!THEMES[themeId]) return;
+      STATE.selectedTheme = themeId;
+
+      document.querySelectorAll('.theme-pill-btn').forEach((btn) => {
+        const isSelected = btn.getAttribute('data-theme') === themeId;
+        btn.className = isSelected
+          ? 'theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-indigo-600/35 border-amber-300 text-white shadow'
+          : 'theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-slate-900/75 border-white/15 hover:border-white/35 text-slate-200';
+      });
+
+      if (STATE.screen === 'print') {
+        await renderSelphyComposition();
+      }
+    }
+
+    /**
+     * Switch print layout between Postcard (4×6) and Dual-Strip (شريطين 2×6)
+     */
+    async function selectPrintLayout(layoutId) {
+      if (layoutId !== 'postcard' && layoutId !== 'dual_strip') return;
+      STATE.printLayout = layoutId;
+
+      document.querySelectorAll('.layout-pill-btn').forEach((btn) => {
+        const isSelected = btn.getAttribute('data-layout') === layoutId;
+        btn.className = isSelected
+          ? 'layout-pill-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black transition bg-indigo-600 text-white shadow'
+          : 'layout-pill-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black transition text-slate-300 hover:text-white';
+      });
+
+      if (STATE.screen === 'print') {
+        await renderSelphyComposition();
+      }
+    }
+
+    /**
+     * Direct print trigger calibrated for Canon SELPHY (4in x 6in / 100mm x 148mm)
+     */
+    async function triggerDirectPrint() {
+      await renderSelphyComposition();
+      setTimeout(() => {
+        try {
+          window.print();
+        } catch (err) {}
+      }, 100);
+    }
+
+    /**
+     * Return cleanly to Screen 1 (Start Kiosk)
      */
     async function resetToStartScreen() {
       STATE.sessionId += 1;
       STATE.isCaptureRunning = false;
       STATE.capturedPhotos = [];
-      document.getElementById('countdownOverlay').classList.add('hidden');
-      renderCapturedThumbnails();
-      setActiveScreen('start');
-      await ensureCameraAccess();
-    }
 
-    let toastTimeout = null;
-    function showStatusToast(message) {
-      const toast = document.getElementById('statusToast');
-      const textEl = document.getElementById('statusToastText');
-      textEl.textContent = message;
-      toast.classList.remove('opacity-0');
-      toast.classList.add('opacity-100');
-      clearTimeout(toastTimeout);
-      toastTimeout = setTimeout(() => {
-        toast.classList.remove('opacity-100');
-        toast.classList.add('opacity-0');
-      }, 3200);
+      const overlay = document.getElementById('countdownOverlay');
+      if (overlay) {
+        overlay.classList.add('hidden');
+      }
+
+      setActiveScreen('start');
+      await ensureCameraReady();
     }
 
     /**
@@ -849,7 +1181,8 @@
       installViewportLocks();
       startSimulatedCameraLoop();
       await selectTheme('kids');
-      await ensureCameraAccess();
+      await selectPrintLayout('postcard');
+      await ensureCameraReady();
     });
   </script>
 </body>
