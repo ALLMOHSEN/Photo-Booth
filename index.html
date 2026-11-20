@@ -81,6 +81,19 @@
       transform: scaleX(-1);
     }
 
+    /* تأثير بلور ضبابي ناعم لخلفية الكاميرا في الصفحة الأولى */
+    .ambient-blur {
+      transform: scaleX(-1) scale(1.08);
+      filter: blur(18px) brightness(0.62) saturate(1.2);
+      transition: filter 0.65s ease, transform 0.65s ease;
+    }
+
+    .live-clear {
+      transform: scaleX(-1) scale(1);
+      filter: blur(0px) brightness(1) saturate(1);
+      transition: filter 0.65s ease, transform 0.65s ease;
+    }
+
     .glass-card {
       background: rgba(15, 23, 42, 0.72);
       backdrop-filter: blur(18px);
@@ -148,10 +161,21 @@
   <!-- ===================================================================== -->
   <!-- الشاشة 1: شاشة البداية فائقة البساطة (زر مركزي فقط)                  -->
   <!-- ===================================================================== -->
-  <section id="screenStart" class="w-full h-full flex flex-col items-center justify-center p-6 relative">
+  <section id="screenStart" class="w-full h-full flex flex-col items-center justify-center p-6 relative overflow-hidden">
+
+    <!-- خلفية الكاميرا الحية مع تأثير البلور الضبابي -->
+    <div id="ambientCameraBg" class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+      <video id="bgCameraFeed" autoplay playsinline muted class="w-full h-full object-cover ambient-blur"></video>
+      <!-- بديل أنيق في حال عدم توفر الكاميرا أو رفض الإذن -->
+      <div id="bgCameraFallback" class="w-full h-full bg-gradient-to-br from-indigo-950 via-slate-950 to-fuchsia-950/70 flex items-center justify-center">
+        <div class="w-96 h-96 rounded-full bg-indigo-500/20 blur-3xl"></div>
+      </div>
+      <!-- طبقة تظليل خفيفة لوضوح الزر والواجهة -->
+      <div class="fixed inset-0 bg-slate-950/35 backdrop-blur-[2px]"></div>
+    </div>
     
     <!-- زر إعدادات مخفي/بسيط في الزاوية للمشرف فقط -->
-    <button onclick="toggleAdminSettings()" class="absolute top-5 left-5 p-3 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/10 transition" title="إعدادات الكشك">
+    <button onclick="toggleAdminSettings()" class="absolute top-5 left-5 z-20 p-3 rounded-2xl bg-black/35 hover:bg-black/55 text-slate-200 hover:text-white border border-white/15 backdrop-blur-md transition" title="إعدادات الكشك">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
         <circle cx="12" cy="12" r="3" />
@@ -159,7 +183,7 @@
     </button>
 
     <!-- الزر المركزي الكبير -->
-    <div class="flex flex-col items-center text-center max-w-xl w-full">
+    <div class="relative z-10 flex flex-col items-center text-center max-w-xl w-full">
       <button onclick="beginBoothFlow()" class="kiosk-cta-btn group relative w-full sm:w-auto sm:min-w-[420px] px-10 py-10 sm:py-12 rounded-[2.5rem] bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 text-white border-2 border-white/25 transition-all duration-300 active:scale-95 flex flex-col items-center justify-center gap-4 cursor-pointer">
         
         <!-- أيقونة الكاميرا -->
@@ -172,12 +196,12 @@
 
         <!-- النص الرئيسي -->
         <span class="text-3xl sm:text-5xl font-black tracking-tight drop-shadow-md">
-          أخذ صورة ذكرى
+          أخذ صورة ذكرى بسعر 5,000
         </span>
 
         <!-- شارة السعر -->
         <span class="mt-1 px-7 py-2.5 rounded-full bg-black/35 border border-white/20 text-amber-300 text-xl sm:text-2xl font-extrabold shadow-lg">
-          بسعر 5,000 د.ع
+          5,000 د.ع
         </span>
       </button>
     </div>
@@ -297,17 +321,30 @@
       </div>
 
       <!-- أزرار الطباعة المباشرة والعودة للبداية -->
-      <div class="flex flex-col sm:flex-row gap-2.5 pt-2 border-t border-white/10 shrink-0">
-        <button onclick="printDirectToSelphy()" class="flex-1 py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-black text-lg sm:text-xl shadow-xl shadow-emerald-600/30 active:scale-[0.98] transition flex items-center justify-center gap-3 cursor-pointer">
-          <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-          </svg>
-          <span>طباعة الصورة مباشرة</span>
-        </button>
+      <div class="flex flex-col gap-2 pt-2 border-t border-white/10 shrink-0">
+        <!-- تنبيه واضح للزبون حول الاستلام من الكاشير -->
+        <div class="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-amber-500/15 border border-amber-400/35 text-amber-200 text-xs sm:text-sm font-extrabold">
+          <span>🧾</span>
+          <span>تنبيه: يتم دفع المبلغ واستلام الصورة المطبوعة من الكاشير</span>
+        </div>
 
-        <button onclick="returnToStart()" class="py-4 px-5 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-white/15 text-slate-200 font-extrabold text-sm sm:text-base transition flex items-center justify-center gap-2 cursor-pointer">
-          <span>إنهاء والعودة للبداية</span>
-        </button>
+        <div class="flex flex-col sm:flex-row gap-2.5">
+          <button onclick="printDirectToSelphy()" class="flex-1 py-4 px-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-black text-base sm:text-xl shadow-xl shadow-emerald-600/30 active:scale-[0.98] transition flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-3 cursor-pointer">
+            <div class="flex items-center gap-2">
+              <svg class="w-6 h-6 sm:w-7 sm:h-7 shrink-0" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+              </svg>
+              <span>طباعة الصورة مباشرة</span>
+            </div>
+            <span class="px-3 py-0.5 rounded-full bg-black/25 border border-white/25 text-amber-200 text-xs sm:text-sm font-extrabold">
+              الاستلام من الكاشير
+            </span>
+          </button>
+
+          <button onclick="returnToStart()" class="py-4 px-5 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-white/15 text-slate-200 font-extrabold text-sm sm:text-base transition flex items-center justify-center gap-2 cursor-pointer">
+            <span>إنهاء والعودة للبداية</span>
+          </button>
+        </div>
       </div>
     </div>
   </section>
@@ -327,13 +364,14 @@
     const KIOSK = {
       initialDelaySec: 6,      // 6 ثوانٍ قبل أول صورة
       betweenShotsSec: 3,      // 3 ثوانٍ بين كل صورة وأخرى
-      shotCount: 4,            // عدد الصور الافتراضي (4 صور)
+      shotCount: 3,            // عدد اللقطات الافتراضي (3 صور)
       isMirrored: true,
       layoutMode: 'postcard',  // 'postcard' أو 'double_strip'
       activeCategory: 'kids',
       selectedThemeId: 'kids_stars',
       capturedPhotos: [],
       stream: null,
+      bgStream: null,
       isRunning: false
     };
 
@@ -507,61 +545,10 @@
     ];
 
     /**
-     * نظام المؤثرات الصوتية المدمج (Web Audio API)
-     */
-    const SoundFX = {
-      ctx: null,
-      init() {
-        if (!this.ctx) {
-          this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (this.ctx.state === 'suspended') this.ctx.resume();
-      },
-      beep(freq = 720, dur = 0.14) {
-        try {
-          this.init();
-          const osc = this.ctx.createOscillator();
-          const gain = this.ctx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-          gain.gain.setValueAtTime(0.28, this.ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + dur);
-          osc.connect(gain);
-          gain.connect(this.ctx.destination);
-          osc.start();
-          osc.stop(this.ctx.currentTime + dur);
-        } catch (e) {}
-      },
-      shutter() {
-        try {
-          this.init();
-          const len = this.ctx.sampleRate * 0.13;
-          const buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
-          const data = buf.getChannelData(0);
-          for (let i = 0; i < len; i++) {
-            data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (len * 0.28));
-          }
-          const src = this.ctx.createBufferSource();
-          src.buffer = buf;
-          const gain = this.ctx.createGain();
-          gain.gain.setValueAtTime(0.65, this.ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.13);
-          src.connect(gain);
-          gain.connect(this.ctx.destination);
-          src.start();
-        } catch (e) {}
-      },
-      chime() {
-        this.beep(523.25, 0.12);
-        setTimeout(() => this.beep(659.25, 0.12), 110);
-        setTimeout(() => this.beep(783.99, 0.25), 220);
-      }
-    };
-
-    /**
-     * تهيئة تبويبات الثيمات عند تحميل الصفحة
+     * تهيئة تبويبات الثيمات وتشغيل الكاميرا الضبابية في الصفحة الأولى عند التحميل
      */
     window.addEventListener('DOMContentLoaded', () => {
+      setShotCount(KIOSK.shotCount);
       document.querySelectorAll('.cat-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           KIOSK.activeCategory = btn.dataset.cat;
@@ -579,7 +566,42 @@
         });
       });
       renderThemesGrid();
+      initAmbientBackgroundCamera();
     });
+
+    /**
+     * تشغيل بث الكاميرا الخلفية الضبابية في الصفحة الأولى
+     */
+    async function initAmbientBackgroundCamera() {
+      const bgVideo = document.getElementById('bgCameraFeed');
+      const fallback = document.getElementById('bgCameraFallback');
+      try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          fallback.classList.remove('hidden');
+          return;
+        }
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
+        });
+        KIOSK.bgStream = stream;
+        bgVideo.srcObject = stream;
+        bgVideo.className = KIOSK.isMirrored
+          ? 'w-full h-full object-cover ambient-blur'
+          : 'w-full h-full object-cover blur-[18px] brightness-[0.62] saturate-125 scale-105';
+        await bgVideo.play();
+        fallback.classList.add('hidden');
+      } catch (e) {
+        fallback.classList.remove('hidden');
+      }
+    }
+
+    function stopAmbientBackgroundCamera() {
+      if (KIOSK.bgStream) {
+        KIOSK.bgStream.getTracks().forEach(t => t.stop());
+        KIOSK.bgStream = null;
+      }
+    }
 
     /**
      * الانتقال من شاشة البداية إلى فتح الكاميرا وبدء العدّ التنازلي
@@ -588,6 +610,7 @@
       if (KIOSK.isRunning) return;
       SoundFX.init();
       KIOSK.capturedPhotos = [];
+      stopAmbientBackgroundCamera();
       showScreen('screenCamera');
       await startCameraAndCapture();
     }
@@ -600,6 +623,7 @@
       const video = document.getElementById('videoFeed');
       const fallbackBox = document.getElementById('cameraFallbackBox');
       fallbackBox.classList.add('hidden');
+      video.classList.toggle('mirror-video', KIOSK.isMirrored);
 
       try {
         if (KIOSK.stream) {
@@ -734,285 +758,24 @@
     }
 
     /**
-     * دعم رفع صور يدوياً في حال عدم توفر كاميرا
-     */
-    function handleManualPhotos(event) {
-      const files = Array.from(event.target.files || []).slice(0, 4);
-      if (!files.length) return;
-      KIOSK.capturedPhotos = [];
-      let done = 0;
-      files.forEach((f, idx) => {
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-          KIOSK.capturedPhotos[idx] = e.target.result;
-          done++;
-          if (done === files.length) {
-            await renderCompositeCanvas();
-            showScreen('screenResult');
-          }
-        };
-        reader.readAsDataURL(f);
-      });
-    }
-
-    /**
-     * رسم بطاقات الثيمات في الشاشة النهائية
-     */
-    function renderThemesGrid() {
-      const container = document.getElementById('themesContainer');
-      const items = THEMES.filter(t => t.category === KIOSK.activeCategory);
-
-      container.innerHTML = items.map(theme => {
-        const active = theme.id === KIOSK.selectedThemeId;
-        return `
-          <button type="button" onclick="selectTheme('${theme.id}')"
-            class="text-right rounded-2xl p-2.5 transition-all border-2 cursor-pointer ${active ? 'border-emerald-400 bg-indigo-950/80 shadow-lg scale-[1.02]' : 'border-white/10 bg-slate-900/70 hover:border-white/30'}">
-            <div class="h-14 sm:h-16 w-full rounded-xl bg-gradient-to-br ${theme.gradient} mb-2 flex items-center justify-between px-3 shadow-inner">
-              <span class="text-2xl drop-shadow">${theme.stickers[0]}</span>
-              <span class="text-xl drop-shadow">${theme.stickers[1]}</span>
-            </div>
-            <div class="flex items-center justify-between gap-1">
-              <span class="text-xs sm:text-sm font-extrabold text-white line-clamp-1">${theme.name}</span>
-              ${active ? '<span class="w-5 h-5 rounded-full bg-emerald-500 text-white text-xs flex items-center justify-center shrink-0">✓</span>' : ''}
-            </div>
-          </button>
-        `;
-      }).join('');
-    }
-
-    async function selectTheme(id) {
-      KIOSK.selectedThemeId = id;
-      renderThemesGrid();
-      await renderCompositeCanvas();
-    }
-
-    async function setLayoutMode(mode) {
-      KIOSK.layoutMode = mode;
-      const pBtn = document.getElementById('layoutPostcardBtn');
-      const sBtn = document.getElementById('layoutStripBtn');
-      if (mode === 'postcard') {
-        pBtn.className = 'px-3 py-1.5 rounded-lg bg-indigo-600 text-white transition';
-        sBtn.className = 'px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition';
-      } else {
-        sBtn.className = 'px-3 py-1.5 rounded-lg bg-indigo-600 text-white transition';
-        pBtn.className = 'px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition';
-      }
-      await renderCompositeCanvas();
-    }
-
-    /**
-     * توليد التصميم النهائي عالي الدقة 1200×1800 بكسل (4×6 إنش / 100×148 مم)
-     */
-    async function renderCompositeCanvas() {
-      const canvas = document.getElementById('compositeCanvas');
-      const ctx = canvas.getContext('2d');
-      const W = 1200;
-      const H = 1800;
-      canvas.width = W;
-      canvas.height = H;
-
-      const theme = THEMES.find(t => t.id === KIOSK.selectedThemeId) || THEMES[0];
-      const images = await Promise.all(KIOSK.capturedPhotos.map(loadImage));
-
-      ctx.clearRect(0, 0, W, H);
-
-      if (KIOSK.layoutMode === 'double_strip') {
-        drawSheet(ctx, 0, 0, W / 2, H, images, theme, true);
-        drawSheet(ctx, W / 2, 0, W / 2, H, images, theme, true);
-
-        // خط قص منقط في المنتصف
-        ctx.save();
-        ctx.strokeStyle = 'rgba(148, 163, 184, 0.65)';
-        ctx.lineWidth = 2;
-        ctx.setLineDash([14, 14]);
-        ctx.beginPath();
-        ctx.moveTo(W / 2, 0);
-        ctx.lineTo(W / 2, H);
-        ctx.stroke();
-        ctx.restore();
-      } else {
-        drawSheet(ctx, 0, 0, W, H, images, theme, false);
-      }
-
-      const dataUrl = canvas.toDataURL('image/png', 1.0);
-      document.getElementById('finalPreviewImg').src = dataUrl;
-      document.getElementById('printImageTarget').src = dataUrl;
-    }
-
-    function drawSheet(ctx, ox, oy, w, h, images, theme, isStrip) {
-      ctx.save();
-      ctx.translate(ox, oy);
-      ctx.beginPath();
-      ctx.rect(0, 0, w, h);
-      ctx.clip();
-
-      // 1. الخلفية
-      const grad = ctx.createLinearGradient(0, 0, w, h);
-      grad.addColorStop(0, theme.bgColors[0]);
-      grad.addColorStop(0.5, theme.bgColors[1]);
-      grad.addColorStop(1, theme.bgColors[2]);
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, w, h);
-
-      drawBackgroundPattern(ctx, w, h, theme);
-
-      // 2. الإطار الزخرفي الخارجي
-      const pad = isStrip ? 22 : 36;
-      ctx.strokeStyle = theme.frameColor;
-      ctx.lineWidth = isStrip ? 6 : 10;
-      roundRect(ctx, pad, pad, w - pad * 2, h - pad * 2, isStrip ? 18 : 30);
-      ctx.stroke();
-
-      ctx.strokeStyle = theme.secondaryColor;
-      ctx.lineWidth = isStrip ? 2 : 3;
-      roundRect(ctx, pad + 10, pad + 10, w - (pad + 10) * 2, h - (pad + 10) * 2, isStrip ? 12 : 22);
-      ctx.stroke();
-
-      // 3. توزيع الصور
-      const topH = isStrip ? 70 : 95;
-      const botH = isStrip ? 165 : 220;
-      const areaX = pad + (isStrip ? 20 : 40);
-      const areaY = pad + topH;
-      const areaW = w - areaX * 2;
-      const areaH = h - areaY - (pad + botH);
-
-      // زخرفة علوية
-      ctx.font = `${isStrip ? 28 : 38}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(`${theme.stickers[0]}   •   ${theme.stickers[1]}`, w / 2, pad + topH / 2 + 4);
-
-      const count = images.length || 1;
-      const gap = isStrip ? 18 : 26;
-      const slots = [];
-
-      if (isStrip || count <= 3) {
-        const slotH = (areaH - gap * (count - 1)) / count;
-        for (let i = 0; i < count; i++) {
-          slots.push({ x: areaX, y: areaY + i * (slotH + gap), w: areaW, h: slotH });
-        }
-      } else {
-        const slotW = (areaW - gap) / 2;
-        const slotH = (areaH - gap) / 2;
-        for (let i = 0; i < 4; i++) {
-          slots.push({
-            x: areaX + (i % 2) * (slotW + gap),
-            y: areaY + Math.floor(i / 2) * (slotH + gap),
-            w: slotW,
-            h: slotH
-          });
-        }
-      }
-
-      slots.forEach((slot, idx) => {
-        const img = images[idx];
-        if (!img) return;
-        const r = isStrip ? 14 : 22;
-
-        ctx.save();
-        ctx.shadowColor = 'rgba(0,0,0,0.22)';
-        ctx.shadowBlur = 16;
-        ctx.shadowOffsetY = 6;
-        roundRect(ctx, slot.x, slot.y, slot.w, slot.h, r);
-        ctx.fillStyle = '#ffffff';
-        ctx.fill();
-        ctx.restore();
-
-        ctx.save();
-        roundRect(ctx, slot.x, slot.y, slot.w, slot.h, r);
-        ctx.clip();
-        drawImageCover(ctx, img, slot.x, slot.y, slot.w, slot.h);
-        ctx.restore();
-
-        ctx.save();
-        roundRect(ctx, slot.x, slot.y, slot.w, slot.h, r);
-        ctx.strokeStyle = theme.frameColor;
-        ctx.lineWidth = isStrip ? 5 : 7;
-        ctx.stroke();
-        ctx.restore();
-
-        // ملصق على زاوية الإطار
-        const sticker = theme.stickers[idx % theme.stickers.length];
-        ctx.font = `${isStrip ? 32 : 46}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
-        ctx.fillText(sticker, idx % 2 === 0 ? slot.x + slot.w - 14 : slot.x + 14, slot.y + 14);
-      });
-
-      // 4. التذييل (العبارة + التاريخ)
-      const footerCenterY = h - pad - botH / 2;
-      ctx.fillStyle = theme.textColor;
-      ctx.font = `900 ${isStrip ? 26 : 42}px "Cairo", sans-serif`;
-      ctx.fillText(theme.footerText, w / 2, footerCenterY - (isStrip ? 18 : 24), w - 90);
-
-      const dateStr = new Date().toLocaleDateString('ar-IQ', { year: 'numeric', month: 'long', day: 'numeric' });
-      ctx.fillStyle = theme.frameColor;
-      ctx.font = `700 ${isStrip ? 19 : 28}px "Tajawal", sans-serif`;
-      ctx.fillText(dateStr, w / 2, footerCenterY + (isStrip ? 20 : 30));
-
-      ctx.restore();
-    }
-
-    function drawBackgroundPattern(ctx, w, h, theme) {
-      ctx.save();
-      if (theme.bgType === 'confetti') {
-        const palette = [theme.frameColor, theme.secondaryColor, '#38BDF8', '#A855F7'];
-        for (let i = 0; i < 60; i++) {
-          ctx.fillStyle = palette[i % palette.length] + '33';
-          ctx.beginPath();
-          ctx.arc((i * 197) % w, (i * 313) % h, ((i % 4) + 2) * 4, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      } else if (theme.bgType === 'bokeh') {
-        for (let i = 0; i < 24; i++) {
-          ctx.fillStyle = theme.frameColor + '16';
-          ctx.beginPath();
-          ctx.arc((i * 293) % w, (i * 419) % h, 45 + (i % 5) * 18, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      } else if (theme.bgType === 'stars') {
-        for (let i = 0; i < 85; i++) {
-          ctx.fillStyle = i % 3 === 0 ? theme.frameColor + '88' : 'rgba(255,255,255,0.45)';
-          ctx.beginPath();
-          ctx.arc((i * 251) % w, (i * 389) % h, (i % 3) + 1.5, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      } else if (theme.bgType === 'grid') {
-        ctx.strokeStyle = 'rgba(6, 182, 212, 0.14)';
-        ctx.lineWidth = 2;
-        for (let x = 0; x <= w; x += 60) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
-        for (let y = 0; y <= h; y += 60) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
-      } else if (theme.bgType === 'checkers') {
-        const s = 40;
-        for (let x = 0; x < w; x += s) {
-          for (let y = 0; y < 80; y += s) {
-            if (((x / s) + (y / s)) % 2 === 0) {
-              ctx.fillStyle = 'rgba(255,255,255,0.12)';
-              ctx.fillRect(x, y, s, s);
-              ctx.fillRect(x, h - y - s, s, s);
-            }
-          }
-        }
-      }
-      ctx.restore();
-    }
-
-    /**
-     * الطباعة المباشرة على طابعة Canon SELPHY عبر الواي فاي
+     * الطباعة المباشرة على طابعة Canon SELPHY عبر الواي فاي مع تنبيه الاستلام من الكاشير
      */
     function printDirectToSelphy() {
-      showToast('جاري إرسال الصورة إلى طابعة Canon SELPHY...');
+      showToast('جاري الإرسال إلى طابعة Canon SELPHY • الاستلام من الكاشير');
       setTimeout(() => {
         window.print();
       }, 200);
     }
 
     /**
-     * العودة إلى شاشة البداية للزبون التالي
+     * العودة إلى شاشة البداية للزبون التالي وإعادة تشغيل الكاميرا الضبابية
      */
     function returnToStart() {
       stopCameraStream();
       KIOSK.isRunning = false;
       KIOSK.capturedPhotos = [];
       showScreen('screenStart');
+      initAmbientBackgroundCamera();
     }
 
     function showScreen(screenId) {
@@ -1046,6 +809,12 @@
         ? 'px-4 py-1.5 rounded-xl font-extrabold bg-emerald-600 text-white'
         : 'px-4 py-1.5 rounded-xl font-extrabold bg-slate-700 text-slate-300';
       document.getElementById('videoFeed').classList.toggle('mirror-video', KIOSK.isMirrored);
+      const bgVideo = document.getElementById('bgCameraFeed');
+      if (bgVideo) {
+        bgVideo.className = KIOSK.isMirrored
+          ? 'w-full h-full object-cover ambient-blur'
+          : 'w-full h-full object-cover blur-[18px] brightness-[0.62] saturate-125 scale-105';
+      }
     }
 
     function roundRect(ctx, x, y, w, h, r) {
