@@ -35,6 +35,9 @@
     button, [role="button"] {
       touch-action: manipulation;
       cursor: pointer;
+      position: relative;
+      z-index: 2;
+      -webkit-tap-highlight-color: rgba(255, 255, 255, 0.14);
     }
 
     /* Blurred live camera background on home screen */
@@ -109,20 +112,20 @@
 
     /* Canon SELPHY 4x6 inch / 100mm x 148mm borderless print rules */
     @page {
-      size: 4in 6in;
+      size: 100mm 148mm;
       margin: 0;
     }
 
     @media print {
       @page {
-        size: 4in 6in;
+        size: 100mm 148mm;
         margin: 0 !important;
       }
 
       html, body, #app {
-        width: 4in !important;
-        height: 6in !important;
-        min-height: 6in !important;
+        width: 100mm !important;
+        height: 148mm !important;
+        min-height: 148mm !important;
         margin: 0 !important;
         padding: 0 !important;
         overflow: hidden !important;
@@ -138,8 +141,8 @@
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
-        width: 4in !important;
-        height: 6in !important;
+        width: 100mm !important;
+        height: 148mm !important;
         margin: 0 !important;
         padding: 0 !important;
         background: #ffffff !important;
@@ -147,8 +150,8 @@
       }
 
       #printOnlyImg {
-        width: 4in !important;
-        height: 6in !important;
+        width: 100mm !important;
+        height: 148mm !important;
         max-width: none !important;
         max-height: none !important;
         object-fit: fill !important;
@@ -163,18 +166,69 @@
     <!-- Full-screen flash overlay on photo capture -->
     <div id="flashOverlay" class="fixed inset-0 bg-white pointer-events-none opacity-0 z-50"></div>
 
-    <!-- Print-only full-bleed 4in x 6in (100mm x 148mm) output -->
+    <!-- Non-intrusive Camera Status Pill & Diagnostic Modal (shown only when fallback/issue occurs) -->
+    <div id="cameraStatusBadge" class="hidden fixed top-3 left-3 z-40 max-w-[82vw]">
+      <button
+        id="btnOpenCameraDiag"
+        type="button"
+        onclick="openCameraDiagnostics(true)"
+        class="px-3 py-1.5 rounded-2xl bg-amber-950/90 hover:bg-amber-900 border border-amber-300/50 text-amber-100 text-xs font-extrabold shadow-lg flex items-center gap-2"
+      >
+        <span class="w-2.5 h-2.5 rounded-full bg-amber-400 shrink-0"></span>
+        <span id="cameraStatusBadgeText">وضع المعاينة الافتراضية — اضغط للتشخيص</span>
+      </button>
+    </div>
+
+    <div id="cameraDiagModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="w-full max-w-lg glass-panel rounded-3xl p-5 sm:p-6 border border-white/20 shadow-2xl flex flex-col gap-4 text-right">
+        <div class="flex items-center justify-between gap-2 border-b border-white/10 pb-3">
+          <h3 class="text-lg sm:text-xl font-black text-white">تشخيص الكاميرا وإعادة التشغيل</h3>
+          <button
+            type="button"
+            onclick="closeCameraDiagnostics()"
+            class="px-3 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-bold"
+          >
+            إغلاق
+          </button>
+        </div>
+
+        <div class="bg-slate-950/75 rounded-2xl p-3.5 border border-white/10 flex flex-col gap-1.5">
+          <div id="diagErrorCode" class="text-xs font-black text-amber-300">حالة الكاميرا</div>
+          <p id="diagExplanation" class="text-sm font-bold text-slate-100 leading-relaxed"></p>
+          <p id="diagSuggestion" class="text-xs font-semibold text-slate-300 leading-relaxed"></p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2.5">
+          <button
+            type="button"
+            onclick="initCamera(true)"
+            class="flex-1 min-w-[160px] py-3 px-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black text-sm shadow-lg transition"
+          >
+            إعادة تشغيل الكاميرا
+          </button>
+          <button
+            type="button"
+            onclick="toggleFacingModeAndRestart()"
+            class="py-3 px-4 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-white/15 text-slate-100 font-extrabold text-sm transition"
+          >
+            تبديل الكاميرا (أمامية / خلفية)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Print-only full-bleed 100mm x 148mm (4in x 6in) output -->
     <div id="printOnlyContainer" aria-hidden="true">
-      <img id="printOnlyImg" alt="Canon SELPHY 4x6 Print" />
+      <img id="printOnlyImg" alt="Canon SELPHY 100mm x 148mm Print" />
     </div>
 
     <!-- ===================================================================== -->
-    <!-- SCREEN 1: COMPLETELY CLEAN START SCREEN (ONLY BLURRED BG + 1 BUTTON)   -->
+    <!-- SCREEN 1: STRICTLY CLEAN START SCREEN (ONLY BLURRED BG + 3/4 + BTN)   -->
     <!-- ===================================================================== -->
-    <section id="screenStart" class="relative w-full h-full flex items-center justify-center p-6 overflow-hidden">
+    <section id="homeScreen" class="relative w-full h-full flex items-center justify-center p-6 overflow-hidden">
       <!-- Blurred Camera Background (<video> with automatic fallback to smooth animated canvas) -->
       <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <video id="bgVideo" autoplay playsinline muted class="w-full h-full object-cover blurred-camera-bg mirrored hidden"></video>
+        <video id="bgVideo" autoplay playsinline webkit-playsinline="true" muted class="w-full h-full object-cover blurred-camera-bg mirrored hidden"></video>
         <canvas id="bgSimCanvas" width="1280" height="720" class="w-full h-full object-cover blurred-camera-bg"></canvas>
         <div class="fixed inset-0 bg-slate-950/35"></div>
       </div>
@@ -186,8 +240,8 @@
           <button
             id="btnShots3"
             type="button"
+            data-action="select-shots"
             data-shots="3"
-            onclick="selectShotCount(3)"
             class="shot-count-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-3 transition bg-indigo-600/45 border-amber-300 text-white shadow"
           >
             <svg class="w-5 h-7 shrink-0" viewBox="0 0 24 34" fill="none" aria-hidden="true">
@@ -202,8 +256,8 @@
           <button
             id="btnShots4"
             type="button"
+            data-action="select-shots"
             data-shots="4"
-            onclick="selectShotCount(4)"
             class="shot-count-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-3 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35"
           >
             <svg class="w-5 h-7 shrink-0" viewBox="0 0 24 34" fill="none" aria-hidden="true">
@@ -219,9 +273,9 @@
 
         <!-- Single Centered Capture Button with Price -->
         <button
-          id="btnStartBooth"
+          id="startCaptureBtn"
           type="button"
-          onclick="handleStartBoothClick()"
+          data-action="start-capture"
           class="capture-btn-pulse w-full px-8 py-9 sm:px-10 sm:py-10 rounded-[2.25rem] bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 active:scale-95 text-white border-2 border-white/25 transition-all duration-200 flex flex-col items-center justify-center gap-3"
         >
           <svg class="w-12 h-12 sm:w-14 sm:h-14 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
@@ -238,14 +292,14 @@
     <!-- ===================================================================== -->
     <!-- SCREEN 2: FULL-SCREEN UNBLURRED CAPTURE (6s INITIAL -> 3s BETWEEN)   -->
     <!-- ===================================================================== -->
-    <section id="screenCapture" class="hidden relative w-full h-full flex items-center justify-center bg-black overflow-hidden">
-      <video id="liveVideo" autoplay playsinline muted class="w-full h-full object-cover live-camera-feed mirrored hidden"></video>
+    <section id="captureScreen" class="hidden relative w-full h-full flex items-center justify-center bg-black overflow-hidden">
+      <video id="liveVideo" autoplay playsinline webkit-playsinline="true" muted class="w-full h-full object-cover live-camera-feed mirrored hidden"></video>
       <canvas id="liveSimCanvas" width="1280" height="720" class="w-full h-full object-cover live-camera-feed mirrored hidden"></canvas>
 
-      <!-- Shot progress indicator (1/3, 2/3, 3/3) -->
+      <!-- Shot progress indicator (1 / 3, 2 / 3, 3 / 3) -->
       <div class="fixed top-4 right-4 z-20 pointer-events-none">
         <div id="captureShotCounter" class="px-4 py-2 rounded-2xl bg-slate-950/75 border border-white/20 text-sm sm:text-base font-black text-white shadow-lg">
-          1/3
+          1 / 3
         </div>
       </div>
 
@@ -260,7 +314,7 @@
     <!-- ===================================================================== -->
     <!-- SCREEN 3: THEMES + DUAL STRIP / POSTCARD + DIRECT PRINT             -->
     <!-- ===================================================================== -->
-    <section id="screenPrint" class="hidden relative w-full h-full p-3 sm:p-5 lg:p-6 flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch justify-center overflow-hidden">
+    <section id="editorScreen" class="hidden relative w-full h-full p-3 sm:p-5 lg:p-6 flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch justify-center overflow-hidden">
       <!-- Left / Top Preview Column: 4x6 Canon SELPHY Composition -->
       <div class="lg:w-1/2 h-[42%] lg:h-full glass-panel rounded-3xl p-3 sm:p-5 flex items-center justify-center relative overflow-hidden">
         <img
@@ -280,16 +334,16 @@
             <div class="inline-flex rounded-xl bg-slate-900/90 p-1 border border-white/15 shrink-0" role="group" aria-label="قياس الطباعة">
               <button
                 type="button"
+                data-action="select-layout"
                 data-layout="postcard"
-                onclick="selectPrintLayout('postcard')"
                 class="layout-pill-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black transition bg-indigo-600 text-white shadow"
               >
                 بوست كارد (4×6)
               </button>
               <button
                 type="button"
+                data-action="select-layout"
                 data-layout="dual_strip"
-                onclick="selectPrintLayout('dual_strip')"
                 class="layout-pill-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black transition text-slate-300 hover:text-white"
               >
                 شريطين (2×6)
@@ -301,8 +355,8 @@
           <div id="themesGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
             <button
               type="button"
+              data-action="select-theme"
               data-theme="kids"
-              onclick="selectTheme('kids')"
               class="theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-amber-500/25 border-amber-300 text-white shadow"
             >
               <span class="w-5 h-5 rounded-full shrink-0 border border-white/40 bg-gradient-to-br from-amber-300 to-sky-400"></span>
@@ -311,8 +365,8 @@
 
             <button
               type="button"
+              data-action="select-theme"
               data-theme="girls"
-              onclick="selectTheme('girls')"
               class="theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-slate-900/75 border-white/15 hover:border-pink-400/60 text-slate-200"
             >
               <span class="w-5 h-5 rounded-full shrink-0 border border-white/40 bg-gradient-to-br from-pink-400 to-rose-500"></span>
@@ -321,8 +375,8 @@
 
             <button
               type="button"
+              data-action="select-theme"
               data-theme="boys"
-              onclick="selectTheme('boys')"
               class="theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-slate-900/75 border-white/15 hover:border-cyan-400/60 text-slate-200"
             >
               <span class="w-5 h-5 rounded-full shrink-0 border border-white/40 bg-gradient-to-br from-cyan-400 to-blue-600"></span>
@@ -331,8 +385,8 @@
 
             <button
               type="button"
+              data-action="select-theme"
               data-theme="adults"
-              onclick="selectTheme('adults')"
               class="theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-slate-900/75 border-white/15 hover:border-yellow-400/60 text-slate-200"
             >
               <span class="w-5 h-5 rounded-full shrink-0 border border-white/40 bg-gradient-to-br from-neutral-900 to-amber-500"></span>
@@ -341,8 +395,8 @@
 
             <button
               type="button"
+              data-action="select-theme"
               data-theme="royal_white"
-              onclick="selectTheme('royal_white')"
               class="theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-slate-900/75 border-white/15 hover:border-amber-200/70 text-slate-200"
             >
               <span class="w-5 h-5 rounded-full shrink-0 border border-slate-400 bg-gradient-to-br from-white to-amber-200"></span>
@@ -351,8 +405,8 @@
 
             <button
               type="button"
+              data-action="select-theme"
               data-theme="pastel"
-              onclick="selectTheme('pastel')"
               class="theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-slate-900/75 border-white/15 hover:border-teal-300/60 text-slate-200"
             >
               <span class="w-5 h-5 rounded-full shrink-0 border border-white/40 bg-gradient-to-br from-emerald-200 via-purple-200 to-rose-200"></span>
@@ -366,7 +420,7 @@
           <button
             id="btnDirectPrint"
             type="button"
-            onclick="triggerDirectPrint()"
+            data-action="direct-print"
             class="w-full py-4 px-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 active:scale-[0.98] text-white font-black text-base sm:text-lg shadow-xl transition flex items-center justify-center gap-2"
           >
             <span>طباعة فورية — الاستلام من الكاشير</span>
@@ -375,7 +429,7 @@
           <button
             id="btnFinishReset"
             type="button"
-            onclick="resetToStartScreen()"
+            data-action="reset-kiosk"
             class="w-full py-3.5 px-5 rounded-2xl bg-slate-800 hover:bg-slate-700 active:scale-[0.98] border border-white/15 text-slate-100 font-extrabold text-sm sm:text-base transition flex items-center justify-center gap-2"
           >
             <span>بدء من جديد</span>
@@ -383,6 +437,19 @@
         </div>
       </div>
     </section>
+
+    <!-- Accessible live status announcer & subtle print confirmation toast -->
+    <div
+      id="kioskLiveStatus"
+      role="status"
+      aria-live="polite"
+      class="sr-only"
+    ></div>
+
+    <div
+      id="kioskStatusToast"
+      class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-2xl bg-slate-950/90 border border-emerald-400/50 text-emerald-200 text-xs sm:text-sm font-black shadow-2xl pointer-events-none"
+    ></div>
 
     <!-- 1200x1800 px (100mm x 148mm / 4x6 inch at 300 DPI) Canon SELPHY Canvas -->
     <canvas id="selphyCanvas" width="1200" height="1800" class="hidden"></canvas>
@@ -399,19 +466,28 @@
       betweenShotsSec: 3,       // 3 seconds between subsequent shots
       selectedTheme: 'kids',    // 'kids' | 'girls' | 'boys' | 'adults' | 'royal_white' | 'pastel'
       printLayout: 'postcard',  // 'postcard' (4x6) | 'dual_strip' (شريطين 2x6)
+      facingMode: 'user',       // 'user' | 'environment'
       mirrorCamera: true,
       stream: null,
       hasLiveVideoStream: false,
+      isInitializingCamera: false,
+      lastCameraError: {
+        code: '',
+        name: '',
+        explanation: '',
+        suggestion: ''
+      },
       capturedPhotos: [],       // Captured frame Data URLs
       isCaptureRunning: false,
+      isStartingSequence: false,
       sessionId: 0,             // Monotonic session token to cancel stale loops
       simAnimFrame: null,
+      simPhase: 0,
       audioCtx: null
     };
 
     /**
-     * Theme Definitions for 1200x1800 (4x6 inch / 100mm x 148mm at 300 DPI) Print Canvas
-     * Uses expressive Arabic captions instead of theme names.
+     * Theme Definitions for 1200x1800 (100mm x 148mm / 4x6 inch at 300 DPI) Print Canvas
      */
     const THEMES = {
       kids: {
@@ -543,6 +619,9 @@
       }, { passive: false });
 
       document.addEventListener('touchmove', (e) => {
+        if (e.target && e.target.closest && e.target.closest('#themesGrid')) {
+          return;
+        }
         if (e.touches && e.touches.length > 1) {
           e.preventDefault();
         }
@@ -550,6 +629,9 @@
 
       let lastTouchEnd = 0;
       document.addEventListener('touchend', (e) => {
+        if (e.target && e.target.closest && e.target.closest('button, [role="button"]')) {
+          return;
+        }
         const now = Date.now();
         if (now - lastTouchEnd <= 300) {
           e.preventDefault();
@@ -559,8 +641,40 @@
     }
 
     /**
-     * Web Audio API Shutter Sound (no external audio files)
+     * Web Audio API Shutter & Countdown Tones (no external audio files)
      */
+    function playCountdownTone(isFinalBeat = false) {
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+
+        if (!STATE.audioCtx) {
+          STATE.audioCtx = new AudioContextClass();
+        }
+        if (STATE.audioCtx.state === 'suspended') {
+          STATE.audioCtx.resume().catch(() => {});
+        }
+
+        const ctx = STATE.audioCtx;
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(isFinalBeat ? 880 : 620, now);
+
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.12);
+      } catch (err) {
+        // Ignore audio errors when restricted
+      }
+    }
+
     function playShutterSound() {
       try {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -576,7 +690,6 @@
         const ctx = STATE.audioCtx;
         const now = ctx.currentTime;
 
-        // Crisp mechanical shutter click burst
         const bufferSize = Math.floor(ctx.sampleRate * 0.09);
         const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
         const data = noiseBuffer.getChannelData(0);
@@ -650,7 +763,6 @@
             ctx.fill();
           });
 
-          // Subtle studio portrait silhouette guide
           ctx.save();
           ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
           ctx.lineWidth = 3;
@@ -664,6 +776,7 @@
           ctx.restore();
         });
 
+        STATE.simPhase = t;
         STATE.simAnimFrame = requestAnimationFrame(renderFrame);
       };
 
@@ -671,13 +784,69 @@
     }
 
     /**
+     * Render a live animated studio frame onto an offscreen canvas when no hardware frame is ready
+     */
+    function renderFallbackStudioFrame(width = 1280, height = 720, phaseSec = null) {
+      const t = typeof phaseSec === 'number'
+        ? phaseSec
+        : (STATE.simPhase || (performance.now() * 0.001));
+
+      const offCanvas = document.createElement('canvas');
+      offCanvas.width = width;
+      offCanvas.height = height;
+      const ctx = offCanvas.getContext('2d');
+      if (!ctx) return offCanvas;
+
+      const grad = ctx.createLinearGradient(0, 0, width, height);
+      grad.addColorStop(0, '#1e1b4b');
+      grad.addColorStop(0.5, '#3b0764');
+      grad.addColorStop(1, '#0f172a');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, width, height);
+
+      const orbs = [
+        { x: width * (0.3 + 0.12 * Math.sin(t * 0.85)), y: height * (0.4 + 0.1 * Math.cos(t * 0.65)), r: width * 0.24, color: 'rgba(99, 102, 241, 0.36)' },
+        { x: width * (0.72 + 0.1 * Math.cos(t * 0.75)), y: height * (0.55 + 0.12 * Math.sin(t * 0.6)), r: width * 0.25, color: 'rgba(236, 72, 153, 0.32)' },
+        { x: width * 0.5, y: height * 0.48, r: width * 0.16, color: 'rgba(56, 189, 248, 0.2)' }
+      ];
+
+      orbs.forEach((orb) => {
+        const rg = ctx.createRadialGradient(orb.x, orb.y, 10, orb.x, orb.y, orb.r);
+        rg.addColorStop(0, orb.color);
+        rg.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = rg;
+        ctx.beginPath();
+        ctx.arc(orb.x, orb.y, orb.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.16)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(width * 0.5, height * 0.4, height * 0.13, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.ellipse(width * 0.5, height * 0.74, height * 0.22, height * 0.16, 0, Math.PI, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+
+      return offCanvas;
+    }
+
+    /**
      * Switch between 'start' | 'capture' | 'print' screens
      */
     function setActiveScreen(target) {
       STATE.screen = target;
-      document.getElementById('screenStart').classList.toggle('hidden', target !== 'start');
-      document.getElementById('screenCapture').classList.toggle('hidden', target !== 'capture');
-      document.getElementById('screenPrint').classList.toggle('hidden', target !== 'print');
+      const homeEl = document.getElementById('homeScreen') || document.getElementById('screenStart');
+      const captureEl = document.getElementById('captureScreen');
+      const editorEl = document.getElementById('editorScreen') || document.getElementById('screenPrint');
+
+      if (homeEl) homeEl.classList.toggle('hidden', target !== 'start');
+      if (captureEl) captureEl.classList.toggle('hidden', target !== 'capture');
+      if (editorEl) editorEl.classList.toggle('hidden', target !== 'print');
       syncCameraVisualTargets();
     }
 
@@ -690,18 +859,51 @@
       const liveVideo = document.getElementById('liveVideo');
       const liveSim = document.getElementById('liveSimCanvas');
 
-      const useLiveVideo = Boolean(STATE.hasLiveVideoStream && STATE.stream);
+      const activeTracks = STATE.stream && typeof STATE.stream.getVideoTracks === 'function'
+        ? STATE.stream.getVideoTracks().filter((t) => t.readyState === 'live')
+        : [];
+      const hasActiveStream = Boolean(STATE.stream && activeTracks.length > 0);
+      const hasVideoDimensions = Boolean(
+        hasActiveStream && (
+          (liveVideo && liveVideo.videoWidth > 0 && liveVideo.videoHeight > 0) ||
+          (bgVideo && bgVideo.videoWidth > 0 && bgVideo.videoHeight > 0)
+        )
+      );
+      const useLiveVideo = Boolean(hasActiveStream && (STATE.hasLiveVideoStream || hasVideoDimensions));
+      const shouldMirror = STATE.mirrorCamera && STATE.facingMode === 'user';
 
       [bgVideo, liveVideo].forEach((vid) => {
         if (!vid) return;
-        if (useLiveVideo) {
+        vid.autoplay = true;
+        vid.playsInline = true;
+        vid.muted = true;
+        vid.defaultMuted = true;
+        vid.setAttribute('autoplay', '');
+        vid.setAttribute('playsinline', '');
+        vid.setAttribute('webkit-playsinline', '');
+        vid.setAttribute('muted', '');
+
+        if (hasActiveStream) {
           if (vid.srcObject !== STATE.stream) {
             vid.srcObject = STATE.stream;
           }
-          vid.classList.toggle('mirrored', STATE.mirrorCamera);
-          vid.play().catch(() => {});
-        } else {
-          vid.pause();
+          vid.classList.toggle('mirrored', shouldMirror);
+          if (vid.paused || vid.readyState < 2) {
+            Promise.resolve().then(() => {
+              try {
+                const playPromise = vid.play();
+                if (playPromise && typeof playPromise.catch === 'function') {
+                  playPromise.catch(() => {});
+                }
+              } catch (e) {}
+            });
+          }
+        }
+      });
+
+      [bgSim, liveSim].forEach((sim) => {
+        if (sim) {
+          sim.classList.toggle('mirrored', shouldMirror);
         }
       });
 
@@ -711,135 +913,384 @@
       if (liveSim) liveSim.classList.toggle('hidden', !(STATE.screen === 'capture' && !useLiveVideo));
     }
 
-    /**
-     * Request camera stream with clean fallback to animated canvas
-     */
-    async function tryOpenCameraStream() {
-      if (STATE.hasLiveVideoStream && STATE.stream) {
-        const activeTracks = STATE.stream.getVideoTracks().filter((t) => t.readyState === 'live');
-        if (activeTracks.length > 0) {
-          syncCameraVisualTargets();
-          return true;
-        }
+    function stopExistingStreamTracks() {
+      if (STATE.stream && typeof STATE.stream.getTracks === 'function') {
+        STATE.stream.getTracks().forEach((track) => {
+          try {
+            track.stop();
+          } catch (e) {}
+        });
       }
-
-      if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== 'function') {
-        STATE.hasLiveVideoStream = false;
-        syncCameraVisualTargets();
-        return false;
-      }
-
-      const constraintsList = [
-        { video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false },
-        { video: true, audio: false }
-      ];
-
-      for (let i = 0; i < constraintsList.length; i++) {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia(constraintsList[i]);
-          if (stream && stream.getVideoTracks().length > 0) {
-            STATE.stream = stream;
-            STATE.hasLiveVideoStream = true;
-
-            const bgVideo = document.getElementById('bgVideo');
-            const liveVideo = document.getElementById('liveVideo');
-            if (bgVideo) {
-              bgVideo.srcObject = stream;
-              await bgVideo.play().catch(() => {});
-            }
-            if (liveVideo) {
-              liveVideo.srcObject = stream;
-              await liveVideo.play().catch(() => {});
-            }
-
-            syncCameraVisualTargets();
-            return true;
-          }
-        } catch (err) {
-          // Try next fallback constraint or fall back to simulated canvas
-        }
-      }
-
       STATE.stream = null;
       STATE.hasLiveVideoStream = false;
+    }
+
+    function attachStreamToVideos(stream) {
+      if (!stream) return;
+      STATE.stream = stream;
+
+      const bgVideo = document.getElementById('bgVideo');
+      const liveVideo = document.getElementById('liveVideo');
+      const shouldMirror = STATE.mirrorCamera && STATE.facingMode === 'user';
+
+      [bgVideo, liveVideo].forEach((vid) => {
+        if (!vid) return;
+        vid.autoplay = true;
+        vid.playsInline = true;
+        vid.muted = true;
+        vid.defaultMuted = true;
+        vid.setAttribute('autoplay', '');
+        vid.setAttribute('playsinline', '');
+        vid.setAttribute('webkit-playsinline', '');
+        vid.setAttribute('muted', '');
+        vid.classList.toggle('mirrored', shouldMirror);
+
+        if (vid.srcObject !== stream) {
+          vid.srcObject = stream;
+        }
+
+        const ensurePlaying = () => {
+          if (vid.srcObject !== stream) {
+            vid.srcObject = stream;
+          }
+          if (vid.videoWidth > 0 && vid.videoHeight > 0) {
+            STATE.hasLiveVideoStream = true;
+          }
+          try {
+            const playPromise = vid.play();
+            if (playPromise && typeof playPromise.then === 'function') {
+              playPromise.then(() => {
+                if (vid.videoWidth > 0 && vid.videoHeight > 0) {
+                  STATE.hasLiveVideoStream = true;
+                }
+                syncCameraVisualTargets();
+              }).catch(() => {
+                syncCameraVisualTargets();
+              });
+            } else {
+              syncCameraVisualTargets();
+            }
+          } catch (err) {
+            syncCameraVisualTargets();
+          }
+        };
+
+        vid.onloadedmetadata = () => {
+          if (vid.videoWidth > 0 && vid.videoHeight > 0) {
+            STATE.hasLiveVideoStream = true;
+          }
+          ensurePlaying();
+        };
+        vid.oncanplay = () => {
+          if (vid.videoWidth > 0 && vid.videoHeight > 0) {
+            STATE.hasLiveVideoStream = true;
+          }
+          ensurePlaying();
+        };
+
+        ensurePlaying();
+      });
+
       syncCameraVisualTargets();
-      return false;
     }
 
-    async function ensureCameraReady() {
-      const ok = await tryOpenCameraStream();
-      if (!ok) {
-        startSimulatedCameraLoop();
+    function requestRawMediaStream(constraints) {
+      if (navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function') {
+        return navigator.mediaDevices.getUserMedia(constraints);
       }
-      return ok;
+
+      const legacyGetUserMedia =
+        navigator.getUserMedia ||
+        navigator.webkitGetUserMedia ||
+        navigator.mozGetUserMedia ||
+        navigator.msGetUserMedia;
+
+      if (typeof legacyGetUserMedia === 'function') {
+        return new Promise((resolve, reject) => {
+          try {
+            legacyGetUserMedia.call(navigator, constraints, resolve, reject);
+          } catch (err) {
+            reject(err);
+          }
+        });
+      }
+
+      return Promise.reject(new Error('Camera API unavailable'));
+    }
+
+    async function getEnumeratedVideoDeviceIds() {
+      const deviceIds = [];
+      try {
+        if (navigator.mediaDevices && typeof navigator.mediaDevices.enumerateDevices === 'function') {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          if (Array.isArray(devices)) {
+            devices.forEach((dev) => {
+              if (dev && dev.kind === 'videoinput' && dev.deviceId) {
+                deviceIds.push(dev.deviceId);
+              }
+            });
+          }
+        }
+      } catch (err) {
+        // Ignore device enumeration restrictions in sandboxed/embedded frames
+      }
+      return deviceIds;
+    }
+
+    async function requestUserMediaWithFallbacks(facingMode) {
+      const constraintSteps = [
+        { audio: false, video: { facingMode: { ideal: facingMode }, width: { ideal: 1280 }, height: { ideal: 720 } } },
+        { audio: false, video: { facingMode: facingMode } },
+        { audio: false, video: true }
+      ];
+
+      let lastErr = new Error('Camera stream request failed');
+
+      for (const constraints of constraintSteps) {
+        try {
+          const stream = await requestRawMediaStream(constraints);
+          if (stream) {
+            return stream;
+          }
+        } catch (err) {
+          lastErr = err || lastErr;
+        }
+      }
+
+      const videoDeviceIds = await getEnumeratedVideoDeviceIds();
+      for (const deviceId of videoDeviceIds) {
+        try {
+          const stream = await requestRawMediaStream({
+            audio: false,
+            video: { deviceId: { exact: deviceId } }
+          });
+          if (stream) {
+            return stream;
+          }
+        } catch (err) {
+          lastErr = err || lastErr;
+        }
+      }
+
+      throw lastErr;
+    }
+
+    function updateCameraBadgeAndDiagnostics(err = null) {
+      const badge = document.getElementById('cameraStatusBadge');
+      const codeEl = document.getElementById('diagErrorCode');
+      const expEl = document.getElementById('diagExplanation');
+      const sugEl = document.getElementById('diagSuggestion');
+
+      if (STATE.hasLiveVideoStream && STATE.stream) {
+        if (badge) badge.classList.add('hidden');
+        return;
+      }
+
+      const errName = (err && (err.name || err.code)) || 'CameraUnavailable';
+      STATE.lastCameraError = {
+        code: errName,
+        name: errName,
+        explanation: 'تعذر تشغيل بث الكاميرا الحية حالياً وتم تفعيل وضع المعاينة البديلة تلقائياً.',
+        suggestion: 'تحقق من منح إذن الكاميرا للمتصفح والاتصال عبر HTTPS أو localhost، ثم اضغط لإعادة المحاولة.'
+      };
+
+      if (badge) badge.classList.remove('hidden');
+      if (codeEl) codeEl.textContent = `رمز الحالة: ${STATE.lastCameraError.code}`;
+      if (expEl) expEl.textContent = STATE.lastCameraError.explanation;
+      if (sugEl) sugEl.textContent = STATE.lastCameraError.suggestion;
+    }
+
+    async function initCamera(forceRestart = false) {
+      const existingLiveTracks = STATE.stream && typeof STATE.stream.getVideoTracks === 'function'
+        ? STATE.stream.getVideoTracks().filter((t) => t.readyState === 'live')
+        : [];
+
+      if (!forceRestart && STATE.stream && existingLiveTracks.length > 0) {
+        attachStreamToVideos(STATE.stream);
+        const bgVideo = document.getElementById('bgVideo');
+        const liveVideo = document.getElementById('liveVideo');
+        if (
+          (liveVideo && liveVideo.videoWidth > 0 && liveVideo.videoHeight > 0) ||
+          (bgVideo && bgVideo.videoWidth > 0 && bgVideo.videoHeight > 0)
+        ) {
+          STATE.hasLiveVideoStream = true;
+        }
+        syncCameraVisualTargets();
+        updateCameraBadgeAndDiagnostics();
+        return STATE.stream;
+      }
+
+      if (STATE.isInitializingCamera && !forceRestart) {
+        return STATE.stream;
+      }
+
+      STATE.isInitializingCamera = true;
+      try {
+        if (forceRestart || STATE.stream) {
+          stopExistingStreamTracks();
+        }
+
+        const stream = await requestUserMediaWithFallbacks(STATE.facingMode);
+        STATE.stream = stream;
+        STATE.hasLiveVideoStream = true;
+        attachStreamToVideos(stream);
+        updateCameraBadgeAndDiagnostics(null);
+        return stream;
+      } catch (err) {
+        stopExistingStreamTracks();
+        syncCameraVisualTargets();
+        updateCameraBadgeAndDiagnostics(err);
+        return null;
+      } finally {
+        STATE.isInitializingCamera = false;
+      }
+    }
+
+    async function unlockVideoPlaybackOnGesture() {
+      const bgVideo = document.getElementById('bgVideo');
+      const liveVideo = document.getElementById('liveVideo');
+      const targets = [liveVideo, bgVideo].filter(Boolean);
+
+      for (const vid of targets) {
+        vid.autoplay = true;
+        vid.playsInline = true;
+        vid.muted = true;
+        vid.defaultMuted = true;
+        vid.setAttribute('autoplay', '');
+        vid.setAttribute('playsinline', '');
+        vid.setAttribute('webkit-playsinline', '');
+        vid.setAttribute('muted', '');
+
+        if (STATE.stream && vid.srcObject !== STATE.stream) {
+          vid.srcObject = STATE.stream;
+        }
+
+        if (vid.srcObject) {
+          try {
+            await vid.play();
+            if (vid.videoWidth > 0 && vid.videoHeight > 0) {
+              STATE.hasLiveVideoStream = true;
+            }
+          } catch (err) {
+            // Keep graceful fallback when hardware camera is unavailable or blocked
+          }
+        }
+      }
+
+      syncCameraVisualTargets();
+    }
+
+    async function ensureCameraReady(forceRestart = false) {
+      const hasLiveTrack = STATE.stream && typeof STATE.stream.getVideoTracks === 'function'
+        ? STATE.stream.getVideoTracks().some((t) => t.readyState === 'live')
+        : false;
+
+      if (!forceRestart && hasLiveTrack && STATE.stream) {
+        attachStreamToVideos(STATE.stream);
+        await unlockVideoPlaybackOnGesture();
+        return STATE.stream;
+      }
+      const stream = await initCamera(forceRestart);
+      await unlockVideoPlaybackOnGesture();
+      return stream;
+    }
+
+    function openCameraDiagnostics(show = true) {
+      const modal = document.getElementById('cameraDiagModal');
+      if (!modal) return;
+      if (show) {
+        updateCameraBadgeAndDiagnostics(STATE.lastCameraError && STATE.lastCameraError.code ? { name: STATE.lastCameraError.code } : null);
+      }
+      modal.classList.toggle('hidden', !show);
+    }
+
+    function closeCameraDiagnostics() {
+      openCameraDiagnostics(false);
+    }
+
+    async function toggleFacingModeAndRestart() {
+      STATE.facingMode = STATE.facingMode === 'user' ? 'environment' : 'user';
+      await initCamera(true);
+    }
+
+    function announceKioskStatus(message, showToast = false) {
+      const liveRegion = document.getElementById('kioskLiveStatus');
+      if (liveRegion) {
+        liveRegion.textContent = message;
+      }
+
+      if (!showToast) return;
+      const toast = document.getElementById('kioskStatusToast');
+      if (!toast) return;
+      toast.textContent = message;
+      toast.classList.remove('hidden');
+
+      clearTimeout(announceKioskStatus._toastTimer);
+      announceKioskStatus._toastTimer = setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 2400);
     }
 
     /**
-     * Cover-fit helper for drawing media without distortion
+     * Exact FIT (contain) photo placement inside a slot frame `(slotX, slotY, slotW, slotH)`
+     * with full aspect preservation, zero cropping, zero distortion, and neat centered mat padding.
      */
-    function drawCoverFit(ctx, source, srcW, srcH, dx, dy, dw, dh) {
-      if (!srcW || !srcH || !dw || !dh) return;
-      const srcAspect = srcW / srcH;
-      const dstAspect = dw / dh;
+    function drawPhotoFittedInRect(ctx, img, slotX, slotY, slotW, slotH, options = {}) {
+      if (!ctx || !img || slotW <= 0 || slotH <= 0) return;
 
-      let sx = 0;
-      let sy = 0;
-      let sWidth = srcW;
-      let sHeight = srcH;
+      const radius = typeof options.radius === 'number' ? options.radius : 22;
+      const matColor = options.matColor || '#1e293b';
+      const borderColor = options.borderColor || 'rgba(255, 255, 255, 0.75)';
+      const borderWidth = typeof options.borderWidth === 'number' ? options.borderWidth : 4;
+      const padRatio = typeof options.padRatio === 'number' ? options.padRatio : 0.045;
+      const minPad = typeof options.minPad === 'number' ? options.minPad : 10;
 
-      if (srcAspect > dstAspect) {
-        sWidth = srcH * dstAspect;
-        sx = (srcW - sWidth) * 0.5;
-      } else {
-        sHeight = srcW / dstAspect;
-        sy = (srcH - sHeight) * 0.5;
-      }
-
-      ctx.drawImage(source, sx, sy, sWidth, sHeight, dx, dy, dw, dh);
-    }
-
-    /**
-     * Contain-fit helper that keeps the ENTIRE photo uncropped inside a styled mat/frame
-     */
-    function drawContainInMat(ctx, img, matX, matY, matW, matH, matColor, accentColor, radius = 20) {
       ctx.save();
-      roundRectPath(ctx, matX, matY, matW, matH, radius);
-      ctx.fillStyle = matColor || '#1e293b';
+      roundRectPath(ctx, slotX, slotY, slotW, slotH, radius);
+      ctx.fillStyle = matColor;
       ctx.fill();
       ctx.clip();
 
-      const pad = Math.max(8, Math.min(matW, matH) * 0.04);
-      const innerX = matX + pad;
-      const innerY = matY + pad;
-      const innerW = Math.max(10, matW - pad * 2);
-      const innerH = Math.max(10, matH - pad * 2);
+      const matGrad = ctx.createLinearGradient(slotX, slotY, slotX, slotY + slotH);
+      matGrad.addColorStop(0, 'rgba(255, 255, 255, 0.14)');
+      matGrad.addColorStop(1, 'rgba(0, 0, 0, 0.14)');
+      ctx.fillStyle = matGrad;
+      ctx.fillRect(slotX, slotY, slotW, slotH);
 
-      const srcW = img.width || 1200;
-      const srcH = img.height || 800;
-      const scale = Math.min(innerW / srcW, innerH / srcH);
-      const drawW = srcW * scale;
-      const drawH = srcH * scale;
+      const pad = Math.max(minPad, Math.min(slotW, slotH) * padRatio);
+      const innerX = slotX + pad;
+      const innerY = slotY + pad;
+      const innerW = Math.max(12, slotW - pad * 2);
+      const innerH = Math.max(12, slotH - pad * 2);
+
+      const imgW = img.naturalWidth || img.width || 1200;
+      const imgH = img.naturalHeight || img.height || 800;
+      const fitScale = Math.min(innerW / imgW, innerH / imgH);
+      const drawW = Math.max(1, imgW * fitScale);
+      const drawH = Math.max(1, imgH * fitScale);
       const drawX = innerX + (innerW - drawW) * 0.5;
       const drawY = innerY + (innerH - drawH) * 0.5;
 
-      const innerRadius = Math.max(8, radius - 6);
-      roundRectPath(ctx, drawX, drawY, drawW, drawH, innerRadius);
+      const photoRadius = Math.max(8, radius - 6);
       ctx.save();
+      roundRectPath(ctx, drawX, drawY, drawW, drawH, photoRadius);
       ctx.clip();
-      ctx.drawImage(img, drawX, drawY, drawW, drawH);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, 0, 0, imgW, imgH, drawX, drawY, drawW, drawH);
       ctx.restore();
 
-      ctx.strokeStyle = accentColor || '#ffffff';
-      ctx.lineWidth = 3;
-      roundRectPath(ctx, drawX, drawY, drawW, drawH, innerRadius);
+      ctx.strokeStyle = borderColor;
+      ctx.lineWidth = Math.max(2, borderWidth * 0.7);
+      roundRectPath(ctx, drawX, drawY, drawW, drawH, photoRadius);
       ctx.stroke();
 
       ctx.restore();
 
       ctx.save();
-      ctx.strokeStyle = accentColor || '#ffffff';
-      ctx.lineWidth = 4;
-      roundRectPath(ctx, matX, matY, matW, matH, radius);
+      ctx.strokeStyle = borderColor;
+      ctx.lineWidth = borderWidth;
+      roundRectPath(ctx, slotX, slotY, slotW, slotH, radius);
       ctx.stroke();
       ctx.restore();
     }
@@ -861,53 +1312,93 @@
     }
 
     /**
-     * Capture a full-frame photo from live video or simulated canvas preserving natural aspect ratio
+     * Capture a full-frame photo from live video (`liveVideo` then `bgVideo` when readyState >= 2)
+     * or render a live animated studio fallback frame onto an offscreen canvas.
      */
-    function captureFrameDataUrl() {
-      const useLiveVideo = Boolean(STATE.hasLiveVideoStream && STATE.stream);
+    function captureFrameToDataUrl() {
       const liveVideo = document.getElementById('liveVideo');
+      const bgVideo = document.getElementById('bgVideo');
       const liveSim = document.getElementById('liveSimCanvas');
+      const bgSim = document.getElementById('bgSimCanvas');
 
+      let sourceEl = null;
+      let isHardwareVideo = false;
       let srcW = 1280;
       let srcH = 720;
-      let sourceEl = liveSim;
 
-      if (useLiveVideo && liveVideo && liveVideo.readyState >= 2 && liveVideo.videoWidth > 0 && liveVideo.videoHeight > 0) {
+      if (liveVideo && liveVideo.readyState >= 2 && liveVideo.videoWidth > 0 && liveVideo.videoHeight > 0) {
+        sourceEl = liveVideo;
+        isHardwareVideo = true;
         srcW = liveVideo.videoWidth;
         srcH = liveVideo.videoHeight;
-        sourceEl = liveVideo;
-      } else if (liveSim) {
-        srcW = liveSim.width || 1280;
-        srcH = liveSim.height || 720;
+      } else if (bgVideo && bgVideo.readyState >= 2 && bgVideo.videoWidth > 0 && bgVideo.videoHeight > 0) {
+        sourceEl = bgVideo;
+        isHardwareVideo = true;
+        srcW = bgVideo.videoWidth;
+        srcH = bgVideo.videoHeight;
+      } else if (liveSim && liveSim.width > 0 && liveSim.height > 0) {
         sourceEl = liveSim;
+        srcW = liveSim.width;
+        srcH = liveSim.height;
+      } else if (bgSim && bgSim.width > 0 && bgSim.height > 0) {
+        sourceEl = bgSim;
+        srcW = bgSim.width;
+        srcH = bgSim.height;
       } else {
-        const bgSim = document.getElementById('bgSimCanvas');
-        if (bgSim) {
-          srcW = bgSim.width || 1280;
-          srcH = bgSim.height || 720;
-          sourceEl = bgSim;
-        }
+        sourceEl = renderFallbackStudioFrame(1280, 720);
+        srcW = sourceEl.width;
+        srcH = sourceEl.height;
       }
 
       const maxDim = 1200;
-      const ratio = Math.min(1, maxDim / Math.max(srcW, srcH));
+      const scale = Math.min(1, maxDim / Math.max(srcW, srcH));
+      const outW = Math.max(1, Math.round(srcW * scale));
+      const outH = Math.max(1, Math.round(srcH * scale));
+
       const snapCanvas = document.createElement('canvas');
-      snapCanvas.width = Math.max(1, Math.round(srcW * ratio));
-      snapCanvas.height = Math.max(1, Math.round(srcH * ratio));
-      const ctx = snapCanvas.getContext('2d');
+      snapCanvas.width = outW;
+      snapCanvas.height = outH;
+      const sctx = snapCanvas.getContext('2d');
 
-      ctx.save();
-      if (STATE.mirrorCamera) {
-        ctx.translate(snapCanvas.width, 0);
-        ctx.scale(-1, 1);
+      const shouldMirror = STATE.mirrorCamera && STATE.facingMode === 'user';
+      if (shouldMirror) {
+        sctx.translate(outW, 0);
+        sctx.scale(-1, 1);
       }
 
-      if (sourceEl) {
-        ctx.drawImage(sourceEl, 0, 0, snapCanvas.width, snapCanvas.height);
+      try {
+        sctx.drawImage(sourceEl, 0, 0, outW, outH);
+      } catch (err) {
+        const safeFallback = renderFallbackStudioFrame(outW, outH);
+        sctx.setTransform(1, 0, 0, 1, 0, 0);
+        sctx.drawImage(safeFallback, 0, 0, outW, outH);
       }
 
-      ctx.restore();
+      if (isHardwareVideo) {
+        STATE.hasLiveVideoStream = true;
+      }
+
       return snapCanvas.toDataURL('image/jpeg', 0.94);
+    }
+
+    function loadImageElement(src) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
+      });
+    }
+
+    function roundRectPath(ctx, x, y, w, h, r) {
+      const radius = Math.max(0, Math.min(r, w / 2, h / 2));
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.arcTo(x + w, y, x + w, y + h, radius);
+      ctx.arcTo(x + w, y + h, x, y + h, radius);
+      ctx.arcTo(x, y + h, x, y, radius);
+      ctx.arcTo(x, y, x + w, y, radius);
+      ctx.closePath();
     }
 
     /**
@@ -929,6 +1420,7 @@
         numEl.classList.remove('count-pop');
         void numEl.offsetWidth;
         numEl.classList.add('count-pop');
+        playCountdownTone(s === 1);
 
         const ok = await delayMs(1000, sessionToken);
         if (!ok) {
@@ -939,6 +1431,164 @@
 
       overlay.classList.add('hidden');
       return true;
+    }
+
+    async function startPhotoSequence() {
+      if (STATE.isCaptureRunning) return;
+      STATE.isCaptureRunning = true;
+      STATE.sessionId += 1;
+      const sessionToken = STATE.sessionId;
+      STATE.capturedPhotos = [];
+
+      const totalShots = STATE.shotCount === 4 ? 4 : 3;
+      const counterEl = document.getElementById('captureShotCounter');
+
+      closeCameraDiagnostics();
+      setActiveScreen('capture');
+      await ensureCameraReady(!STATE.hasLiveVideoStream);
+      await unlockVideoPlaybackOnGesture();
+
+      for (let shotIdx = 1; shotIdx <= totalShots; shotIdx++) {
+        if (sessionToken !== STATE.sessionId) {
+          STATE.isCaptureRunning = false;
+          return;
+        }
+
+        if (counterEl) {
+          counterEl.textContent = `${shotIdx} / ${totalShots}`;
+        }
+
+        const waitSec = shotIdx === 1 ? STATE.initialCountdownSec : STATE.betweenShotsSec;
+        const completed = await runCountdown(waitSec, sessionToken);
+        if (!completed || sessionToken !== STATE.sessionId) {
+          STATE.isCaptureRunning = false;
+          return;
+        }
+
+        triggerCameraFlash();
+        playShutterSound();
+        const photoDataUrl = captureFrameToDataUrl();
+        STATE.capturedPhotos.push(photoDataUrl);
+
+        if (shotIdx < totalShots) {
+          const ok = await delayMs(180, sessionToken);
+          if (!ok) {
+            STATE.isCaptureRunning = false;
+            return;
+          }
+        }
+      }
+
+      if (sessionToken !== STATE.sessionId) {
+        STATE.isCaptureRunning = false;
+        return;
+      }
+
+      STATE.isCaptureRunning = false;
+      setActiveScreen('print');
+      await renderSelphyComposition();
+    }
+
+    function handleStartBoothClick(event) {
+      if (event && typeof event.stopPropagation === 'function') {
+        event.stopPropagation();
+      }
+      unlockVideoPlaybackOnGesture().catch(() => {});
+      if (STATE.isStartingSequence || STATE.isCaptureRunning) return;
+      STATE.isStartingSequence = true;
+      announceKioskStatus(`بدء التقاط ${STATE.shotCount} صور`);
+
+      try {
+        startPhotoSequence().finally(() => {
+          STATE.isStartingSequence = false;
+        });
+      } catch (err) {
+        STATE.isStartingSequence = false;
+      }
+    }
+
+    function dispatchButtonAction(buttonEl, event) {
+      if (!buttonEl || buttonEl.disabled) return;
+
+      const explicitAction = buttonEl.getAttribute('data-action');
+      const btnId = buttonEl.id || '';
+
+      if (explicitAction === 'select-shots' || buttonEl.classList.contains('shot-count-btn')) {
+        const rawShots = Number(buttonEl.getAttribute('data-shots'));
+        const shots = rawShots === 4 ? 4 : 3;
+        selectShotCount(shots);
+        announceKioskStatus(`تم اختيار ${shots} صور`);
+        return;
+      }
+
+      if (explicitAction === 'start-capture' || btnId === 'startCaptureBtn') {
+        handleStartBoothClick(event);
+        return;
+      }
+
+      if (explicitAction === 'select-theme' || buttonEl.classList.contains('theme-pill-btn')) {
+        const themeId = buttonEl.getAttribute('data-theme');
+        if (themeId && THEMES[themeId]) {
+          selectTheme(themeId);
+          announceKioskStatus(`تم اختيار ثيم ${THEMES[themeId].label}`);
+        }
+        return;
+      }
+
+      if (explicitAction === 'select-layout' || buttonEl.classList.contains('layout-pill-btn')) {
+        const layoutId = buttonEl.getAttribute('data-layout');
+        if (layoutId === 'postcard' || layoutId === 'dual_strip') {
+          selectPrintLayout(layoutId);
+          announceKioskStatus(layoutId === 'dual_strip' ? 'تم اختيار شريطين (2×6)' : 'تم اختيار بوست كارد (4×6)');
+        }
+        return;
+      }
+
+      if (explicitAction === 'direct-print' || btnId === 'btnDirectPrint') {
+        announceKioskStatus('جاري تجهيز الطباعة — الاستلام من الكاشير', true);
+        triggerDirectPrint();
+        return;
+      }
+
+      if (explicitAction === 'reset-kiosk' || btnId === 'btnFinishReset') {
+        announceKioskStatus('تمت العودة إلى شاشة البداية');
+        resetToStartScreen();
+      }
+    }
+
+    function bindStartButtonEvents() {
+      const appRoot = document.getElementById('app') || document.body;
+      if (!appRoot || appRoot.dataset.kioskButtonsBound === '1') return;
+      appRoot.dataset.kioskButtonsBound = '1';
+
+      const recentActivations = new WeakMap();
+
+      const activateOnce = (buttonEl, event) => {
+        if (!buttonEl) return;
+        const now = Date.now();
+        const lastAt = recentActivations.get(buttonEl) || 0;
+        if (now - lastAt < 380) {
+          return;
+        }
+        recentActivations.set(buttonEl, now);
+        dispatchButtonAction(buttonEl, event);
+      };
+
+      appRoot.addEventListener('touchend', (event) => {
+        if (event.touches && event.touches.length > 0) return;
+        const target = event.target && event.target.closest ? event.target.closest('button, [role="button"]') : null;
+        if (!target || !appRoot.contains(target)) return;
+        if (event.cancelable) {
+          event.preventDefault();
+        }
+        activateOnce(target, event);
+      }, { passive: false });
+
+      appRoot.addEventListener('click', (event) => {
+        const target = event.target && event.target.closest ? event.target.closest('button, [role="button"]') : null;
+        if (!target || !appRoot.contains(target)) return;
+        activateOnce(target, event);
+      });
     }
 
     /**
@@ -1006,7 +1656,6 @@
       }
       ctx.restore();
 
-      // Outer frame border
       ctx.save();
       ctx.strokeStyle = theme.borderColor;
       ctx.lineWidth = 14;
@@ -1045,20 +1694,24 @@
 
       for (let i = 0; i < count; i++) {
         const py = topPad + i * (photoH + gap);
-        drawContainInMat(
+        drawPhotoFittedInRect(
           ctx,
           images[i],
           stripX + padX,
           py,
           photoW,
           photoH,
-          theme.matColor,
-          theme.accentColor,
-          16
+          {
+            matColor: theme.matColor,
+            borderColor: theme.accentColor,
+            borderWidth: 3.5,
+            radius: 16,
+            padRatio: 0.045,
+            minPad: 8
+          }
         );
       }
 
-      // Expressive caption (not the theme name)
       ctx.fillStyle = theme.textColor;
       ctx.font = '800 28px Cairo, sans-serif';
       ctx.textAlign = 'center';
@@ -1082,7 +1735,7 @@
 
       const sources = STATE.capturedPhotos.length > 0
         ? STATE.capturedPhotos
-        : [captureFrameDataUrl()];
+        : [captureFrameToDataUrl()];
 
       const loadedImages = [];
       for (let i = 0; i < sources.length; i++) {
@@ -1107,14 +1760,12 @@
       const H = canvas.height;
 
       if (STATE.printLayout === 'dual_strip') {
-        // Two 2x6 strips (600x1800 each) side-by-side on 1200x1800 4x6 sheet
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, W, H);
 
         renderSingleStrip(ctx, theme, loadedImages, 0, 0, 600, H);
         renderSingleStrip(ctx, theme, loadedImages, 600, 0, 600, H);
 
-        // Subtle center cut guide line
         ctx.save();
         ctx.setLineDash([12, 10]);
         ctx.strokeStyle = 'rgba(100, 116, 139, 0.55)';
@@ -1125,7 +1776,6 @@
         ctx.stroke();
         ctx.restore();
       } else {
-        // Full 4x6 postcard layout (1200x1800 px)
         drawThemeBackground(ctx, theme, W, H);
 
         const headerHeight = 148;
@@ -1134,7 +1784,6 @@
         const gap = countGapForShots(loadedImages.length);
         const count = loadedImages.length;
 
-        // Top expressive caption (not theme name)
         ctx.fillStyle = theme.textColor;
         ctx.font = '900 44px Cairo, sans-serif';
         ctx.textAlign = 'center';
@@ -1147,20 +1796,24 @@
 
         for (let i = 0; i < count; i++) {
           const y = headerHeight + i * (cellH + gap);
-          drawContainInMat(
+          drawPhotoFittedInRect(
             ctx,
             loadedImages[i],
             sideMargin,
             y,
             cellW,
             cellH,
-            theme.matColor,
-            theme.accentColor,
-            22
+            {
+              matColor: theme.matColor,
+              borderColor: theme.accentColor,
+              borderWidth: 4.5,
+              radius: 22,
+              padRatio: 0.045,
+              minPad: 12
+            }
           );
         }
 
-        // Bottom expressive caption (not theme name)
         ctx.fillStyle = theme.textColor;
         ctx.font = '800 36px Cairo, sans-serif';
         ctx.textAlign = 'center';
@@ -1235,6 +1888,7 @@
     async function resetToStartScreen() {
       STATE.sessionId += 1;
       STATE.isCaptureRunning = false;
+      STATE.isStartingSequence = false;
       STATE.capturedPhotos = [];
 
       const overlay = document.getElementById('countdownOverlay');
@@ -1243,7 +1897,7 @@
       }
 
       setActiveScreen('start');
-      await ensureCameraReady();
+      await ensureCameraReady(false);
     }
 
     /**
@@ -1251,11 +1905,30 @@
      */
     window.addEventListener('DOMContentLoaded', async () => {
       installViewportLocks();
+      bindStartButtonEvents();
       startSimulatedCameraLoop();
       selectShotCount(3);
       await selectTheme('kids');
       await selectPrintLayout('postcard');
-      await ensureCameraReady();
+      await ensureCameraReady(false);
+
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+          ensureCameraReady(!STATE.hasLiveVideoStream).catch(() => {});
+        }
+      });
+
+      const resumeVideoOnGesture = () => {
+        if (STATE.stream) {
+          attachStreamToVideos(STATE.stream);
+          unlockVideoPlaybackOnGesture().catch(() => {});
+        } else if (!STATE.hasLiveVideoStream) {
+          ensureCameraReady(false).catch(() => {});
+        }
+      };
+
+      document.addEventListener('pointerdown', resumeVideoOnGesture, { passive: true });
+      document.addEventListener('click', resumeVideoOnGesture, { passive: true });
     });
   </script>
 </body>
