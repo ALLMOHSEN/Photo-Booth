@@ -179,21 +179,60 @@
         <div class="fixed inset-0 bg-slate-950/35"></div>
       </div>
 
-      <!-- Single Centered Capture Button with Price -->
-      <button
-        id="btnStartBooth"
-        type="button"
-        onclick="handleStartBoothClick()"
-        class="capture-btn-pulse relative z-10 w-full max-w-md px-8 py-9 sm:px-12 sm:py-11 rounded-[2.25rem] bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 active:scale-95 text-white border-2 border-white/25 transition-all duration-200 flex flex-col items-center justify-center gap-3"
-      >
-        <svg class="w-12 h-12 sm:w-14 sm:h-14 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-          <circle cx="12" cy="13" r="3.5" />
-        </svg>
-        <span class="text-2xl sm:text-3xl font-black tracking-tight text-center leading-snug">
-          أخذ صورة ذكرى بسعر 5,000 د.ع
-        </span>
-      </button>
+      <!-- Center Stack: 3/4 Shot Picker + Main Capture Button -->
+      <div class="relative z-10 w-full max-w-md flex flex-col items-center justify-center gap-4">
+        <!-- Simple 3-Shot / 4-Shot Picker with Miniature Strip Icons -->
+        <div class="w-full grid grid-cols-2 gap-3 glass-panel p-2 rounded-3xl" role="group" aria-label="عدد الصور">
+          <button
+            id="btnShots3"
+            type="button"
+            data-shots="3"
+            onclick="selectShotCount(3)"
+            class="shot-count-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-3 transition bg-indigo-600/45 border-amber-300 text-white shadow"
+          >
+            <svg class="w-5 h-7 shrink-0" viewBox="0 0 24 34" fill="none" aria-hidden="true">
+              <rect x="2" y="2" width="20" height="30" rx="3.5" stroke="currentColor" stroke-width="2" />
+              <rect x="5.5" y="5.5" width="13" height="6.2" rx="1.2" fill="currentColor" opacity="0.9" />
+              <rect x="5.5" y="13.8" width="13" height="6.2" rx="1.2" fill="currentColor" opacity="0.9" />
+              <rect x="5.5" y="22.1" width="13" height="6.2" rx="1.2" fill="currentColor" opacity="0.9" />
+            </svg>
+            <span class="text-base sm:text-lg font-black">3 صور</span>
+          </button>
+
+          <button
+            id="btnShots4"
+            type="button"
+            data-shots="4"
+            onclick="selectShotCount(4)"
+            class="shot-count-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-3 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35"
+          >
+            <svg class="w-5 h-7 shrink-0" viewBox="0 0 24 34" fill="none" aria-hidden="true">
+              <rect x="2" y="2" width="20" height="30" rx="3.5" stroke="currentColor" stroke-width="2" />
+              <rect x="6" y="4.8" width="12" height="4.6" rx="1" fill="currentColor" opacity="0.9" />
+              <rect x="6" y="11.1" width="12" height="4.6" rx="1" fill="currentColor" opacity="0.9" />
+              <rect x="6" y="17.4" width="12" height="4.6" rx="1" fill="currentColor" opacity="0.9" />
+              <rect x="6" y="23.7" width="12" height="4.6" rx="1" fill="currentColor" opacity="0.9" />
+            </svg>
+            <span class="text-base sm:text-lg font-black">4 صور</span>
+          </button>
+        </div>
+
+        <!-- Single Centered Capture Button with Price -->
+        <button
+          id="btnStartBooth"
+          type="button"
+          onclick="handleStartBoothClick()"
+          class="capture-btn-pulse w-full px-8 py-9 sm:px-10 sm:py-10 rounded-[2.25rem] bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 active:scale-95 text-white border-2 border-white/25 transition-all duration-200 flex flex-col items-center justify-center gap-3"
+        >
+          <svg class="w-12 h-12 sm:w-14 sm:h-14 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+            <circle cx="12" cy="13" r="3.5" />
+          </svg>
+          <span class="text-2xl sm:text-3xl font-black tracking-tight text-center leading-snug">
+            أخذ صورة ذكرى بسعر 5,000 د.ع
+          </span>
+        </button>
+      </div>
     </section>
 
     <!-- ===================================================================== -->
@@ -339,7 +378,7 @@
             onclick="resetToStartScreen()"
             class="w-full py-3.5 px-5 rounded-2xl bg-slate-800 hover:bg-slate-700 active:scale-[0.98] border border-white/15 text-slate-100 font-extrabold text-sm sm:text-base transition flex items-center justify-center gap-2"
           >
-            <span>إنهاء</span>
+            <span>بدء من جديد</span>
           </button>
         </div>
       </div>
@@ -355,7 +394,7 @@
      */
     const STATE = {
       screen: 'start',          // 'start' | 'capture' | 'print'
-      shotCount: 3,             // 3 photos per session (1/3, 2/3, 3/3)
+      shotCount: 3,             // 3 or 4 photos per session
       initialCountdownSec: 6,   // 6 seconds before Shot 1
       betweenShotsSec: 3,       // 3 seconds between subsequent shots
       selectedTheme: 'kids',    // 'kids' | 'girls' | 'boys' | 'adults' | 'royal_white' | 'pastel'
@@ -372,15 +411,19 @@
 
     /**
      * Theme Definitions for 1200x1800 (4x6 inch / 100mm x 148mm at 300 DPI) Print Canvas
+     * Uses expressive Arabic captions instead of theme names.
      */
     const THEMES = {
       kids: {
         id: 'kids',
         label: 'أطفال',
-        bgTop: '#FFFBEB',
+        topCaption: 'أحلى لحظات العمر',
+        bottomCaption: 'ضحكتك تنور المكان',
+        bgTop: '#FFF7ED',
         bgBottom: '#E0F2FE',
+        matColor: '#FEF3C7',
         borderColor: '#F59E0B',
-        accentColor: '#0EA5E9',
+        accentColor: '#0284C7',
         textColor: '#0F172A',
         stickerLeft: '⭐',
         stickerRight: '🎈',
@@ -389,10 +432,13 @@
       girls: {
         id: 'girls',
         label: 'بنات',
+        topCaption: 'لحظات تبقى بالقلب',
+        bottomCaption: 'إشراقة لا مثيل لها',
         bgTop: '#FFF1F2',
         bgBottom: '#FCE7F3',
+        matColor: '#FFE4E6',
         borderColor: '#EC4899',
-        accentColor: '#F43F5E',
+        accentColor: '#E11D48',
         textColor: '#831843',
         stickerLeft: '💖',
         stickerRight: '✨',
@@ -401,8 +447,11 @@
       boys: {
         id: 'boys',
         label: 'أولاد',
+        topCaption: 'أسعد الأوقات معاً',
+        bottomCaption: 'مغامرة وذكريات جميلة',
         bgTop: '#061224',
         bgBottom: '#0F172A',
+        matColor: '#0B1E38',
         borderColor: '#06B6D4',
         accentColor: '#3B82F6',
         textColor: '#E0F2FE',
@@ -413,8 +462,11 @@
       adults: {
         id: 'adults',
         label: 'كبار',
+        topCaption: 'ذكريات لا تُنسى',
+        bottomCaption: 'لحظات استثنائية تدوم',
         bgTop: '#09090B',
-        bgBottom: '#18181B',
+        bgBottom: '#1C1917',
+        matColor: '#1F1B18',
         borderColor: '#EAB308',
         accentColor: '#FACC15',
         textColor: '#FEF08A',
@@ -425,8 +477,11 @@
       royal_white: {
         id: 'royal_white',
         label: 'أبيض ملكي',
+        topCaption: 'بداية حكاية جميلة',
+        bottomCaption: 'نقاء اللحظة وجمالها',
         bgTop: '#FFFFFF',
-        bgBottom: '#FAF8F5',
+        bgBottom: '#F8FAFC',
+        matColor: '#F1F5F9',
         borderColor: '#C5A059',
         accentColor: '#A16207',
         textColor: '#1E293B',
@@ -437,16 +492,35 @@
       pastel: {
         id: 'pastel',
         label: 'باستيل',
+        topCaption: 'أجمل ما في اليوم',
+        bottomCaption: 'فرحة تملأ المكان',
         bgTop: '#ECFDF5',
         bgBottom: '#F3E8FF',
+        matColor: '#FAF5FF',
         borderColor: '#A78BFA',
-        accentColor: '#34D399',
+        accentColor: '#10B981',
         textColor: '#312E81',
         stickerLeft: '🌸',
         stickerRight: '🌿',
         pattern: 'pastel'
       }
     };
+
+    /**
+     * Select 3 or 4 shots on the home screen and update UI buttons
+     */
+    function selectShotCount(count) {
+      if (count !== 3 && count !== 4) return;
+      STATE.shotCount = count;
+
+      document.querySelectorAll('.shot-count-btn').forEach((btn) => {
+        const val = Number(btn.getAttribute('data-shots'));
+        const active = val === count;
+        btn.className = active
+          ? 'shot-count-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-3 transition bg-indigo-600/45 border-amber-300 text-white shadow'
+          : 'shot-count-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-3 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35';
+      });
+    }
 
     /**
      * Lock viewport against pinch-zoom, multi-touch pan, double-tap zoom, and context menus
@@ -724,6 +798,52 @@
       ctx.drawImage(source, sx, sy, sWidth, sHeight, dx, dy, dw, dh);
     }
 
+    /**
+     * Contain-fit helper that keeps the ENTIRE photo uncropped inside a styled mat/frame
+     */
+    function drawContainInMat(ctx, img, matX, matY, matW, matH, matColor, accentColor, radius = 20) {
+      ctx.save();
+      roundRectPath(ctx, matX, matY, matW, matH, radius);
+      ctx.fillStyle = matColor || '#1e293b';
+      ctx.fill();
+      ctx.clip();
+
+      const pad = Math.max(8, Math.min(matW, matH) * 0.04);
+      const innerX = matX + pad;
+      const innerY = matY + pad;
+      const innerW = Math.max(10, matW - pad * 2);
+      const innerH = Math.max(10, matH - pad * 2);
+
+      const srcW = img.width || 1200;
+      const srcH = img.height || 800;
+      const scale = Math.min(innerW / srcW, innerH / srcH);
+      const drawW = srcW * scale;
+      const drawH = srcH * scale;
+      const drawX = innerX + (innerW - drawW) * 0.5;
+      const drawY = innerY + (innerH - drawH) * 0.5;
+
+      const innerRadius = Math.max(8, radius - 6);
+      roundRectPath(ctx, drawX, drawY, drawW, drawH, innerRadius);
+      ctx.save();
+      ctx.clip();
+      ctx.drawImage(img, drawX, drawY, drawW, drawH);
+      ctx.restore();
+
+      ctx.strokeStyle = accentColor || '#ffffff';
+      ctx.lineWidth = 3;
+      roundRectPath(ctx, drawX, drawY, drawW, drawH, innerRadius);
+      ctx.stroke();
+
+      ctx.restore();
+
+      ctx.save();
+      ctx.strokeStyle = accentColor || '#ffffff';
+      ctx.lineWidth = 4;
+      roundRectPath(ctx, matX, matY, matW, matH, radius);
+      ctx.stroke();
+      ctx.restore();
+    }
+
     function triggerCameraFlash() {
       const flash = document.getElementById('flashOverlay');
       if (!flash) return;
@@ -741,7 +861,57 @@
     }
 
     /**
-     * Countdown runner (e.g., 6, 5, 4, 3, 2, 1 or 3, 2, 1)
+     * Capture a full-frame photo from live video or simulated canvas preserving natural aspect ratio
+     */
+    function captureFrameDataUrl() {
+      const useLiveVideo = Boolean(STATE.hasLiveVideoStream && STATE.stream);
+      const liveVideo = document.getElementById('liveVideo');
+      const liveSim = document.getElementById('liveSimCanvas');
+
+      let srcW = 1280;
+      let srcH = 720;
+      let sourceEl = liveSim;
+
+      if (useLiveVideo && liveVideo && liveVideo.readyState >= 2 && liveVideo.videoWidth > 0 && liveVideo.videoHeight > 0) {
+        srcW = liveVideo.videoWidth;
+        srcH = liveVideo.videoHeight;
+        sourceEl = liveVideo;
+      } else if (liveSim) {
+        srcW = liveSim.width || 1280;
+        srcH = liveSim.height || 720;
+        sourceEl = liveSim;
+      } else {
+        const bgSim = document.getElementById('bgSimCanvas');
+        if (bgSim) {
+          srcW = bgSim.width || 1280;
+          srcH = bgSim.height || 720;
+          sourceEl = bgSim;
+        }
+      }
+
+      const maxDim = 1200;
+      const ratio = Math.min(1, maxDim / Math.max(srcW, srcH));
+      const snapCanvas = document.createElement('canvas');
+      snapCanvas.width = Math.max(1, Math.round(srcW * ratio));
+      snapCanvas.height = Math.max(1, Math.round(srcH * ratio));
+      const ctx = snapCanvas.getContext('2d');
+
+      ctx.save();
+      if (STATE.mirrorCamera) {
+        ctx.translate(snapCanvas.width, 0);
+        ctx.scale(-1, 1);
+      }
+
+      if (sourceEl) {
+        ctx.drawImage(sourceEl, 0, 0, snapCanvas.width, snapCanvas.height);
+      }
+
+      ctx.restore();
+      return snapCanvas.toDataURL('image/jpeg', 0.94);
+    }
+
+    /**
+     * Start capture flow: 6s initial countdown -> Shot 1 -> 3s wait between shots
      */
     async function runCountdown(seconds, sessionToken) {
       const overlay = document.getElementById('countdownOverlay');
@@ -772,169 +942,67 @@
     }
 
     /**
-     * Capture a high-res photo frame from live video or simulated canvas
-     */
-    function captureFrameDataUrl() {
-      const snapCanvas = document.createElement('canvas');
-      snapCanvas.width = 1200;
-      snapCanvas.height = 800;
-      const ctx = snapCanvas.getContext('2d');
-
-      const useLiveVideo = Boolean(STATE.hasLiveVideoStream && STATE.stream);
-      const liveVideo = document.getElementById('liveVideo');
-      const liveSim = document.getElementById('liveSimCanvas');
-
-      ctx.save();
-      if (STATE.mirrorCamera) {
-        ctx.translate(snapCanvas.width, 0);
-        ctx.scale(-1, 1);
-      }
-
-      if (useLiveVideo && liveVideo && liveVideo.readyState >= 2 && liveVideo.videoWidth > 0) {
-        drawCoverFit(ctx, liveVideo, liveVideo.videoWidth, liveVideo.videoHeight, 0, 0, snapCanvas.width, snapCanvas.height);
-      } else if (liveSim) {
-        drawCoverFit(ctx, liveSim, liveSim.width, liveSim.height, 0, 0, snapCanvas.width, snapCanvas.height);
-      } else {
-        const bgSim = document.getElementById('bgSimCanvas');
-        if (bgSim) {
-          drawCoverFit(ctx, bgSim, bgSim.width, bgSim.height, 0, 0, snapCanvas.width, snapCanvas.height);
-        }
-      }
-
-      ctx.restore();
-      return snapCanvas.toDataURL('image/jpeg', 0.93);
-    }
-
-    /**
-     * Start capture flow: 6s initial countdown -> Shot 1 -> 3s wait -> Shot 2 -> 3s wait -> Shot 3
-     */
-    async function handleStartBoothClick() {
-      if (STATE.isCaptureRunning) return;
-
-      // Unlock AudioContext on user gesture
-      try {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        if (AudioContextClass && !STATE.audioCtx) {
-          STATE.audioCtx = new AudioContextClass();
-        }
-        if (STATE.audioCtx && STATE.audioCtx.state === 'suspended') {
-          await STATE.audioCtx.resume().catch(() => {});
-        }
-      } catch (err) {}
-
-      STATE.sessionId += 1;
-      const sessionToken = STATE.sessionId;
-      STATE.isCaptureRunning = true;
-      STATE.capturedPhotos = [];
-
-      setActiveScreen('capture');
-      startSimulatedCameraLoop();
-      await tryOpenCameraStream();
-      syncCameraVisualTargets();
-
-      const counterEl = document.getElementById('captureShotCounter');
-
-      for (let i = 0; i < STATE.shotCount; i++) {
-        if (sessionToken !== STATE.sessionId) {
-          STATE.isCaptureRunning = false;
-          return;
-        }
-
-        if (counterEl) {
-          counterEl.textContent = `${i + 1}/${STATE.shotCount}`;
-        }
-
-        const waitSec = i === 0 ? STATE.initialCountdownSec : STATE.betweenShotsSec;
-        const completed = await runCountdown(waitSec, sessionToken);
-        if (!completed || sessionToken !== STATE.sessionId) {
-          STATE.isCaptureRunning = false;
-          return;
-        }
-
-        triggerCameraFlash();
-        playShutterSound();
-        const photoUrl = captureFrameDataUrl();
-        STATE.capturedPhotos.push(photoUrl);
-
-        if (i < STATE.shotCount - 1) {
-          const ok = await delayMs(200, sessionToken);
-          if (!ok || sessionToken !== STATE.sessionId) {
-            STATE.isCaptureRunning = false;
-            return;
-          }
-        }
-      }
-
-      if (sessionToken !== STATE.sessionId) {
-        STATE.isCaptureRunning = false;
-        return;
-      }
-
-      STATE.isCaptureRunning = false;
-      await renderSelphyComposition();
-      setActiveScreen('print');
-    }
-
-    /**
-     * Load image helper for canvas rendering
-     */
-    function loadImageElement(src) {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => resolve(img);
-        img.onerror = reject;
-        img.src = src;
-      });
-    }
-
-    /**
-     * Draw rounded rectangle path on canvas
-     */
-    function roundRectPath(ctx, x, y, w, h, r) {
-      const radius = Math.min(r, w / 2, h / 2);
-      ctx.beginPath();
-      ctx.moveTo(x + radius, y);
-      ctx.arcTo(x + w, y, x + w, y + h, radius);
-      ctx.arcTo(x + w, y + h, x, y + h, radius);
-      ctx.arcTo(x, y + h, x, y, radius);
-      ctx.arcTo(x, y, x + w, y, radius);
-      ctx.closePath();
-    }
-
-    /**
-     * Draw subtle decorative background accents for each theme on 1200x1800 canvas
+     * Draw rich vector-drawn background accents and borders for each theme on 1200x1800 canvas
      */
     function drawThemeBackground(ctx, theme, width, height) {
-      const grad = ctx.createLinearGradient(0, 0, 0, height);
+      const grad = ctx.createLinearGradient(0, 0, width * 0.25, height);
       grad.addColorStop(0, theme.bgTop);
       grad.addColorStop(1, theme.bgBottom);
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, width, height);
 
       ctx.save();
-      if (theme.pattern === 'neon') {
-        ctx.strokeStyle = 'rgba(6, 182, 212, 0.14)';
+      if (theme.pattern === 'stars') {
+        ctx.fillStyle = 'rgba(245, 158, 11, 0.14)';
+        for (let y = 140; y < height - 100; y += 220) {
+          for (let x = 110; x < width; x += 240) {
+            ctx.beginPath();
+            ctx.arc(x + ((y / 220) % 2) * 60, y, 16, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      } else if (theme.pattern === 'hearts') {
+        ctx.strokeStyle = 'rgba(236, 72, 153, 0.18)';
+        ctx.lineWidth = 3;
+        for (let y = 160; y < height - 120; y += 260) {
+          ctx.beginPath();
+          ctx.arc(105, y, 36, 0, Math.PI * 2);
+          ctx.arc(width - 105, y + 80, 44, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+      } else if (theme.pattern === 'neon') {
+        ctx.strokeStyle = 'rgba(6, 182, 212, 0.16)';
         ctx.lineWidth = 2;
-        for (let x = 80; x < width; x += 120) {
+        for (let x = 70; x < width; x += 110) {
           ctx.beginPath();
           ctx.moveTo(x, 0);
           ctx.lineTo(x, height);
           ctx.stroke();
         }
+        ctx.strokeStyle = 'rgba(59, 130, 246, 0.22)';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(46, 46, width - 92, height - 92);
       } else if (theme.pattern === 'gold') {
-        ctx.strokeStyle = 'rgba(234, 179, 8, 0.14)';
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = 'rgba(234, 179, 8, 0.28)';
+        ctx.lineWidth = 3;
         ctx.strokeRect(48, 48, width - 96, height - 96);
+        ctx.strokeRect(62, 62, width - 124, height - 124);
       } else if (theme.pattern === 'pastel') {
-        ctx.fillStyle = 'rgba(167, 139, 250, 0.12)';
+        ctx.fillStyle = 'rgba(167, 139, 250, 0.16)';
         ctx.beginPath();
-        ctx.arc(180, 220, 140, 0, Math.PI * 2);
-        ctx.arc(width - 180, height - 240, 160, 0, Math.PI * 2);
+        ctx.arc(160, 220, 150, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(52, 211, 153, 0.16)';
+        ctx.beginPath();
+        ctx.arc(width - 150, height - 220, 170, 0, Math.PI * 2);
         ctx.fill();
       } else if (theme.pattern === 'classic') {
-        ctx.strokeStyle = 'rgba(197, 160, 89, 0.28)';
+        ctx.strokeStyle = 'rgba(197, 160, 89, 0.35)';
         ctx.lineWidth = 3;
-        ctx.strokeRect(44, 44, width - 88, height - 88);
+        ctx.strokeRect(46, 46, width - 92, height - 92);
+        ctx.strokeStyle = 'rgba(197, 160, 89, 0.18)';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(60, 60, width - 120, height - 120);
       }
       ctx.restore();
 
@@ -966,10 +1034,10 @@
       ctx.lineWidth = 8;
       ctx.strokeRect(stripX + 10, stripY + 10, stripW - 20, stripH - 20);
 
-      const padX = 34;
-      const topPad = 40;
+      const padX = 28;
+      const topPad = 34;
       const bottomHeaderH = 140;
-      const gap = 24;
+      const gap = 18;
       const count = images.length;
       const availH = stripH - topPad - bottomHeaderH - gap * (count - 1);
       const photoH = availH / count;
@@ -977,25 +1045,25 @@
 
       for (let i = 0; i < count; i++) {
         const py = topPad + i * (photoH + gap);
-        ctx.save();
-        roundRectPath(ctx, stripX + padX, py, photoW, photoH, 18);
-        ctx.clip();
-        const img = images[i];
-        drawCoverFit(ctx, img, img.width, img.height, stripX + padX, py, photoW, photoH);
-        ctx.restore();
-
-        ctx.strokeStyle = theme.accentColor;
-        ctx.lineWidth = 4;
-        roundRectPath(ctx, stripX + padX, py, photoW, photoH, 18);
-        ctx.stroke();
+        drawContainInMat(
+          ctx,
+          images[i],
+          stripX + padX,
+          py,
+          photoW,
+          photoH,
+          theme.matColor,
+          theme.accentColor,
+          16
+        );
       }
 
-      // Strip footer label
+      // Expressive caption (not the theme name)
       ctx.fillStyle = theme.textColor;
-      ctx.font = '800 32px Cairo, sans-serif';
+      ctx.font = '800 28px Cairo, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(`${theme.stickerLeft} ${theme.label} ${theme.stickerRight}`, stripX + stripW / 2, stripY + stripH - 72);
+      ctx.fillText(`${theme.stickerLeft} ${theme.topCaption} ${theme.stickerRight}`, stripX + stripW / 2, stripY + stripH - 72);
 
       ctx.restore();
     }
@@ -1060,18 +1128,18 @@
         // Full 4x6 postcard layout (1200x1800 px)
         drawThemeBackground(ctx, theme, W, H);
 
-        const headerHeight = 150;
-        const footerHeight = 130;
-        const sideMargin = 68;
-        const gap = 28;
+        const headerHeight = 148;
+        const footerHeight = 128;
+        const sideMargin = 64;
+        const gap = countGapForShots(loadedImages.length);
         const count = loadedImages.length;
 
-        // Top theme banner
+        // Top expressive caption (not theme name)
         ctx.fillStyle = theme.textColor;
-        ctx.font = '900 48px Cairo, sans-serif';
+        ctx.font = '900 44px Cairo, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(`${theme.stickerLeft}  ${theme.label}  ${theme.stickerRight}`, W / 2, 92);
+        ctx.fillText(`${theme.stickerLeft}  ${theme.topCaption}  ${theme.stickerRight}`, W / 2, 90);
 
         const availH = H - headerHeight - footerHeight - gap * (count - 1);
         const cellH = availH / count;
@@ -1079,25 +1147,25 @@
 
         for (let i = 0; i < count; i++) {
           const y = headerHeight + i * (cellH + gap);
-          ctx.save();
-          roundRectPath(ctx, sideMargin, y, cellW, cellH, 24);
-          ctx.clip();
-          const img = loadedImages[i];
-          drawCoverFit(ctx, img, img.width, img.height, sideMargin, y, cellW, cellH);
-          ctx.restore();
-
-          ctx.strokeStyle = theme.accentColor;
-          ctx.lineWidth = 5;
-          roundRectPath(ctx, sideMargin, y, cellW, cellH, 24);
-          ctx.stroke();
+          drawContainInMat(
+            ctx,
+            loadedImages[i],
+            sideMargin,
+            y,
+            cellW,
+            cellH,
+            theme.matColor,
+            theme.accentColor,
+            22
+          );
         }
 
-        // Bottom caption
+        // Bottom expressive caption (not theme name)
         ctx.fillStyle = theme.textColor;
-        ctx.font = '800 34px Cairo, sans-serif';
+        ctx.font = '800 36px Cairo, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('ذكرى جميلة • 4×6', W / 2, H - 64);
+        ctx.fillText(`${theme.stickerLeft}  ${theme.bottomCaption}  ${theme.stickerRight}`, W / 2, H - 64);
       }
 
       const dataUrl = canvas.toDataURL('image/jpeg', 0.96);
@@ -1105,6 +1173,10 @@
       const printImg = document.getElementById('printOnlyImg');
       if (previewImg) previewImg.src = dataUrl;
       if (printImg) printImg.src = dataUrl;
+    }
+
+    function countGapForShots(shotCount) {
+      return shotCount >= 4 ? 18 : 26;
     }
 
     /**
@@ -1180,6 +1252,7 @@
     window.addEventListener('DOMContentLoaded', async () => {
       installViewportLocks();
       startSimulatedCameraLoop();
+      selectShotCount(3);
       await selectTheme('kids');
       await selectPrintLayout('postcard');
       await ensureCameraReady();
