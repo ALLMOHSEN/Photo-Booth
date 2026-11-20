@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>استوديو الفوتو بوث الاحترافي | Canon SELPHY Edition</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Cairo & Tajawal & Amiri -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@500;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #6366f1;
+      --accent: #ec4899;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: radial-gradient(circle at top right, #1e1b4b, #0f172a 60%, #020617);
+      color: #f8fafc;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* شريط تمرير مخصص أنيق */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.5);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(99, 102, 241, 0.5);
+      border-radius: 9999px;
+    }
+
+    /* تأثير فلاش الكاميرا */
+    @keyframes cameraFlash {
+      0% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+    .flash-active {
+      animation: cameraFlash 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* نبض العداد التنازلي */
+    @keyframes countdownPop {
+      0% { transform: scale(0.4); opacity: 0; }
+      40% { transform: scale(1.15); opacity: 1; }
+      80% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(0.85); opacity: 0; }
+    }
+    .countdown-animate {
+      animation: countdownPop 0.92s ease-in-out forwards;
+    }
+
+    /* انعكاس المرآة للفيديو */
+    .mirror-video {
+      transform: scaleX(-1);
+    }
+
+    /* تحسين مظهر التبويبات */
+    .glass-panel {
+      background: rgba(30, 41, 59, 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* قواعد الطباعة الخاصة بطابعة Canon SELPHY CP1500 / CP1300 (100mm x 148mm / 4x6 inch) */
+    #printArea {
+      display: none;
+    }
+
+    @media print {
+      @page {
+        size: 100mm 148mm;
+        margin: 0 !important;
+      }
+
+      html, body {
+        width: 100mm !important;
+        height: 148mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        overflow: hidden !important;
+      }
+
+      body > *:not(#printArea) {
+        display: none !important;
+      }
+
+      #printArea {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        inset: 0;
+        width: 100mm;
+        height: 148mm;
+        margin: 0;
+        padding: 0;
+        background: #ffffff;
+        z-index: 99999;
+      }
+
+      #printArea img {
+        width: 100mm !important;
+        height: 148mm !important;
+        object-fit: fill !important;
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+    }
+  </style>
+</head>
+<body class="flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+  <!-- طبقة الفلاش الأبيض عند التقاط كل صورة -->
+  <div id="flashOverlay" class="fixed inset-0 bg-white pointer-events-none opacity-0 z-50"></div>
+
+  <!-- منطقة الطباعة المخفية المعايرة لطابعة Canon SELPHY -->
+  <div id="printArea">
+    <img id="printImageTarget" alt="Canon SELPHY Print Ready" />
+  </div>
+
+  <!-- الشريط العلوي (Header) -->
+  <header class="glass-panel sticky top-0 z-30 px-4 py-3 md:px-8 border-b border-white/10">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+            <circle cx="12" cy="13" r="3" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-lg md:text-xl font-extrabold tracking-tight bg-gradient-to-l from-white via-indigo-100 to-pink-200 bg-clip-text text-transparent">
+            استوديو الفوتو بوث الذكي
+          </h1>
+          <div class="flex items-center gap-2 text-xs text-slate-300">
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              Canon SELPHY 4×6" (100×148mm)
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- أزرار سريعة في الهيدر -->
+      <div class="flex items-center gap-2">
+        <button id="soundToggleBtn" onclick="toggleSound()" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-white/10 text-slate-200 transition flex items-center gap-1.5 text-xs font-bold" title="تفعيل/كتم الصوت">
+          <span id="soundIcon">🔊</span>
+          <span class="hidden sm:inline" id="soundLabel">الصوت مفعل</span>
+        </button>
+
+        <button onclick="openWifiGuide()" class="px-3.5 py-2.5 rounded-xl bg-indigo-600/25 hover:bg-indigo-600/40 border border-indigo-400/30 text-indigo-200 transition flex items-center gap-2 text-xs md:text-sm font-bold">
+          <svg class="w-4 h-4 text-indigo-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
+          </svg>
+          <span>إعداد طابعة الواي فاي</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- المحتوى الرئيسي -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-5 md:px-6 lg:py-6">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      
+      <!-- القسم الأيمن (7 أعمدة): الكاميرا الحية أو المعاينة النهائية -->
+      <section class="lg:col-span-7 flex flex-col gap-4">
+        
+        <!-- شريط التحكم العلوي للكاميرا -->
+        <div class="glass-panel rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <!-- عدد اللقطات -->
+            <span class="text-xs font-bold text-slate-300 ml-1">عدد الصور:</span>
+            <div class="inline-flex rounded-xl bg-slate-900/80 p-1 border border-white/10" id="shotCountSelector">
+              <button type="button" data-shots="1" class="shot-btn px-3 py-1.5 rounded-lg text-xs font-extrabold transition text-slate-400 hover:text-white">1</button>
+              <button type="button" data-shots="2" class="shot-btn px-3 py-1.5 rounded-lg text-xs font-extrabold transition text-slate-400 hover:text-white">2</button>
+              <button type="button" data-shots="3" class="shot-btn px-3 py-1.5 rounded-lg text-xs font-extrabold transition bg-indigo-600 text-white shadow">3</button>
+              <button type="button" data-shots="4" class="shot-btn px-3 py-1.5 rounded-lg text-xs font-extrabold transition text-slate-400 hover:text-white">4</button>
+            </div>
+          </div>
+
+          <!-- خيار تخطيط الورقة (بوست كارد كامل أو شريطين 2x6) -->
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-slate-300">القالب:</span>
+            <select id="layoutModeSelect" onchange="updateLayoutMode(this.value)" class="bg-slate-900/90 border border-white/15 text-white text-xs font-bold rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500">
+              <option value="postcard">بوست كارد كامل (4×6 إنش)</option>
+              <option value="double_strip">شريطين مزدوجين (2×6 ×2 للقص)</option>
+            </select>
+          </div>
+
+          <!-- أدوات الكاميرا (مرآة / تبديل الكاميرا) -->
+          <div class="flex items-center gap-1.5">
+            <button onclick="toggleMirror()" id="mirrorBtn" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-white/10 text-xs font-bold text-indigo-300 flex items-center gap-1" title="عكس الصورة كمرآة">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+              </svg>
+              <span class="hidden sm:inline">مرآة</span>
+            </button>
+            <button onclick="switchCamera()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-white/10 text-xs font-bold text-slate-200 flex items-center gap-1" title="تبديل الكاميرا الأمامية/الخلفية">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              <span class="hidden sm:inline">تبديل</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- حاوية العرض الرئيسية: إما الكاميرا الحية أو نتيجة الطباعة -->
+        <div class="relative rounded-3xl overflow-hidden bg-slate-950 border-2 border-white/15 shadow-2xl aspect-[4/3] sm:aspect-[16/11] flex items-center justify-center group">
+          
+          <!-- وضع الكاميرا الحية -->
+          <div id="cameraStage" class="relative w-full h-full flex items-center justify-center">
+            <video id="videoFeed" autoplay playsinline muted class="w-full h-full object-cover mirror-video"></video>
+            
+            <!-- إطار إرشادي خفيف للكاميرا -->
+            <div class="absolute inset-4 border border-white/20 rounded-2xl pointer-events-none flex flex-col justify-between p-3">
+              <div class="flex justify-between items-center">
+                <span id="liveThemeBadge" class="px-3 py-1 rounded-full bg-black/50 backdrop-blur-md text-xs font-bold text-white border border-white/15">
+                  الثيم: نجوم المرح
+                </span>
+                <span id="shotProgressBadge" class="px-3 py-1 rounded-full bg-indigo-600/80 backdrop-blur-md text-xs font-extrabold text-white">
+                  جاهز لالتقاط 3 صور
+                </span>
+              </div>
+              
+              <!-- مؤشر الفاصل الزمني -->
+              <div class="self-center bg-black/45 backdrop-blur-md px-3 py-1 rounded-full text-[11px] text-slate-200 border border-white/10">
+                ⏱️ الفاصل الزمني بين كل صورة: <strong class="text-amber-300">3 ثوانٍ</strong>
+              </div>
+            </div>
+
+            <!-- طبقة العداد التنازلي العملاقة (3 - 2 - 1) -->
+            <div id="countdownOverlay" class="hidden absolute inset-0 bg-black/40 backdrop-blur-[2px] flex flex-col items-center justify-center z-20">
+              <div id="countdownNumber" class="text-8xl sm:text-9xl font-black text-white drop-shadow-[0_10px_25px_rgba(99,102,241,0.9)] select-none">
+                3
+              </div>
+              <p id="countdownSubtext" class="mt-3 text-lg sm:text-xl font-extrabold text-amber-300 bg-black/60 px-5 py-1.5 rounded-full">
+                استعد للصورة 1 من 3... ابتسم! 😊
+              </p>
+            </div>
+
+            <!-- رسالة خطأ الكاميرا أو زر التفعيل اليدوي -->
+            <div id="cameraErrorBox" class="hidden absolute inset-0 bg-slate-900/95 flex flex-col items-center justify-center p-6 text-center z-30">
+              <div class="w-16 h-16 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center mb-3 text-3xl">📷</div>
+              <h3 class="text-lg font-extrabold text-white mb-1">تعذر الوصول إلى الكاميرا</h3>
+              <p id="cameraErrorMsg" class="text-sm text-slate-300 max-w-md mb-4">يرجى السماح للمتصفح باستخدام الكاميرا، أو يمكنك رفع صور جاهزة لتجربة القوالب والطباعة فوراً.</p>
+              <div class="flex flex-wrap justify-center gap-3">
+                <button onclick="initCamera()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition">
+                  إعادة محاولة تشغيل الكاميرا
+                </button>
+                <label class="px-5 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-bold text-sm transition cursor-pointer">
+                  📁 اختيار صور من الجهاز
+                  <input type="file" id="fallbackUploadInput" accept="image/*" multiple class="hidden" onchange="handleFallbackUpload(event)" />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- وضع معاينة النتيجة النهائية (يظهر بعد الانتهاء من التقاط الصور) -->
+          <div id="resultStage" class="hidden w-full h-full bg-slate-900/95 p-3 sm:p-5 flex flex-col items-center justify-center relative">
+            <div class="relative h-full max-h-full flex items-center justify-center">
+              <img id="finalPreviewImg" alt="معاينة الصورة النهائية للطباعة" class="max-h-full w-auto rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-white/20 object-contain" />
+              <div class="absolute top-2 left-2 bg-emerald-600/90 backdrop-blur text-white text-[11px] font-extrabold px-2.5 py-1 rounded-lg shadow">
+                1200×1800 px (300 DPI)
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- شريط الصور المصغرة الملتقطة (Thumbnails) مع إمكانية إعادة تصوير لقطة محددة -->
+        <div id="thumbnailsBar" class="glass-panel rounded-2xl p-3">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-extrabold text-slate-300">اللقطات الملتقطة في الجلسة:</span>
+            <span id="captureStatusText" class="text-xs text-indigo-300 font-semibold">في انتظار بدء التصوير</span>
+          </div>
+          <div id="thumbnailsGrid" class="grid grid-cols-4 gap-2.5">
+            <!-- يتم توليد الخانات ديناميكياً -->
+          </div>
+        </div>
+
+        <!-- أزرار التحكم الرئيسية (بدء التصوير / الطباعة عبر Canon SELPHY / التحميل) -->
+        <div class="flex flex-wrap items-center gap-3">
+          <!-- زر بدء الجلسة -->
+          <button id="startBoothBtn" onclick="startPhotoSession()" class="flex-1 min-w-[220px] py-4 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white font-black text-lg shadow-xl shadow-indigo-600/30 active:scale-[0.99] transition flex items-center justify-center gap-3">
+            <span class="text-2xl">📸</span>
+            <span id="startBtnText">ابدأ التصوير الآن (3 ثوانٍ)</span>
+          </button>
+
+          <!-- أزرار ما بعد الالتقاط (تظهر عند اكتمال الصور) -->
+          <div id="postCaptureActions" class="hidden w-full flex flex-wrap items-center gap-3">
+            <button onclick="printToCanonSelphy()" class="flex-1 min-w-[230px] py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-black text-lg shadow-xl shadow-emerald-600/30 active:scale-[0.99] transition flex items-center justify-center gap-3">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+              </svg>
+              <span>طباعة عبر طابعة Canon SELPHY</span>
+            </button>
+
+            <button onclick="downloadFinalPhoto()" class="py-4 px-5 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-white/15 text-white font-extrabold text-sm transition flex items-center justify-center gap-2" title="حفظ نسخة عالية الدقة">
+              <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              <span>حفظ PNG</span>
+            </button>
+
+            <button onclick="resetSession()" class="py-4 px-5 rounded-2xl bg-rose-600/20 hover:bg-rose-600/35 border border-rose-500/30 text-rose-200 font-extrabold text-sm transition flex items-center justify-center gap-2">
+              <span>🔄 جلسة جديدة</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- القسم الأيسر (5 أعمدة): اختيار الثيمات الاحترافية وتخصيص النص -->
+      <aside class="lg:col-span-5 glass-panel rounded-3xl p-4 sm:p-5 flex flex-col gap-4 border border-white/10">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
+            <span>🎨</span>
+            <span>اختر الثيم والتصميم</span>
+          </h2>
+          <span class="text-[11px] text-slate-400 font-semibold">يمكن التغيير قبل أو بعد التصوير</span>
+        </div>
+
+        <!-- تبويبات الفئات: الأطفال / البنات / الأولاد / الكبار والمناسبات -->
+        <div class="grid grid-cols-4 gap-1.5 bg-slate-950/70 p-1.5 rounded-2xl border border-white/10" id="categoryTabs">
+          <button type="button" data-cat="kids" class="cat-tab py-2 px-2 rounded-xl text-xs font-extrabold transition bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow">
+            🧸 الأطفال
+          </button>
+          <button type="button" data-cat="girls" class="cat-tab py-2 px-2 rounded-xl text-xs font-extrabold transition text-slate-300 hover:text-white">
+            👑 البنات
+          </button>
+          <button type="button" data-cat="boys" class="cat-tab py-2 px-2 rounded-xl text-xs font-extrabold transition text-slate-300 hover:text-white">
+            🚀 الأولاد
+          </button>
+          <button type="button" data-cat="adults" class="cat-tab py-2 px-2 rounded-xl text-xs font-extrabold transition text-slate-300 hover:text-white">
+            ✨ الكبار
+          </button>
+        </div>
+
+        <!-- شبكة الثيمات التابعة للفئة المختارة -->
+        <div id="themesGrid" class="grid grid-cols-2 gap-3 max-h-[340px] overflow-y-auto pr-1">
+          <!-- يتم تعبئتها بواسطة JavaScript -->
+        </div>
+
+        <!-- تخصيص نص المناسبة والتاريخ أسفل الصورة المطبوعة -->
+        <div class="bg-slate-900/70 rounded-2xl p-3.5 border border-white/10 flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <label for="eventTitleInput" class="text-xs font-extrabold text-slate-200">✍️ عبارة المناسبة المطبوعة على الصورة:</label>
+            <label class="inline-flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer">
+              <input type="checkbox" id="showDateCheckbox" checked onchange="renderCompositeCanvas()" class="rounded accent-indigo-500 w-4 h-4" />
+              <span>إظهار التاريخ</span>
+            </label>
+          </div>
+          <input type="text" id="eventTitleInput" value="ذكرى جميلة لا تُنسى ✨" maxlength="40" oninput="renderCompositeCanvas()" placeholder="اكتب اسم المناسبة أو التهنئة..." class="w-full bg-slate-950/90 border border-white/15 rounded-xl px-3.5 py-2.5 text-sm font-bold text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500" />
+          
+          <!-- فلاتر لونية سريعة للصور -->
+          <div class="flex items-center justify-between gap-2 pt-1">
+            <span class="text-xs font-bold text-slate-300">فلتر الصور:</span>
+            <div class="flex gap-1.5">
+              <button type="button" data-filter="none" class="filter-btn px-2.5 py-1 rounded-lg text-[11px] font-bold bg-indigo-600 text-white">طبيعي</button>
+              <button type="button" data-filter="vivid" class="filter-btn px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-800 text-slate-300 hover:text-white">مشرق</button>
+              <button type="button" data-filter="warm" class="filter-btn px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-800 text-slate-300 hover:text-white">دافئ</button>
+              <button type="button" data-filter="bw" class="filter-btn px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-800 text-slate-300 hover:text-white">أبيض وأسود</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </main>
+
+  <!-- نافذة إرشادات الربط اللاسلكي مع طابعة Canon SELPHY -->
+  <div id="wifiGuideModal" class="hidden fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="glass-panel bg-slate-900 border border-white/15 rounded-3xl max-w-lg w-full p-6 shadow-2xl relative">
+      <button onclick="closeWifiGuide()" class="absolute top-4 left-4 w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center font-bold">✕</button>
+      
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-12 h-12 rounded-2xl bg-indigo-600/30 border border-indigo-400/30 flex items-center justify-center text-2xl">🖨️</div>
+        <div>
+          <h3 class="text-lg font-black text-white">الطباعة المباشرة عبر Canon SELPHY</h3>
+          <p class="text-xs text-slate-300">مقاس الورق المضبوط تلقائياً: Postcard 4×6" (100×148 mm)</p>
+        </div>
+      </div>
+
+      <ol class="space-y-3 text-sm text-slate-200 leading-relaxed mb-5">
+        <li class="flex gap-2.5">
+          <span class="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-black flex items-center justify-center shrink-0 mt-0.5">1</span>
+          <span>شغّل طابعة <strong>Canon SELPHY (CP1500 / CP1300 / CP1200)</strong> وتأكد من توصيلها بنفس شبكة <strong>الواي فاي (Wi-Fi)</strong> المتصل بها هذا الجهاز (أو اتصل بشبكة الطابعة المباشرة Direct Wi-Fi).</span>
+        </li>
+        <li class="flex gap-2.5">
+          <span class="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-black flex items-center justify-center shrink-0 mt-0.5">2</span>
+          <span>بعد التقاط الصور، اضغط على زر <strong>"طباعة عبر طابعة Canon SELPHY"</strong> الأخضر.</span>
+        </li>
+        <li class="flex gap-2.5">
+          <span class="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-black flex items-center justify-center shrink-0 mt-0.5">3</span>
+          <span>في نافذة الطباعة (AirPrint / Android Print / Windows)، اختر طابعة <strong>Canon SELPHY</strong> وتأكد أن مقاس الورق <strong>100×148 مم (Postcard / 4×6)</strong> وبدون هوامش (Borderless).</span>
+        </li>
+      </ol>
+
+      <button onclick="closeWifiGuide()" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-sm transition">
+        فهمت، جاهز للبدء!
+      </button>
+    </div>
+  </div>
+
+  <!-- رسالة تنبيه منبثقة أنيقة (بديل alert) -->
+  <div id="toastNotification" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-all duration-300">
+    <div id="toastText" class="px-5 py-3 rounded-2xl bg-slate-900/95 border border-indigo-400/40 text-white text-sm font-bold shadow-2xl backdrop-blur-md"></div>
+  </div>
+
+  <!-- كانفاس مخفي عالي الدقة لتوليد صورة الطباعة 1200x1800 بكسل (300 DPI لقياس 4x6 إنش) -->
+  <canvas id="compositeCanvas" width="1200" height="1800" class="hidden"></canvas>
+
+  <script>
+    /**
+     * إعدادات وحالة التطبيق الرئيسية
+     */
+    const STATE = {
+      shotCount: 3,                 // عدد الصور الافتراضي (3 صور)
+      intervalSeconds: 3,           // الفاصل الزمني بين كل صورة (3 ثوانٍ)
+      layoutMode: 'postcard',       // 'postcard' (4x6 كامل) أو 'double_strip' (شريطين 2x6)
+      isMirrored: true,             // انعكاس المرآة للكاميرا
+      facingMode: 'user',           // الكاميرا الأمامية أو الخلفية
+      soundEnabled: true,           // المؤثرات الصوتية
+      isCapturing: false,           // حالة الالتقاط النشط
+      capturedPhotos: [],           // مصفوفة الصور الملتقطة (DataURLs)
+      activeCategory: 'kids',       // الفئة المختارة حالياً
+      selectedThemeId: 'kids_stars',// الثيم المختار حالياً
+      photoFilter: 'none',          // الفلتر اللوني
+      stream: null
+    };
+
+    /**
+     * مكتبة الثيمات الاحترافية المصنفة (الأطفال، البنات، الأولاد، الكبار)
+     */
+    const THEMES = [
+      // ================= 1. ثيمات الأطفال (KIDS) =================
+      {
+        id: 'kids_stars',
+        category: 'kids',
+        name: 'نجوم المرح والألوان',
+        previewGradient: 'from-amber-400 via-orange-400 to-rose-400',
+        badge: '🧸 مبهج',
+        bgType: 'confetti_pastel',
+        bgColors: ['#FFFBEB', '#FEF3C7', '#FDE68A'],
+        frameColor: '#F59E0B',
+        frameSecondary: '#EC4899',
+        textColor: '#92400E',
+        accentColor: '#EF4444',
+        stickers: ['⭐', '🎈', '🌈', '🧸', '🎨', '✨']
+      },
+      {
+        id: 'kids_dino',
+        category: 'kids',
+        name: 'مغامرة الديناصورات',
+        previewGradient: 'from-emerald-400 via-teal-500 to-lime-500',
+        badge: '🦖 مغامرة',
+        bgType: 'jungle_dots',
+        bgColors: ['#ECFDF5', '#D1FAE5', '#A7F3D0'],
+        frameColor: '#059669',
+        frameSecondary: '#F59E0B',
+        textColor: '#065F46',
+        accentColor: '#10B981',
+        stickers: ['🦖', '🦕', '🌴', '🥚', '🌿', '⭐']
+      },
+      {
+        id: 'kids_candy',
+        category: 'kids',
+        name: 'عالم الحلوى والبالونات',
+        previewGradient: 'from-sky-400 via-pink-400 to-amber-300',
+        badge: '🍭 حلوى',
+        bgType: 'stripes_playful',
+        bgColors: ['#F0F9FF', '#FCE7F3', '#FEF9C3'],
+        frameColor: '#0284C7',
+        frameSecondary: '#F43F5E',
+        textColor: '#0369A1',
+        accentColor: '#EC4899',
+        stickers: ['🍭', '🧁', '🎈', '🍬', '🎪', '🎉']
+      },
+      {
+        id: 'kids_animals',
+        category: 'kids',
+        name: 'أصدقاء الغابة اللطفاء',
+        previewGradient: 'from-yellow-400 via-amber-500 to-orange-500',
+        badge: '🦁 كيوت',
+        bgType: 'confetti_pastel',
+        bgColors: ['#FFF7ED', '#FFEDD5', '#FED7AA'],
+        frameColor: '#EA580C',
+        frameSecondary: '#16A34A',
+        textColor: '#7C2D12',
+        accentColor: '#F97316',
+        stickers: ['🦁', '🐼', '🦊', '🐰', '🌻', '🐾']
+      },
+
+      // ================= 2. ثيمات البنات (GIRLS) =================
+      {
+        id: 'girls_princess',
+        category: 'girls',
+        name: 'تاج الأميرة الوردي',
+        previewGradient: 'from-pink-400 via-rose-400 to-fuchsia-500',
+        badge: '👑 ملكي',
+        bgType: 'floral_soft',
+        bgColors: ['#FFF1F2', '#FFE4E6', '#FECDD3'],
+        frameColor: '#E11D48',
+        frameSecondary: '#F59E0B',
+        textColor: '#881337',
+        accentColor: '#F43F5E',
+        stickers: ['👑', '💖', '🌸', '✨', '🦋', '🎀']
+      },
+      {
+        id: 'girls_butterfly',
+        category: 'girls',
+        name: 'فراشات الربيع واللافندر',
+        previewGradient: 'from-purple-400 via-fuchsia-400 to-pink-400',
+        badge: '🦋 ربيعي',
+        bgType: 'sparkles_dream',
+        bgColors: ['#FAF5FF', '#F3E8FF', '#FCE7F3'],
+        frameColor: '#9333EA',
+        frameSecondary: '#EC4899',
+        textColor: '#581C87',
+        accentColor: '#C026D3',
+        stickers: ['🦋', '🌷', '💜', '✨', '🌺', '🧚‍♀️']
+      },
+      {
+        id: 'girls_rosegold',
+        category: 'girls',
+        name: 'روز جولد الأنيق',
+        previewGradient: 'from-rose-300 via-amber-200 to-pink-300',
+        badge: '🌸 ناعم',
+        bgType: 'luxury_border',
+        bgColors: ['#FFF8F6', '#FDE8E4', '#FAD2C8'],
+        frameColor: '#B76E79',
+        frameSecondary: '#D4AF37',
+        textColor: '#6D2E36',
+        accentColor: '#B76E79',
+        stickers: ['🌹', '✨', '🥂', '💎', '🤍', '🌸']
+      },
+      {
+        id: 'girls_unicorn',
+        category: 'girls',
+        name: 'يونيكورن الأحلام',
+        previewGradient: 'from-cyan-300 via-fuchsia-300 to-amber-200',
+        badge: '🦄 سحري',
+        bgType: 'sparkles_dream',
+        bgColors: ['#FDF4FF', '#E0F2FE', '#FCE7F3'],
+        frameColor: '#D946EF',
+        frameSecondary: '#38BDF8',
+        textColor: '#701A75',
+        accentColor: '#EC4899',
+        stickers: ['🦄', '🌈', '⭐', '💖', '🍦', '✨']
+      },
+
+      // ================= 3. ثيمات الأولاد (BOYS) =================
+      {
+        id: 'boys_space',
+        category: 'boys',
+        name: 'رواد الفضاء والمجرات',
+        previewGradient: 'from-indigo-600 via-blue-700 to-slate-900',
+        badge: '🚀 فضاء',
+        bgType: 'space_stars',
+        bgColors: ['#0F172A', '#1E1B4B', '#172554'],
+        frameColor: '#38BDF8',
+        frameSecondary: '#FACC15',
+        textColor: '#F8FAFC',
+        accentColor: '#38BDF8',
+        stickers: ['🚀', '🪐', '👨‍🚀', '⭐', '🛸', '☄️']
+      },
+      {
+        id: 'boys_gaming',
+        category: 'boys',
+        name: 'نيون جيمرز المحترفين',
+        previewGradient: 'from-cyan-500 via-blue-600 to-purple-700',
+        badge: '🎮 جيمينج',
+        bgType: 'cyber_grid',
+        bgColors: ['#090D16', '#111827', '#0F172A'],
+        frameColor: '#06B6D4',
+        frameSecondary: '#A855F7',
+        textColor: '#22D3EE',
+        accentColor: '#A855F7',
+        stickers: ['🎮', '⚡', '🏆', '🕹️', '🔥', '🎧']
+      },
+      {
+        id: 'boys_racing',
+        category: 'boys',
+        name: 'سباق الأبطال السريع',
+        previewGradient: 'from-red-600 via-slate-800 to-amber-500',
+        badge: '🏎️ سباق',
+        bgType: 'racing_checkers',
+        bgColors: ['#18181B', '#27272A', '#18181B'],
+        frameColor: '#EF4444',
+        frameSecondary: '#FACC15',
+        textColor: '#FFFFFF',
+        accentColor: '#EF4444',
+        stickers: ['🏎️', '🏁', '🏆', '🔥', '⚡', '🥇']
+      },
+      {
+        id: 'boys_superhero',
+        category: 'boys',
+        name: 'الأبطال الخارقون (كوميك)',
+        previewGradient: 'from-blue-600 via-red-500 to-yellow-400',
+        badge: '⚡ خارق',
+        bgType: 'comic_dots',
+        bgColors: ['#EFF6FF', '#DBEAFE', '#FEF08A'],
+        frameColor: '#1D4ED8',
+        frameSecondary: '#DC2626',
+        textColor: '#1E3A8A',
+        accentColor: '#DC2626',
+        stickers: ['⚡', '💥', '🛡️', '🦸‍♂️', '⭐', '🔥']
+      },
+
+      // ================= 4. ثيمات الكبار والمناسبات (ADULTS & EVENTS) =================
+      {
+        id: 'adults_vip_gold',
+        category: 'adults',
+        name: 'فخامة VIP الذهبي والأسود',
+        previewGradient: 'from-neutral-900 via-amber-700 to-neutral-900',
+        badge: '✨ فاخر',
+        bgType: 'luxury_dark',
+        bgColors: ['#0A0A0A', '#171717', '#0A0A0A'],
+        frameColor: '#D4AF37',
+        frameSecondary: '#FDE68A',
+        textColor: '#FDE68A',
+        accentColor: '#D4AF37',
+        stickers: ['✨', '🥂', '👑', '💫']
+      },
+      {
+        id: 'adults_wedding_white',
+        category: 'adults',
+        name: 'أبيض ملكي للأعراس والخطوبة',
+        previewGradient: 'from-stone-100 via-amber-100 to-stone-200',
+        badge: '💍 أعراس',
+        bgType: 'luxury_border',
+        bgColors: ['#FFFFFF', '#FAF8F5', '#F5F0E6'],
+        frameColor: '#C5A059',
+        frameSecondary: '#8C6D3F',
+        textColor: '#4A3B22',
+        accentColor: '#C5A059',
+        stickers: ['💍', '🤍', '🕊️', '✨']
+      },
+      {
+        id: 'adults_polaroid',
+        category: 'adults',
+        name: 'كلاسيك بولارويد الأبيض',
+        previewGradient: 'from-slate-100 via-gray-200 to-slate-300',
+        badge: '📷 كلاسيك',
+        bgType: 'minimal_clean',
+        bgColors: ['#FFFFFF', '#F8FAFC', '#F1F5F9'],
+        frameColor: '#1E293B',
+        frameSecondary: '#64748B',
+        textColor: '#0F172A',
+        accentColor: '#334155',
+        stickers: ['📷', '🎞️', '🖤']
+      },
+      {
+        id: 'adults_graduation',
+        category: 'adults',
+        name: 'حفل التخرج والنجاح',
+        previewGradient: 'from-slate-900 via-indigo-950 to-amber-600',
+        badge: '🎓 تخرج',
+        bgType: 'luxury_dark',
+        bgColors: ['#0F172A', '#1E293B', '#0F172A'],
+        frameColor: '#F59E0B',
+        frameSecondary: '#38BDF8',
+        textColor: '#FEF3C7',
+        accentColor: '#F59E0B',
+        stickers: ['🎓', '📜', '🎉', '⭐']
+      }
+    ];
+
+    /**
+     * نظام الصوت المدمج عبر Web Audio API (بدون الحاجة لأي روابط خارجية)
+     */
+    const AudioFX = {
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      },
+      playBeep(freq = 750, duration = 0.14) {
+        if (!STATE.soundEnabled) return;
+        try {
+          this.init();
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + duration);
+        } catch (e) {}
+      },
+      playShutter() {
+        if (!STATE.soundEnabled) return;
+        try {
+          this.init();
+          // صوت نقرة الكاميرا الميكانيكية (White Noise قصير + نغمة سريعة)
+          const bufferSize = this.ctx.sampleRate * 0.12;
+          const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.3));
+          }
+          const noise = this.ctx.createBufferSource();
+          noise.buffer = buffer;
+
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.value = 1800;
+
+          const gain = this.ctx.createGain();
+          gain.gain.setValueAtTime(0.6, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.12);
+
+          noise.connect(filter);
+          filter.connect(gain);
+          gain.connect(this.ctx.destination);
+          noise.start();
+        } catch (e) {}
+      },
+      playSuccess() {
+        if (!STATE.soundEnabled) return;
+        this.playBeep(523.25, 0.12);
+        setTimeout(() => this.playBeep(659.25, 0.12), 110);
+        setTimeout(() => this.playBeep(783.99, 0.25), 220);
+      }
+    };
+
+    /**
+     * تهيئة الصفحة عند التحميل
+     */
+    window.addEventListener('DOMContentLoaded', () => {
+      setupEventListeners();
+      renderThemesList();
+      renderThumbnailsPlaceholders();
+      initCamera();
+    });
+
+    function setupEventListeners() {
+      // أزرار اختيار عدد اللقطات (1، 2، 3، 4)
+      document.querySelectorAll('.shot-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (STATE.isCapturing) return;
+          const count = parseInt(btn.dataset.shots, 10);
+          STATE.shotCount = count;
+          document.querySelectorAll('.shot-btn').forEach(b => {
+            b.classList.remove('bg-indigo-600', 'text-white', 'shadow');
+            b.classList.add('text-slate-400');
+          });
+          btn.classList.add('bg-indigo-600', 'text-white', 'shadow');
+          btn.classList.remove('text-slate-400');
+
+          document.getElementById('shotProgressBadge').textContent = `جاهز لالتقاط ${count} ${count === 1 ? 'صورة' : 'صور'}`;
+          
+          // إذا كان هناك صور ملتقطة مسبقاً، نقوم بتعديل المصفوفة وإعادة الرسم
+          if (STATE.capturedPhotos.length > 0) {
+            STATE.capturedPhotos = STATE.capturedPhotos.slice(0, count);
+            renderThumbnailsPlaceholders();
+            if (STATE.capturedPhotos.length === count) {
+              renderCompositeCanvas();
+            } else {
+              switchToCameraView();
+            }
+          } else {
+            renderThumbnailsPlaceholders();
+          }
+        });
+      });
+
+      // أزرار تبويبات الفئات (الأطفال، البنات، الأولاد، الكبار)
+      document.querySelectorAll('.cat-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          STATE.activeCategory = tab.dataset.cat;
+          document.querySelectorAll('.cat-tab').forEach(t => {
+            t.className = 'cat-tab py-2 px-2 rounded-xl text-xs font-extrabold transition text-slate-300 hover:text-white';
+          });
+          const gradients = {
+            kids: 'from-amber-500 to-orange-500',
+            girls: 'from-pink-500 to-rose-500',
+            boys: 'from-blue-600 to-cyan-500',
+            adults: 'from-amber-600 to-yellow-600'
+          };
+          tab.className = `cat-tab py-2 px-2 rounded-xl text-xs font-extrabold transition bg-gradient-to-r ${gradients[STATE.activeCategory]} text-white shadow`;
+          renderThemesList();
+        });
+      });
+
+      // أزرار الفلاتر اللونية
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          STATE.photoFilter = btn.dataset.filter;
+          document.querySelectorAll('.filter-btn').forEach(b => {
+            b.className = 'filter-btn px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-800 text-slate-300 hover:text-white';
+          });
+          btn.className = 'filter-btn px-2.5 py-1 rounded-lg text-[11px] font-bold bg-indigo-600 text-white';
+          
+          // تطبيق الفلتر على الفيديو الحي
+          const video = document.getElementById('videoFeed');
+          video.style.filter = getCssFilterString(STATE.photoFilter);
+
+          if (STATE.capturedPhotos.length > 0) {
+            renderCompositeCanvas();
+          }
+        });
+      });
+    }
+
+    function getCssFilterString(filterName) {
+      switch (filterName) {
+        case 'vivid': return 'contrast(1.12) saturate(1.28) brightness(1.04)';
+        case 'warm': return 'sepia(0.22) saturate(1.2) brightness(1.05)';
+        case 'bw': return 'grayscale(1) contrast(1.18)';
+        default: return 'none';
+      }
+    }
+
+    /**
+     * تشغيل الكاميرا الحية بأعلى دقة متاحة
+     */
+    async function initCamera() {
+      const video = document.getElementById('videoFeed');
+      const errorBox = document.getElementById('cameraErrorBox');
+
+      if (STATE.stream) {
+        STATE.stream.getTracks().forEach(track => track.stop());
+      }
+
+      try {
+        errorBox.classList.add('hidden');
+        const constraints = {
+          audio: false,
+          video: {
+            facingMode: STATE.facingMode,
+            width: { ideal: 1920 },
+            height: { ideal: 1080 }
+          }
+        };
+        STATE.stream = await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject = STATE.stream;
+      } catch (err) {
+        console.warn('Camera access error:', err);
+        errorBox.classList.remove('hidden');
+      }
+    }
+
+    function toggleMirror() {
+      STATE.isMirrored = !STATE.isMirrored;
+      const video = document.getElementById('videoFeed');
+      if (STATE.isMirrored) {
+        video.classList.add('mirror-video');
+      } else {
+        video.classList.remove('mirror-video');
+      }
+      showToast(STATE.isMirrored ? 'تم تفعيل وضع المرآة' : 'تم إلغاء وضع المرآة');
+    }
+
+    function switchCamera() {
+      STATE.facingMode = STATE.facingMode === 'user' ? 'environment' : 'user';
+      // تلقائياً نلغي المرآة عند استخدام الكاميرا الخلفية
+      STATE.isMirrored = STATE.facingMode === 'user';
+      const video = document.getElementById('videoFeed');
+      video.classList.toggle('mirror-video', STATE.isMirrored);
+      initCamera();
+    }
+
+    function toggleSound() {
+      STATE.soundEnabled = !STATE.soundEnabled;
+      document.getElementById('soundIcon').textContent = STATE.soundEnabled ? '🔊' : '🔇';
+      document.getElementById('soundLabel').textContent = STATE.soundEnabled ? 'الصوت مفعل' : 'صامت';
+    }
+
+    function updateLayoutMode(mode) {
+      STATE.layoutMode = mode;
+      if (STATE.capturedPhotos.length > 0) {
+        renderCompositeCanvas();
+      }
+    }
+
+    /**
+     * رسم قائمة الثيمات حسب الفئة المختارة
+     */
+    function renderThemesList() {
+      const grid = document.getElementById('themesGrid');
+      const filtered = THEMES.filter(t => t.category === STATE.activeCategory);
+      
+      grid.innerHTML = filtered.map(theme => {
+        const isSelected = theme.id === STATE.selectedThemeId;
+        return `
+          <button type="button" onclick="selectTheme('${theme.id}')"
+            class="group relative text-right rounded-2xl p-3 transition-all border-2 ${isSelected ? 'border-indigo-400 bg-indigo-950/60 shadow-lg shadow-indigo-500/20 scale-[1.02]' : 'border-white/10 bg-slate-900/60 hover:border-white/25'}">
+            
+            <!-- معاينة بصرية مصغرة للثيم -->
+            <div class="h-16 w-full rounded-xl bg-gradient-to-br ${theme.previewGradient} mb-2.5 flex items-center justify-between px-3 relative overflow-hidden shadow-inner">
+              <span class="text-2xl drop-shadow">${theme.stickers[0]}</span>
+              <span class="px-2 py-0.5 rounded-full bg-black/35 backdrop-blur-sm text-[10px] font-extrabold text-white">
+                ${theme.badge}
+              </span>
+              <span class="text-xl drop-shadow">${theme.stickers[1] || '✨'}</span>
+            </div>
+
+            <div class="flex items-center justify-between gap-1">
+              <span class="text-xs font-extrabold text-white leading-tight line-clamp-1">${theme.name}</span>
+              ${isSelected ? '<span class="w-5 h-5 rounded-full bg-indigo-500 text-white text-[11px] flex items-center justify-center shrink-0">✓</span>' : ''}
+            </div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectTheme(themeId) {
+      STATE.selectedThemeId = themeId;
+      const theme = THEMES.find(t => t.id === themeId);
+      if (theme) {
+        document.getElementById('liveThemeBadge').textContent = `الثيم: ${theme.name}`;
+      }
+      renderThemesList();
+      if (STATE.capturedPhotos.length > 0) {
+        renderCompositeCanvas();
+      }
+    }
+
+    /**
+     * عرض خانات الصور المصغرة أسفل الكاميرا
+     */
+    function renderThumbnailsPlaceholders() {
+      const grid = document.getElementById('thumbnailsGrid');
+      grid.style.gridTemplateColumns = `repeat(${STATE.shotCount}, minmax(0, 1fr))`;
+      
+      let html = '';
+      for (let i = 0; i < STATE.shotCount; i++) {
+        const photo = STATE.capturedPhotos[i];
+        if (photo) {
+          html += `
+            <div class="relative aspect-[4/3] rounded-xl overflow-hidden border-2 border-indigo-400/70 group bg-slate-900">
+              <img src="${photo}" class="w-full h-full object-cover" alt="لقطة ${i + 1}" />
+              <span class="absolute top-1 right-1 w-5 h-5 rounded-full bg-indigo-600 text-white text-[10px] font-black flex items-center justify-center shadow">${i + 1}</span>
+              <button type="button" onclick="retakeSinglePhoto(${i})" class="absolute inset-0 bg-black/65 opacity-0 group-hover:opacity-100 transition flex flex-col items-center justify-center text-white text-[11px] font-extrabold gap-1">
+                <span>🔄 إعادة</span>
+              </button>
+            </div>
+          `;
+        } else {
+          html += `
+            <div class="aspect-[4/3] rounded-xl border-2 border-dashed border-white/15 bg-slate-900/50 flex flex-col items-center justify-center text-slate-500">
+              <span class="text-sm font-black">${i + 1}</span>
+              <span class="text-[10px]">بانتظار الالتقاط</span>
+            </div>
+          `;
+        }
+      }
+      grid.innerHTML = html;
+    }
+
+    /**
+     * بدء جلسة التصوير المتتابع بفاصل زمني 3 ثوانٍ بين كل صورة
+     */
+    async function startPhotoSession() {
+      if (STATE.isCapturing) return;
+      
+      const video = document.getElementById('videoFeed');
+      if (!video.srcObject) {
+        showToast('يرجى تفعيل الكاميرا أولاً أو رفع صور من الجهاز');
+        return;
+      }
+
+      AudioFX.init();
+      STATE.isCapturing = true;
+      STATE.capturedPhotos = [];
+      switchToCameraView();
+      renderThumbnailsPlaceholders();
+
+      const startBtn = document.getElementById('startBoothBtn');
+      startBtn.disabled = true;
+      startBtn.classList.add('opacity-60', 'cursor-not-allowed');
+
+      for (let shotIdx = 0; shotIdx < STATE.shotCount; shotIdx++) {
+        document.getElementById('captureStatusText').textContent = `جاري التقاط الصورة ${shotIdx + 1} من ${STATE.shotCount}...`;
+        document.getElementById('shotProgressBadge').textContent = `لقطة ${shotIdx + 1} / ${STATE.shotCount}`;
+
+        // عد تنازلي 3 ثوانٍ قبل كل صورة
+        await runCountdown(STATE.intervalSeconds, shotIdx + 1, STATE.shotCount);
+
+        // التقاط اللقطة مع الفلاش والصوت
+        const frameDataUrl = captureVideoFrame();
+        STATE.capturedPhotos.push(frameDataUrl);
+        renderThumbnailsPlaceholders();
+
+        // استراحة قصيرة جداً بعد الفلاش لرؤية اللقطة قبل بدء عداد الصورة التالية
+        if (shotIdx < STATE.shotCount - 1) {
+          await sleep(650);
+        }
+      }
+
+      STATE.isCapturing = false;
+      startBtn.disabled = false;
+      startBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+      document.getElementById('captureStatusText').textContent = 'اكتملت جميع اللقطات بنجاح! جاهز للطباعة';
+      AudioFX.playSuccess();
+
+      // توليد التصميم النهائي وعرضه
+      await renderCompositeCanvas();
+      switchToResultView();
+    }
+
+    /**
+     * إعادة تصوير لقطة محددة فقط بفاصل 3 ثوانٍ
+     */
+    async function retakeSinglePhoto(index) {
+      if (STATE.isCapturing) return;
+      const video = document.getElementById('videoFeed');
+      if (!video.srcObject) return;
+
+      STATE.isCapturing = true;
+      switchToCameraView();
+      document.getElementById('captureStatusText').textContent = `إعادة التقاط الصورة رقم ${index + 1}...`;
+
+      await runCountdown(STATE.intervalSeconds, index + 1, STATE.shotCount);
+      const frameDataUrl = captureVideoFrame();
+      STATE.capturedPhotos[index] = frameDataUrl;
+      renderThumbnailsPlaceholders();
+
+      STATE.isCapturing = false;
+      AudioFX.playSuccess();
+      await renderCompositeCanvas();
+      switchToResultView();
+    }
+
+    /**
+     * العداد التنازلي المرئي والصوتي (3 - 2 - 1)
+     */
+    function runCountdown(seconds, currentShot, totalShots) {
+      return new Promise(resolve => {
+        const overlay = document.getElementById('countdownOverlay');
+        const numEl = document.getElementById('countdownNumber');
+        const subEl = document.getElementById('countdownSubtext');
+
+        overlay.classList.remove('hidden');
+        let remaining = seconds;
+
+        const tick = () => {
+          if (remaining > 0) {
+            numEl.textContent = remaining;
+            subEl.textContent = remaining === 1
+              ? `📸 استعد... ابتسم الآن! (${currentShot}/${totalShots})`
+              : `استعد للصورة ${currentShot} من ${totalShots}...`;
+
+            // إعادة تشغيل الأنيميشن
+            numEl.classList.remove('countdown-animate');
+            void numEl.offsetWidth;
+            numEl.classList.add('countdown-animate');
+
+            AudioFX.playBeep(remaining === 1 ? 980 : 660, 0.15);
+            remaining--;
+            setTimeout(tick, 1000);
+          } else {
+            overlay.classList.add('hidden');
+            resolve();
+          }
+        };
+
+        tick();
+      });
+    }
+
+    /**
+     * التقاط إطار من الفيديو وتطبيق الانعكاس والفلتر
+     */
+    function captureVideoFrame() {
+      const video = document.getElementById('videoFeed');
+      const flash = document.getElementById('flashOverlay');
+
+      // تشغيل الفلاش وصوت الكاميرا
+      AudioFX.playShutter();
+      flash.classList.remove('flash-active');
+      void flash.offsetWidth;
+      flash.classList.add('flash-active');
+
+      const tempCanvas = document.createElement('canvas');
+      const vw = video.videoWidth || 1280;
+      const vh = video.videoHeight || 960;
+      tempCanvas.width = vw;
+      tempCanvas.height = vh;
+      const tCtx = tempCanvas.getContext('2d');
+
+      tCtx.save();
+      tCtx.filter = getCssFilterString(STATE.photoFilter);
+      if (STATE.isMirrored) {
+        tCtx.translate(vw, 0);
+        tCtx.scale(-1, 1);
+      }
+      tCtx.drawImage(video, 0, 0, vw, vh);
+      tCtx.restore();
+
+      return tempCanvas.toDataURL('image/jpeg', 0.95);
+    }
+
+    /**
+     * دعم رفع صور جاهزة في حال عدم وجود كاميرا
+     */
+    function handleFallbackUpload(event) {
+      const files = Array.from(event.target.files || []).slice(0, 4);
+      if (!files.length) return;
+
+      STATE.shotCount = files.length;
+      STATE.capturedPhotos = [];
+
+      let loaded = 0;
+      files.forEach((file, idx) => {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          STATE.capturedPhotos[idx] = e.target.result;
+          loaded++;
+          if (loaded === files.length) {
+            renderThumbnailsPlaceholders();
+            await renderCompositeCanvas();
+            switchToResultView();
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    /**
+     * التبديل بين واجهة الكاميرا وواجهة النتيجة النهائية
+     */
+    function switchToResultView() {
+      document.getElementById('cameraStage').classList.add('hidden');
+      document.getElementById('resultStage').classList.remove('hidden');
+      document.getElementById('startBoothBtn').classList.add('hidden');
+      document.getElementById('postCaptureActions').classList.remove('hidden');
+    }
+
+    function switchToCameraView() {
+      document.getElementById('resultStage').classList.add('hidden');
+      document.getElementById('cameraStage').classList.remove('hidden');
+      document.getElementById('postCaptureActions').classList.add('hidden');
+      document.getElementById('startBoothBtn').classList.remove('hidden');
+    }
+
+    function resetSession() {
+      STATE.capturedPhotos = [];
+      renderThumbnailsPlaceholders();
+      document.getElementById('captureStatusText').textContent = 'في انتظار بدء التصوير';
+      document.getElementById('shotProgressBadge').textContent = `جاهز لالتقاط ${STATE.shotCount} ${STATE.shotCount === 1 ? 'صورة' : 'صور'}`;
+      switchToCameraView();
+    }
+
+    /**
+     * المحرك الرسومي لتوليد صورة الطباعة النهائية بمقاس Canon SELPHY
+     * 1200 × 1800 بكسل (4×6 إنش / 100×148 مم بدقة 300 DPI)
+     */
+    async function renderCompositeCanvas() {
+      const canvas = document.getElementById('compositeCanvas');
+      const ctx = canvas.getContext('2d');
+      const W = 1200;
+      const H = 1800;
+      canvas.width = W;
+      canvas.height = H;
+
+      const theme = THEMES.find(t => t.id === STATE.selectedThemeId) || THEMES[0];
+      const images = await Promise.all(STATE.capturedPhotos.map(loadImage));
+
+      // مسح الكانفاس
+      ctx.clearRect(0, 0, W, H);
+
+      if (STATE.layoutMode === 'double_strip') {
+        // وضع الشريطين المزدوجين (2x6 إنش مرتين جنباً إلى جنب مع خط قص في المنتصف)
+        drawSingleSheetLayout(ctx, 0, 0, W / 2, H, images, theme, true);
+        drawSingleSheetLayout(ctx, W / 2, 0, W / 2, H, images, theme, true);
+
+        // خط قص متقطع في المنتصف
+        ctx.save();
+        ctx.strokeStyle = 'rgba(148, 163, 184, 0.6)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([14, 14]);
+        ctx.beginPath();
+        ctx.moveTo(W / 2, 0);
+        ctx.lineTo(W / 2, H);
+        ctx.stroke();
+        ctx.restore();
+      } else {
+        // وضع البوست كارد الكامل (4×6 إنش)
+        drawSingleSheetLayout(ctx, 0, 0, W, H, images, theme, false);
+      }
+
+      const finalDataUrl = canvas.toDataURL('image/png', 1.0);
+      document.getElementById('finalPreviewImg').src = finalDataUrl;
+      document.getElementById('printImageTarget').src = finalDataUrl;
+    }
+
+    /**
+     * رسم قالب متكامل داخل المساحة المحددة (سواء ورقة كاملة أو شريط 2×6)
+     */
+    function drawSingleSheetLayout(ctx, offsetX, offsetY, width, height, images, theme, isStrip) {
+      ctx.save();
+      ctx.translate(offsetX, offsetY);
+      ctx.beginPath();
+      ctx.rect(0, 0, width, height);
+      ctx.clip();
+
+      // 1. رسم الخلفية المزخرفة حسب نوع الثيم
+      drawThemeBackground(ctx, width, height, theme);
+
+      // 2. رسم الإطار الخارجي الزخرفي للورقة
+      const outerPad = isStrip ? 22 : 36;
+      ctx.strokeStyle = theme.frameColor;
+      ctx.lineWidth = isStrip ? 6 : 10;
+      roundRectPath(ctx, outerPad, outerPad, width - outerPad * 2, height - outerPad * 2, isStrip ? 20 : 32);
+      ctx.stroke();
+
+      // خط داخلي ذهبي/ثانوي رفيع للثيمات الفاخرة
+      ctx.strokeStyle = theme.frameSecondary;
+      ctx.lineWidth = isStrip ? 2 : 3;
+      roundRectPath(ctx, outerPad + 10, outerPad + 10, width - (outerPad + 10) * 2, height - (outerPad + 10) * 2, isStrip ? 14 : 24);
+      ctx.stroke();
+
+      // 3. حساب توزيع الصور داخل المساحة المتاحة
+      const headerSpace = isStrip ? 75 : 105;
+      const footerSpace = isStrip ? 175 : 230;
+      const innerX = outerPad + (isStrip ? 22 : 42);
+      const innerY = outerPad + headerSpace;
+      const innerW = width - innerX * 2;
+      const innerH = height - innerY - (outerPad + footerSpace);
+
+      // رسم شارة علوية صغيرة (تاريخ أو زخرفة)
+      drawTopHeaderDecor(ctx, width, outerPad + 20, theme, isStrip);
+
+      // توزيع الشبكة حسب عدد الصور ووضع الشريط
+      const count = images.length || 1;
+      const gap = isStrip ? 20 : 28;
+      let slots = [];
+
+      if (isStrip || count <= 3) {
+        // ترتيب عمودي أنيق
+        const slotH = (innerH - gap * (count - 1)) / count;
+        for (let i = 0; i < count; i++) {
+          slots.push({
+            x: innerX,
+            y: innerY + i * (slotH + gap),
+            w: innerW,
+            h: slotH
+          });
+        }
+      } else {
+        // 4 صور في وضع البوست كارد الكامل: شبكة 2×2 متوازنة
+        const slotW = (innerW - gap) / 2;
+        const slotH = (innerH - gap) / 2;
+        for (let i = 0; i < 4; i++) {
+          const col = i % 2;
+          const row = Math.floor(i / 2);
+          slots.push({
+            x: innerX + col * (slotW + gap),
+            y: innerY + row * (slotH + gap),
+            w: slotW,
+            h: slotH
+          });
+        }
+      }
+
+      // 4. رسم كل صورة داخل إطارها مع قص متناسب (Object-Fit: Cover)
+      slots.forEach((slot, idx) => {
+        const img = images[idx];
+        if (!img) return;
+
+        ctx.save();
+        // ظل خفيف خلف كل إطار صورة
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.22)';
+        ctx.shadowBlur = 18;
+        ctx.shadowOffsetY = 8;
+
+        const radius = isStrip ? 16 : 24;
+        roundRectPath(ctx, slot.x, slot.y, slot.w, slot.h, radius);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        ctx.restore();
+
+        // قص ورسم الصورة
+        ctx.save();
+        roundRectPath(ctx, slot.x, slot.y, slot.w, slot.h, radius);
+        ctx.clip();
+        drawImageCover(ctx, img, slot.x, slot.y, slot.w, slot.h);
+        ctx.restore();
+
+        // حدود إطار الصورة
+        ctx.save();
+        roundRectPath(ctx, slot.x, slot.y, slot.w, slot.h, radius);
+        ctx.strokeStyle = theme.frameColor;
+        ctx.lineWidth = isStrip ? 5 : 7;
+        ctx.stroke();
+        ctx.restore();
+
+        // ملصق زخرفي صغير على زاوية الصورة
+        if (theme.stickers && theme.stickers.length > 0) {
+          const sticker = theme.stickers[idx % theme.stickers.length];
+          ctx.save();
+          ctx.font = `${isStrip ? 34 : 48}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          const sx = idx % 2 === 0 ? slot.x + slot.w - 14 : slot.x + 14;
+          const sy = slot.y + 16;
+          ctx.fillText(sticker, sx, sy);
+          ctx.restore();
+        }
+      });
+
+      // 5. رسم التذييل (نص المناسبة + التاريخ + ملصقات الثيم)
+      drawFooterTextAndDecor(ctx, width, height, outerPad, footerSpace, theme, isStrip);
+
+      ctx.restore();
+    }
+
+    /**
+     * رسم خلفيات فنية متنوعة لكل ثيم
+     */
+    function drawThemeBackground(ctx, w, h, theme) {
+      const grad = ctx.createLinearGradient(0, 0, w, h);
+      grad.addColorStop(0, theme.bgColors[0]);
+      grad.addColorStop(0.5, theme.bgColors[1]);
+      grad.addColorStop(1, theme.bgColors[2]);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.save();
+      if (theme.bgType === 'confetti_pastel' || theme.bgType === 'jungle_dots' || theme.bgType === 'comic_dots') {
+        const colors = [theme.frameColor, theme.frameSecondary, '#38BDF8', '#A855F7', '#10B981'];
+        for (let i = 0; i < 65; i++) {
+          const x = ((i * 197) % w);
+          const y = ((i * 313) % h);
+          const r = (i % 4 + 2) * 4;
+          ctx.fillStyle = colors[i % colors.length] + '33';
+          ctx.beginPath();
+          ctx.arc(x, y, r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      } else if (theme.bgType === 'space_stars' || theme.bgType === 'luxury_dark') {
+        for (let i = 0; i < 90; i++) {
+          const x = ((i * 251) % w);
+          const y = ((i * 389) % h);
+          const r = (i % 3) + 1.5;
+          ctx.fillStyle = i % 3 === 0 ? theme.frameColor + '88' : 'rgba(255,255,255,0.45)';
+          ctx.beginPath();
+          ctx.arc(x, y, r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      } else if (theme.bgType === 'cyber_grid') {
+        ctx.strokeStyle = 'rgba(6, 182, 212, 0.14)';
+        ctx.lineWidth = 2;
+        const step = 60;
+        for (let x = 0; x <= w; x += step) {
+          ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+        }
+        for (let y = 0; y <= h; y += step) {
+          ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+        }
+      } else if (theme.bgType === 'racing_checkers') {
+        const size = 40;
+        for (let x = 0; x < w; x += size) {
+          for (let y = 0; y < 80; y += size) {
+            if (((x / size) + (y / size)) % 2 === 0) {
+              ctx.fillStyle = 'rgba(255,255,255,0.12)';
+              ctx.fillRect(x, y, size, size);
+              ctx.fillRect(x, h - y - size, size, size);
+            }
+          }
+        }
+      } else if (theme.bgType === 'floral_soft' || theme.bgType === 'sparkles_dream') {
+        // دوائر بوكيه حالمة ناعمة
+        for (let i = 0; i < 24; i++) {
+          const x = ((i * 293) % w);
+          const y = ((i * 419) % h);
+          const r = 45 + (i % 5) * 18;
+          ctx.fillStyle = theme.frameColor + '14';
+          ctx.beginPath();
+          ctx.arc(x, y, r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      ctx.restore();
+    }
+
+    function drawTopHeaderDecor(ctx, width, topY, theme, isStrip) {
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const s1 = theme.stickers[0] || '✨';
+      const s2 = theme.stickers[1] || '✨';
+      ctx.font = `${isStrip ? 26 : 36}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
+      ctx.fillText(`${s1}   •   ${s2}`, width / 2, topY + (isStrip ? 22 : 30));
+      ctx.restore();
+    }
+
+    function drawFooterTextAndDecor(ctx, width, height, outerPad, footerSpace, theme, isStrip) {
+      const eventTitle = (document.getElementById('eventTitleInput').value || '').trim();
+      const showDate = document.getElementById('showDateCheckbox').checked;
+      const centerY = height - outerPad - footerSpace / 2;
+
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      // رسم عنوان المناسبة
+      if (eventTitle) {
+        ctx.fillStyle = theme.textColor;
+        const fontSize = isStrip ? 28 : 44;
+        ctx.font = `900 ${fontSize}px "Cairo", sans-serif`;
+        ctx.fillText(eventTitle, width / 2, showDate ? centerY - (isStrip ? 18 : 26) : centerY, width - 100);
+      }
+
+      // رسم التاريخ بالصيغة العربية الأنيقة
+      if (showDate) {
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('ar-IQ', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+        ctx.fillStyle = theme.accentColor;
+        const dateSize = isStrip ? 20 : 28;
+        ctx.font = `700 ${dateSize}px "Tajawal", sans-serif`;
+        ctx.fillText(dateStr, width / 2, eventTitle ? centerY + (isStrip ? 22 : 32) : centerY);
+      }
+
+      // ملصقات جانبية في التذييل
+      if (theme.stickers && theme.stickers.length >= 2) {
+        ctx.font = `${isStrip ? 32 : 46}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
+        ctx.fillText(theme.stickers[2 % theme.stickers.length], outerPad + (isStrip ? 42 : 70), centerY);
+        ctx.fillText(theme.stickers[3 % theme.stickers.length], width - outerPad - (isStrip ? 42 : 70), centerY);
+      }
+
+      ctx.restore();
+    }
+
+    /**
+     * دوال مساعدة للرسم على الكانفاس
+     */
+    function roundRectPath(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
+
+    function drawImageCover(ctx, img, x, y, w, h) {
+      const imgRatio = img.width / img.height;
+      const boxRatio = w / h;
+      let sx = 0, sy = 0, sw = img.width, sh = img.height;
+
+      if (imgRatio > boxRatio) {
+        sw = img.height * boxRatio;
+        sx = (img.width - sw) / 2;
+      } else {
+        sh = img.width / boxRatio;
+        sy = (img.height - sh) / 2;
+      }
+      ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+    }
+
+    function loadImage(src) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
+      });
+    }
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    /**
+     * الطباعة المباشرة على طابعة Canon SELPHY عبر الواي فاي
+     */
+    function printToCanonSelphy() {
+      const printTarget = document.getElementById('printImageTarget');
+      if (!printTarget.src) {
+        showToast('يرجى التقاط الصور أولاً قبل الطباعة');
+        return;
+      }
+      showToast('جاري تجهيز المقاس 100×148mm لطابعة Canon SELPHY...');
+      setTimeout(() => {
+        window.print();
+      }, 250);
+    }
+
+    /**
+     * حفظ الصورة النهائية بصيغة PNG عالية الدقة (1200x1800)
+     */
+    function downloadFinalPhoto() {
+      const canvas = document.getElementById('compositeCanvas');
+      const link = document.createElement('a');
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+      link.download = `Canon-SELPHY-PhotoBooth-${timestamp}.png`;
+      link.href = canvas.toDataURL('image/png', 1.0);
+      link.click();
+      showToast('تم حفظ الصورة بجودة طباعة 300 DPI بنجاح!');
+    }
+
+    function openWifiGuide() {
+      document.getElementById('wifiGuideModal').classList.remove('hidden');
+    }
+
+    function closeWifiGuide() {
+      document.getElementById('wifiGuideModal').classList.add('hidden');
+    }
+
+    let toastTimer = null;
+    function showToast(msg) {
+      const box = document.getElementById('toastNotification');
+      const text = document.getElementById('toastText');
+      text.textContent = msg;
+      box.classList.remove('opacity-0', 'translate-y-3');
+      box.classList.add('opacity-100', 'translate-y-0');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        box.classList.add('opacity-0', 'translate-y-3');
+        box.classList.remove('opacity-100', 'translate-y-0');
+      }, 3200);
+    }
+  </script>
+</body>
+</html>
