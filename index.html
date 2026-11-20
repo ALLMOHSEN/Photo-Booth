@@ -2,108 +2,115 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>فوتو بوث الذكريات | Canon SELPHY</title>
-  
+
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Google Fonts: Cairo & Tajawal -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800;900&family=Tajawal:wght@500;700;800&display=swap" rel="stylesheet">
+
+  <!-- Arabic Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&display=swap" rel="stylesheet" />
 
   <style>
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-    }
-
-    body {
-      font-family: 'Cairo', sans-serif;
-      background: radial-gradient(circle at 50% 25%, #1e1b4b 0%, #090d16 65%, #030712 100%);
-      color: #f8fafc;
+    /* Strict Kiosk Lock: prevent zoom, pan, bounce, selection, and callouts */
+    html, body {
+      width: 100%;
       height: 100dvh;
-      width: 100vw;
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
       overflow: hidden;
+      overscroll-behavior: none;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      font-family: 'Cairo', sans-serif;
+      background-color: #050814;
+      color: #f8fafc;
     }
 
-    /* شريط تمرير ناعم للثيمات */
-    ::-webkit-scrollbar {
-      width: 5px;
-      height: 5px;
-    }
-    ::-webkit-scrollbar-track {
-      background: rgba(15, 23, 42, 0.4);
-    }
-    ::-webkit-scrollbar-thumb {
-      background: rgba(99, 102, 241, 0.5);
-      border-radius: 9999px;
+    button, [role="button"] {
+      touch-action: manipulation;
+      cursor: pointer;
     }
 
-    /* تأثير نبض التوهج للزر المركزي */
-    @keyframes pulseGlow {
-      0%, 100% {
-        box-shadow: 0 0 35px rgba(99, 102, 241, 0.55), 0 0 80px rgba(236, 72, 153, 0.3);
-        transform: scale(1);
-      }
-      50% {
-        box-shadow: 0 0 55px rgba(99, 102, 241, 0.8), 0 0 110px rgba(236, 72, 153, 0.5);
-        transform: scale(1.025);
-      }
-    }
-    .kiosk-cta-btn {
-      animation: pulseGlow 3s infinite ease-in-out;
+    /* Ambient blurred live background on Screen 1 */
+    .ambient-video-blur {
+      filter: blur(14px) brightness(0.72);
+      transform: scale(1.08);
     }
 
-    /* تأثير فلاش الكاميرا */
-    @keyframes cameraFlash {
-      0% { opacity: 1; }
-      100% { opacity: 0; }
-    }
-    .flash-active {
-      animation: cameraFlash 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    .ambient-video-blur.mirrored {
+      transform: scaleX(-1) scale(1.08);
     }
 
-    /* حركة العداد التنازلي */
-    @keyframes countdownPop {
-      0% { transform: scale(0.35); opacity: 0; }
-      35% { transform: scale(1.15); opacity: 1; }
-      80% { transform: scale(1); opacity: 1; }
-      100% { transform: scale(0.85); opacity: 0; }
-    }
-    .countdown-animate {
-      animation: countdownPop 0.92s ease-in-out forwards;
+    /* Clear live camera feed on Screen 2 */
+    .live-camera-feed {
+      filter: blur(0px) brightness(1);
+      transform: scale(1);
     }
 
-    .mirror-video {
+    .live-camera-feed.mirrored {
       transform: scaleX(-1);
     }
 
-    /* تأثير بلور ضبابي ناعم لخلفية الكاميرا في الصفحة الأولى */
-    .ambient-blur {
-      transform: scaleX(-1) scale(1.08);
-      filter: blur(18px) brightness(0.62) saturate(1.2);
-      transition: filter 0.65s ease, transform 0.65s ease;
+    /* Subtle pulse for primary Kiosk start button */
+    @keyframes kioskPulse {
+      0%, 100% {
+        box-shadow: 0 0 35px rgba(99, 102, 241, 0.55), 0 0 75px rgba(236, 72, 153, 0.28);
+        transform: scale(1);
+      }
+      50% {
+        box-shadow: 0 0 50px rgba(99, 102, 241, 0.8), 0 0 100px rgba(236, 72, 153, 0.45);
+        transform: scale(1.02);
+      }
     }
 
-    .live-clear {
-      transform: scaleX(-1) scale(1);
-      filter: blur(0px) brightness(1) saturate(1);
-      transition: filter 0.65s ease, transform 0.65s ease;
+    .start-btn-glow {
+      animation: kioskPulse 2.8s infinite ease-in-out;
     }
 
-    .glass-card {
-      background: rgba(15, 23, 42, 0.72);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+    /* Camera flash overlay animation */
+    @keyframes flashBurst {
+      0% { opacity: 0.95; }
+      100% { opacity: 0; }
     }
 
-    /* إعدادات الطباعة الحصرية لطابعة Canon SELPHY (4x6 inch / 100x148mm) بدون هوامش */
-    #printArea {
+    .flash-burst {
+      animation: flashBurst 0.45s ease-out forwards;
+    }
+
+    /* Countdown number entrance */
+    @keyframes countPop {
+      0% { transform: scale(0.45); opacity: 0; }
+      35% { transform: scale(1.12); opacity: 1; }
+      85% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(0.85); opacity: 0; }
+    }
+
+    .count-pop {
+      animation: countPop 0.9s ease-in-out forwards;
+    }
+
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    /* Print-only container hidden on screen */
+    #printOnlyContainer {
       display: none;
+    }
+
+    /* Exact 100mm x 148mm / 4in x 6in borderless print stylesheet for Canon SELPHY */
+    @page {
+      size: 100mm 148mm;
+      margin: 0;
     }
 
     @media print {
@@ -117,759 +124,961 @@
         height: 148mm !important;
         margin: 0 !important;
         padding: 0 !important;
-        background: #ffffff !important;
         overflow: hidden !important;
+        background: #ffffff !important;
       }
 
-      body > *:not(#printArea) {
+      body > *:not(#printOnlyContainer) {
         display: none !important;
       }
 
-      #printArea {
-        display: flex !important;
-        align-items: center;
-        justify-content: center;
-        position: fixed;
-        inset: 0;
-        width: 100mm;
-        height: 148mm;
-        margin: 0;
-        padding: 0;
-        background: #ffffff;
-        z-index: 99999;
-      }
-
-      #printArea img {
+      #printOnlyContainer {
+        display: block !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
         width: 100mm !important;
         height: 148mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        z-index: 999999 !important;
+      }
+
+      #printOnlyImg {
+        width: 100mm !important;
+        height: 148mm !important;
+        max-width: none !important;
+        max-height: none !important;
         object-fit: fill !important;
         display: block !important;
       }
     }
   </style>
 </head>
-<body class="relative flex items-center justify-center">
+<body class="relative select-none overflow-hidden">
 
-  <!-- طبقة الفلاش الأبيض عند التقاط كل صورة -->
+  <!-- Full-screen flash overlay on photo capture -->
   <div id="flashOverlay" class="fixed inset-0 bg-white pointer-events-none opacity-0 z-50"></div>
 
-  <!-- منطقة الطباعة المخفية المعايرة لطابعة Canon SELPHY -->
-  <div id="printArea">
-    <img id="printImageTarget" alt="Canon SELPHY Print" />
+  <!-- Print-only full-bleed 100mm x 148mm output -->
+  <div id="printOnlyContainer" aria-hidden="true">
+    <img id="printOnlyImg" alt="Canon SELPHY 4x6 Print" />
+  </div>
+
+  <!-- Toast notification banner -->
+  <div id="statusToast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-opacity duration-300 px-3 max-w-full">
+    <div id="statusToastText" class="px-5 py-2.5 rounded-2xl bg-slate-900/95 border border-emerald-400/40 text-white text-xs sm:text-sm font-extrabold shadow-2xl text-center"></div>
   </div>
 
   <!-- ===================================================================== -->
-  <!-- الشاشة 1: شاشة البداية فائقة البساطة (زر مركزي فقط)                  -->
+  <!-- SCREEN 1: START KIOSK (Blurred Live Camera BG + Single Center CTA)   -->
   <!-- ===================================================================== -->
-  <section id="screenStart" class="w-full h-full flex flex-col items-center justify-center p-6 relative overflow-hidden">
-
-    <!-- خلفية الكاميرا الحية مع تأثير البلور الضبابي -->
-    <div id="ambientCameraBg" class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-      <video id="bgCameraFeed" autoplay playsinline muted class="w-full h-full object-cover ambient-blur"></video>
-      <!-- بديل أنيق في حال عدم توفر الكاميرا أو رفض الإذن -->
-      <div id="bgCameraFallback" class="w-full h-full bg-gradient-to-br from-indigo-950 via-slate-950 to-fuchsia-950/70 flex items-center justify-center">
-        <div class="w-96 h-96 rounded-full bg-indigo-500/20 blur-3xl"></div>
-      </div>
-      <!-- طبقة تظليل خفيفة لوضوح الزر والواجهة -->
-      <div class="fixed inset-0 bg-slate-950/35 backdrop-blur-[2px]"></div>
+  <section id="screenStart" class="relative w-full h-full flex items-center justify-center p-4 sm:p-6 overflow-hidden">
+    <!-- Live Camera Background + Simulated Fallback Canvas -->
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+      <video id="bgVideo" autoplay playsinline muted class="w-full h-full object-cover ambient-video-blur mirrored hidden"></video>
+      <canvas id="bgSimCanvas" width="1280" height="720" class="w-full h-full object-cover ambient-video-blur"></canvas>
+      <!-- Dark vignette overlay -->
+      <div class="fixed inset-0 bg-gradient-to-b from-slate-950/55 via-slate-950/35 to-slate-950/65"></div>
     </div>
-    
-    <!-- زر إعدادات مخفي/بسيط في الزاوية للمشرف فقط -->
-    <button onclick="toggleAdminSettings()" class="absolute top-5 left-5 z-20 p-3 rounded-2xl bg-black/35 hover:bg-black/55 text-slate-200 hover:text-white border border-white/15 backdrop-blur-md transition" title="إعدادات الكشك">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-        <circle cx="12" cy="12" r="3" />
-      </svg>
-    </button>
 
-    <!-- الزر المركزي الكبير -->
-    <div class="relative z-10 flex flex-col items-center text-center max-w-xl w-full">
-      <button onclick="beginBoothFlow()" class="kiosk-cta-btn group relative w-full sm:w-auto sm:min-w-[420px] px-10 py-10 sm:py-12 rounded-[2.5rem] bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 text-white border-2 border-white/25 transition-all duration-300 active:scale-95 flex flex-col items-center justify-center gap-4 cursor-pointer">
-        
-        <!-- أيقونة الكاميرا -->
-        <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-white/15 backdrop-blur-md flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
-          <svg class="w-11 h-11 sm:w-14 sm:h-14 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <!-- Subtle camera mode badge -->
+    <div id="startCameraBadge" class="fixed top-4 right-4 z-20 px-3.5 py-1.5 rounded-full bg-black/55 border border-white/15 text-[11px] sm:text-xs font-bold text-slate-200 pointer-events-none">
+      جاري فحص الكاميرا...
+    </div>
+
+    <!-- Single Centered CTA Button -->
+    <div class="relative z-10 w-full max-w-xl flex items-center justify-center">
+      <button
+        id="btnStartBooth"
+        type="button"
+        onclick="handleStartBoothClick()"
+        class="start-btn-glow w-full sm:w-auto sm:min-w-[400px] px-8 py-9 sm:px-12 sm:py-11 rounded-[2.25rem] bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 active:scale-95 text-white border-2 border-white/25 transition-all duration-200 flex flex-col items-center justify-center gap-3"
+      >
+        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/15 flex items-center justify-center shadow-inner">
+          <svg class="w-9 h-9 sm:w-11 sm:h-11 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
             <circle cx="12" cy="13" r="3.5" />
           </svg>
         </div>
-
-        <!-- النص الرئيسي -->
-        <span class="text-3xl sm:text-5xl font-black tracking-tight drop-shadow-md">
+        <span class="text-2xl sm:text-4xl font-black tracking-tight text-center leading-snug">
           أخذ صورة ذكرى بسعر 5,000
-        </span>
-
-        <!-- شارة السعر -->
-        <span class="mt-1 px-7 py-2.5 rounded-full bg-black/35 border border-white/20 text-amber-300 text-xl sm:text-2xl font-extrabold shadow-lg">
-          5,000 د.ع
         </span>
       </button>
     </div>
-
-    <!-- نافذة إعدادات المشرف (مخفية افتراضياً) -->
-    <div id="adminSettingsModal" class="hidden fixed inset-0 bg-black/75 backdrop-blur-sm z-40 flex items-center justify-center p-4">
-      <div class="glass-card rounded-3xl max-w-md w-full p-6 shadow-2xl">
-        <div class="flex items-center justify-between mb-5">
-          <h3 class="text-lg font-black text-white">⚙️ إعدادات الكشك والطابعة</h3>
-          <button onclick="toggleAdminSettings()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center">✕</button>
-        </div>
-
-        <div class="space-y-4 text-sm">
-          <div class="flex items-center justify-between bg-slate-900/70 p-3.5 rounded-2xl border border-white/10">
-            <span class="font-bold text-slate-200">عدد اللقطات في الجلسة:</span>
-            <div class="flex gap-1.5">
-              <button type="button" onclick="setShotCount(3)" id="cfgShots3" class="px-3.5 py-1.5 rounded-xl font-extrabold bg-slate-800 text-slate-300">3 صور</button>
-              <button type="button" onclick="setShotCount(4)" id="cfgShots4" class="px-3.5 py-1.5 rounded-xl font-extrabold bg-indigo-600 text-white">4 صور</button>
-            </div>
-          </div>
-
-          <div class="flex items-center justify-between bg-slate-900/70 p-3.5 rounded-2xl border border-white/10">
-            <span class="font-bold text-slate-200">عكس الكاميرا كمرآة:</span>
-            <button type="button" onclick="toggleMirrorSetting()" id="cfgMirrorBtn" class="px-4 py-1.5 rounded-xl font-extrabold bg-emerald-600 text-white">مفعّل</button>
-          </div>
-
-          <div class="bg-indigo-950/60 border border-indigo-400/25 rounded-2xl p-3.5 text-xs text-indigo-200 leading-relaxed">
-            <strong>معلومات الطابعة:</strong> الصفحة مضبوطة تلقائياً على مقاس <strong>Canon SELPHY (100×148 مم / 4×6 إنش)</strong> بدون هوامش.
-          </div>
-        </div>
-
-        <button onclick="toggleAdminSettings()" class="mt-5 w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold">حفظ وإغلاق</button>
-      </div>
-    </div>
   </section>
 
   <!-- ===================================================================== -->
-  <!-- الشاشة 2: شاشة الكاميرا والعدّ التنازلي (6 ثوانٍ ثم 3 ثوانٍ)           -->
+  <!-- SCREEN 2: LIVE CAPTURE & COUNTDOWN (6s Initial -> 3s Between Shots)  -->
   <!-- ===================================================================== -->
-  <section id="screenCamera" class="hidden w-full h-full relative bg-black flex items-center justify-center">
-    <video id="videoFeed" autoplay playsinline muted class="w-full h-full object-cover mirror-video"></video>
+  <section id="screenCapture" class="hidden relative w-full h-full bg-black flex items-center justify-center overflow-hidden">
+    <!-- Clear Live Camera Video or Simulated Camera Canvas -->
+    <video id="liveVideo" autoplay playsinline muted class="w-full h-full object-cover live-camera-feed mirrored hidden"></video>
+    <canvas id="liveSimCanvas" width="1280" height="720" class="w-full h-full object-cover live-camera-feed"></canvas>
 
-    <!-- مؤشر تقدم اللقطات في الأعلى -->
-    <div class="absolute top-5 inset-x-5 flex items-center justify-between z-20 pointer-events-none">
-      <div id="shotIndicatorPill" class="px-5 py-2.5 rounded-full bg-black/60 backdrop-blur-md border border-white/15 text-white font-extrabold text-sm sm:text-base shadow-lg">
-        اللقطة 1 من 4
+    <!-- Top bar: Shot counter + captured thumbnails + mode indicator -->
+    <div class="fixed top-4 inset-x-4 z-20 flex items-center justify-between gap-2 pointer-events-none">
+      <div class="flex items-center gap-2">
+        <span id="shotProgressBadge" class="px-4 py-2 rounded-full bg-black/65 border border-white/20 text-white text-xs sm:text-sm font-black shadow-lg">
+          الصورة 1 من 3
+        </span>
+        <span id="captureModeBadge" class="hidden px-3 py-1.5 rounded-full bg-amber-500/25 border border-amber-300/40 text-amber-200 text-[11px] font-bold">
+          وضع الكاميرا الافتراضية
+        </span>
       </div>
 
-      <!-- معاينات مصغرة للصور التي تم التقاطها -->
-      <div id="liveThumbsRow" class="flex items-center gap-2"></div>
+      <div id="capturedThumbnails" class="flex items-center gap-1.5 sm:gap-2"></div>
     </div>
 
-    <!-- طبقة العداد التنازلي العملاق -->
-    <div id="countdownLayer" class="absolute inset-0 bg-black/30 flex flex-col items-center justify-center z-20 pointer-events-none px-4 text-center">
-      <div id="countdownTitle" class="mb-3 px-6 py-2 rounded-full bg-black/65 backdrop-blur-md border border-white/20 text-amber-300 text-xl sm:text-3xl font-black shadow-xl">
-        استعد! يبدأ التصوير خلال...
+    <!-- Center Countdown Overlay -->
+    <div id="countdownOverlay" class="fixed inset-0 z-20 bg-black/25 flex flex-col items-center justify-center px-4 text-center pointer-events-none">
+      <div id="countdownLabel" class="mb-2 px-5 py-1.5 rounded-full bg-black/65 border border-white/20 text-amber-300 text-lg sm:text-2xl font-black shadow-lg">
+        استعد للتصوير...
       </div>
-      <div id="countdownDigit" class="text-[9rem] sm:text-[13rem] leading-none font-black text-white drop-shadow-[0_12px_35px_rgba(99,102,241,0.95)]">
+      <div id="countdownNumber" class="text-[8rem] sm:text-[12rem] leading-none font-black text-white drop-shadow-[0_10px_30px_rgba(99,102,241,0.95)]">
         6
       </div>
     </div>
+  </section>
 
-    <!-- رسالة بديلة في حال عدم وجود كاميرا أو رفض الإذن -->
-    <div id="cameraFallbackBox" class="hidden absolute inset-0 bg-slate-950/95 z-30 flex flex-col items-center justify-center p-6 text-center">
-      <div class="text-5xl mb-3">📷</div>
-      <h3 class="text-xl font-black text-white mb-2">يرجى السماح بتشغيل الكاميرا</h3>
-      <p class="text-sm text-slate-300 max-w-md mb-5">تأكد من توصيل الكاميرا وإعطاء الصلاحية للمتصفح، أو يمكنك اختيار صور من جهازك للمتابعة.</p>
-      <div class="flex flex-wrap justify-center gap-3">
-        <button onclick="startCameraAndCapture()" class="px-6 py-3 rounded-2xl bg-indigo-600 text-white font-extrabold text-sm">إعادة المحاولة</button>
-        <label class="px-6 py-3 rounded-2xl bg-slate-800 text-white font-extrabold text-sm cursor-pointer border border-white/15">
-          📁 اختيار صور من الجهاز
-          <input type="file" accept="image/*" multiple class="hidden" onchange="handleManualPhotos(event)" />
-        </label>
-        <button onclick="returnToStart()" class="px-6 py-3 rounded-2xl bg-rose-600/25 text-rose-200 font-extrabold text-sm">رجوع</button>
+  <!-- ===================================================================== -->
+  <!-- SCREEN 3: FIXED THEME PICKER (4 THEMES) & DIRECT CANON SELPHY PRINT   -->
+  <!-- ===================================================================== -->
+  <section id="screenPrint" class="hidden relative w-full h-full p-3 sm:p-5 lg:p-6 flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch justify-center overflow-hidden">
+    <!-- Left / Right Preview Column: 4x6 Canon SELPHY Composition -->
+    <div class="lg:w-1/2 h-[45%] lg:h-full glass-panel rounded-3xl p-3 sm:p-5 flex flex-col items-center justify-center relative overflow-hidden">
+      <img
+        id="composedPreviewImg"
+        alt="معاينة الصورة النهائية 4x6"
+        class="max-h-full w-auto rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.85)] border-2 border-white/20 object-contain"
+      />
+      <span class="absolute top-3 left-3 px-3 py-1 rounded-full bg-black/70 border border-emerald-400/35 text-[11px] font-extrabold text-emerald-300">
+        Canon SELPHY • 100×148mm (4×6")
+      </span>
+    </div>
+
+    <!-- Controls Column: Fixed 4 Themes + Direct Print + Reset -->
+    <div class="lg:w-1/2 h-[55%] lg:h-full glass-panel rounded-3xl p-4 sm:p-6 flex flex-col justify-between gap-3 overflow-hidden">
+      <div>
+        <h2 class="text-lg sm:text-2xl font-black text-white mb-3">اختر الثيم</h2>
+
+        <!-- Fixed 4 Themes Grid: أطفال / بنات / أولاد / كبار -->
+        <div id="fixedThemesGrid" class="grid grid-cols-2 gap-2.5 sm:gap-3">
+          <button
+            type="button"
+            data-theme="kids"
+            onclick="selectFixedTheme('kids')"
+            class="theme-card-btn p-3.5 sm:p-4 rounded-2xl border-2 text-right transition flex items-center gap-3 bg-gradient-to-br from-amber-500/25 to-orange-600/25 border-amber-400 text-white shadow-lg"
+          >
+            <span class="text-2xl sm:text-3xl leading-none">🧸</span>
+            <span class="text-base sm:text-xl font-black">أطفال</span>
+          </button>
+
+          <button
+            type="button"
+            data-theme="girls"
+            onclick="selectFixedTheme('girls')"
+            class="theme-card-btn p-3.5 sm:p-4 rounded-2xl border-2 text-right transition flex items-center gap-3 bg-slate-900/75 border-white/15 hover:border-pink-400/60 text-slate-200"
+          >
+            <span class="text-2xl sm:text-3xl leading-none">👑</span>
+            <span class="text-base sm:text-xl font-black">بنات</span>
+          </button>
+
+          <button
+            type="button"
+            data-theme="boys"
+            onclick="selectFixedTheme('boys')"
+            class="theme-card-btn p-3.5 sm:p-4 rounded-2xl border-2 text-right transition flex items-center gap-3 bg-slate-900/75 border-white/15 hover:border-cyan-400/60 text-slate-200"
+          >
+            <span class="text-2xl sm:text-3xl leading-none">🚀</span>
+            <span class="text-base sm:text-xl font-black">أولاد</span>
+          </button>
+
+          <button
+            type="button"
+            data-theme="adults"
+            onclick="selectFixedTheme('adults')"
+            class="theme-card-btn p-3.5 sm:p-4 rounded-2xl border-2 text-right transition flex items-center gap-3 bg-slate-900/75 border-white/15 hover:border-yellow-400/60 text-slate-200"
+          >
+            <span class="text-2xl sm:text-3xl leading-none">✨</span>
+            <span class="text-base sm:text-xl font-black">كبار</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Primary Print & Reset Actions -->
+      <div class="flex flex-col gap-2.5 pt-2 border-t border-white/10">
+        <button
+          id="btnDirectPrint"
+          type="button"
+          onclick="triggerDirectPrint()"
+          class="w-full py-4 px-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 active:scale-[0.98] text-white font-black text-base sm:text-xl shadow-xl shadow-emerald-600/30 transition flex items-center justify-center gap-2.5"
+        >
+          <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+          </svg>
+          <span>طباعة فورية — الاستلام من الكاشير</span>
+        </button>
+
+        <button
+          id="btnFinishReset"
+          type="button"
+          onclick="resetToStartScreen()"
+          class="w-full py-3.5 px-5 rounded-2xl bg-slate-800 hover:bg-slate-700 active:scale-[0.98] border border-white/15 text-slate-100 font-extrabold text-sm sm:text-base transition flex items-center justify-center gap-2"
+        >
+          <span>إنهاء والعودة</span>
+        </button>
       </div>
     </div>
   </section>
 
-  <!-- ===================================================================== -->
-  <!-- الشاشة 3: اختيار الثيم والطباعة المباشرة على Canon SELPHY            -->
-  <!-- ===================================================================== -->
-  <section id="screenResult" class="hidden w-full h-full p-3 sm:p-5 lg:p-6 flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch justify-center overflow-hidden">
-    
-    <!-- الجانب الأيمن: معاينة الصورة النهائية بمقاس Canon SELPHY (4×6 إنش) -->
-    <div class="lg:w-1/2 h-[44%] lg:h-full glass-card rounded-3xl p-3 sm:p-5 flex flex-col items-center justify-center relative">
-      <div class="relative h-full max-h-full flex items-center justify-center">
-        <img id="finalPreviewImg" alt="معاينة الطباعة" class="max-h-full w-auto rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.85)] border-2 border-white/20 object-contain" />
-        <span class="absolute top-2.5 left-2.5 px-3 py-1 rounded-full bg-black/70 backdrop-blur-md text-[11px] font-extrabold text-emerald-300 border border-emerald-400/30">
-          Canon SELPHY 100×148mm
-        </span>
-      </div>
-    </div>
-
-    <!-- الجانب الأيسر: اختيار الثيم + زر الطباعة المباشرة -->
-    <div class="lg:w-1/2 h-[56%] lg:h-full glass-card rounded-3xl p-4 sm:p-6 flex flex-col justify-between gap-3 overflow-hidden">
-      
-      <!-- العنوان واختيار التخطيط (ورقة كاملة أو شريطين) -->
-      <div class="flex flex-wrap items-center justify-between gap-2 shrink-0">
-        <h2 class="text-lg sm:text-2xl font-black text-white">🎨 اختر الثيم المفضل للطباعة</h2>
-        <div class="inline-flex rounded-xl bg-slate-950/80 p-1 border border-white/10 text-xs font-extrabold">
-          <button type="button" id="layoutPostcardBtn" onclick="setLayoutMode('postcard')" class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white transition">بطاقة كاملة 4×6</button>
-          <button type="button" id="layoutStripBtn" onclick="setLayoutMode('double_strip')" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition">شريطين للقص</button>
-        </div>
-      </div>
-
-      <!-- تبويبات الفئات: أطفال / بنات / أولاد / كبار -->
-      <div class="grid grid-cols-4 gap-1.5 bg-slate-950/80 p-1.5 rounded-2xl border border-white/10 shrink-0" id="categoryBar">
-        <button type="button" data-cat="kids" class="cat-btn py-2.5 px-2 rounded-xl text-xs sm:text-sm font-black transition bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow">🧸 أطفال</button>
-        <button type="button" data-cat="girls" class="cat-btn py-2.5 px-2 rounded-xl text-xs sm:text-sm font-black transition text-slate-300 hover:text-white">👑 بنات</button>
-        <button type="button" data-cat="boys" class="cat-btn py-2.5 px-2 rounded-xl text-xs sm:text-sm font-black transition text-slate-300 hover:text-white">🚀 أولاد</button>
-        <button type="button" data-cat="adults" class="cat-btn py-2.5 px-2 rounded-xl text-xs sm:text-sm font-black transition text-slate-300 hover:text-white">✨ كبار</button>
-      </div>
-
-      <!-- شبكة بطاقات الثيمات -->
-      <div id="themesContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 overflow-y-auto flex-1 pr-1 content-start">
-        <!-- تُملأ تلقائياً عبر JS -->
-      </div>
-
-      <!-- أزرار الطباعة المباشرة والعودة للبداية -->
-      <div class="flex flex-col gap-2 pt-2 border-t border-white/10 shrink-0">
-        <!-- تنبيه واضح للزبون حول الاستلام من الكاشير -->
-        <div class="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-amber-500/15 border border-amber-400/35 text-amber-200 text-xs sm:text-sm font-extrabold">
-          <span>🧾</span>
-          <span>تنبيه: يتم دفع المبلغ واستلام الصورة المطبوعة من الكاشير</span>
-        </div>
-
-        <div class="flex flex-col sm:flex-row gap-2.5">
-          <button onclick="printDirectToSelphy()" class="flex-1 py-4 px-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-black text-base sm:text-xl shadow-xl shadow-emerald-600/30 active:scale-[0.98] transition flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-3 cursor-pointer">
-            <div class="flex items-center gap-2">
-              <svg class="w-6 h-6 sm:w-7 sm:h-7 shrink-0" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-              </svg>
-              <span>طباعة الصورة مباشرة</span>
-            </div>
-            <span class="px-3 py-0.5 rounded-full bg-black/25 border border-white/25 text-amber-200 text-xs sm:text-sm font-extrabold">
-              الاستلام من الكاشير
-            </span>
-          </button>
-
-          <button onclick="returnToStart()" class="py-4 px-5 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-white/15 text-slate-200 font-extrabold text-sm sm:text-base transition flex items-center justify-center gap-2 cursor-pointer">
-            <span>إنهاء والعودة للبداية</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- إشعار منبثق أنيق -->
-  <div id="toastBox" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-all duration-300">
-    <div id="toastMessage" class="px-6 py-3 rounded-2xl bg-slate-900/95 border border-emerald-400/40 text-white text-sm font-extrabold shadow-2xl backdrop-blur-md"></div>
-  </div>
-
-  <!-- كانفاس مخفي عالي الدقة 1200×1800 بكسل (300 DPI لمقاس Canon SELPHY 4×6) -->
-  <canvas id="compositeCanvas" width="1200" height="1800" class="hidden"></canvas>
+  <!-- High-resolution 1200x1800 px (300 DPI at 4x6 inch / 100x148 mm) offscreen print canvas -->
+  <canvas id="selphyCanvas" width="1200" height="1800" class="hidden"></canvas>
 
   <script>
     /**
-     * إعدادات وحالة الكشك
+     * Kiosk State & Configuration
      */
-    const KIOSK = {
-      initialDelaySec: 6,      // 6 ثوانٍ قبل أول صورة
-      betweenShotsSec: 3,      // 3 ثوانٍ بين كل صورة وأخرى
-      shotCount: 3,            // عدد اللقطات الافتراضي (3 صور)
-      isMirrored: true,
-      layoutMode: 'postcard',  // 'postcard' أو 'double_strip'
-      activeCategory: 'kids',
-      selectedThemeId: 'kids_stars',
-      capturedPhotos: [],
+    const STATE = {
+      screen: 'start',          // 'start' | 'capture' | 'print'
+      shotCount: 3,             // Default 3 photos in vertical 4x6 composition
+      initialCountdownSec: 6,   // 6s before first photo
+      betweenShotsSec: 3,       // 3s between subsequent photos
+      selectedTheme: 'kids',    // 'kids' | 'girls' | 'boys' | 'adults'
+      mirrorCamera: true,
       stream: null,
-      bgStream: null,
-      isRunning: false
+      hasLiveVideoStream: false,
+      simulatedMode: false,
+      capturedPhotos: [],       // Data URLs for each captured frame
+      isCaptureRunning: false,
+      sessionId: 0,             // Incrementing token to cancel stale async loops on reset
+      simAnimFrame: null
     };
 
     /**
-     * مكتبة الثيمات الاحترافية (أطفال، بنات، أولاد، كبار)
+     * 4 Fixed Themes definitions for 1200x1800 Canon SELPHY Canvas
      */
-    const THEMES = [
-      // === أطفال (Kids) ===
-      {
-        id: 'kids_stars',
-        category: 'kids',
-        name: 'نجوم المرح',
-        gradient: 'from-amber-400 via-orange-400 to-rose-400',
-        bgType: 'confetti',
-        bgColors: ['#FFFBEB', '#FEF3C7', '#FDE68A'],
-        frameColor: '#F59E0B',
-        secondaryColor: '#EC4899',
+    const FIXED_THEMES = {
+      kids: {
+        id: 'kids',
+        title: 'ذكرى أطفال سعيدة',
+        subtitle: 'عالم المرح والنجوم 🎈⭐',
+        bgTop: '#FFFBEB',
+        bgBottom: '#FEF3C7',
+        borderColor: '#F59E0B',
+        accentColor: '#EC4899',
         textColor: '#92400E',
-        footerText: 'ذكرى سعيدة مليئة بالمرح ✨',
-        stickers: ['⭐', '🎈', '🌈', '🧸']
+        stickerLeft: '🧸',
+        stickerRight: '🎈',
+        pattern: 'confetti'
       },
-      {
-        id: 'kids_dino',
-        category: 'kids',
-        name: 'مغامرة الديناصورات',
-        gradient: 'from-emerald-400 via-teal-500 to-lime-500',
-        bgType: 'confetti',
-        bgColors: ['#ECFDF5', '#D1FAE5', '#A7F3D0'],
-        frameColor: '#059669',
-        secondaryColor: '#F59E0B',
-        textColor: '#065F46',
-        footerText: 'أبطال المغامرة الصغار 🦖',
-        stickers: ['🦖', '🦕', '🌴', '⭐']
-      },
-      {
-        id: 'kids_candy',
-        category: 'kids',
-        name: 'عالم الحلوى',
-        gradient: 'from-sky-400 via-pink-400 to-amber-300',
-        bgType: 'confetti',
-        bgColors: ['#F0F9FF', '#FCE7F3', '#FEF9C3'],
-        frameColor: '#0284C7',
-        secondaryColor: '#F43F5E',
-        textColor: '#0369A1',
-        footerText: 'أحلى الأوقات والذكريات 🍭',
-        stickers: ['🍭', '🧁', '🎈', '🍬']
-      },
-
-      // === بنات (Girls) ===
-      {
-        id: 'girls_princess',
-        category: 'girls',
-        name: 'أميرات الوردي',
-        gradient: 'from-pink-400 via-rose-400 to-fuchsia-500',
-        bgType: 'bokeh',
-        bgColors: ['#FFF1F2', '#FFE4E6', '#FECDD3'],
-        frameColor: '#E11D48',
-        secondaryColor: '#F59E0B',
+      girls: {
+        id: 'girls',
+        title: 'أجمل الذكريات',
+        subtitle: 'تاج الأميرات والورود 👑💖',
+        bgTop: '#FFF1F2',
+        bgBottom: '#FFE4E6',
+        borderColor: '#E11D48',
+        accentColor: '#F59E0B',
         textColor: '#881337',
-        footerText: 'أجمل الأميرات 👑💖',
-        stickers: ['👑', '💖', '🌸', '🎀']
+        stickerLeft: '👑',
+        stickerRight: '🌸',
+        pattern: 'hearts'
       },
-      {
-        id: 'girls_rosegold',
-        category: 'girls',
-        name: 'روز جولد وفراشات',
-        gradient: 'from-rose-300 via-amber-200 to-pink-300',
-        bgType: 'bokeh',
-        bgColors: ['#FFF8F6', '#FDE8E4', '#FAD2C8'],
-        frameColor: '#B76E79',
-        secondaryColor: '#D4AF37',
-        textColor: '#6D2E36',
-        footerText: 'ذكرى لا تُنسى ✨🦋',
-        stickers: ['🦋', '🌹', '✨', '🌸']
+      boys: {
+        id: 'boys',
+        title: 'أبطال المغامرة',
+        subtitle: 'انطلاقة نحو القمة 🚀⚡',
+        bgTop: '#090D16',
+        bgBottom: '#172554',
+        borderColor: '#22D3EE',
+        accentColor: '#FACC15',
+        textColor: '#E0F2FE',
+        stickerLeft: '🚀',
+        stickerRight: '⚡',
+        pattern: 'stars'
       },
-      {
-        id: 'girls_unicorn',
-        category: 'girls',
-        name: 'يونيكورن الأحلام',
-        gradient: 'from-purple-400 via-fuchsia-400 to-cyan-300',
-        bgType: 'bokeh',
-        bgColors: ['#FDF4FF', '#E0F2FE', '#FCE7F3'],
-        frameColor: '#C026D3',
-        secondaryColor: '#38BDF8',
-        textColor: '#701A75',
-        footerText: 'عالم الأحلام السعيدة 🦄',
-        stickers: ['🦄', '🌈', '💖', '⭐']
-      },
-
-      // === أولاد (Boys) ===
-      {
-        id: 'boys_gaming',
-        category: 'boys',
-        name: 'نيون جيمرز',
-        gradient: 'from-cyan-500 via-blue-600 to-purple-700',
-        bgType: 'grid',
-        bgColors: ['#090D16', '#111827', '#0F172A'],
-        frameColor: '#06B6D4',
-        secondaryColor: '#A855F7',
-        textColor: '#22D3EE',
-        footerText: 'GAME ON • أبطال التحدي 🎮',
-        stickers: ['🎮', '⚡', '🏆', '🔥']
-      },
-      {
-        id: 'boys_space',
-        category: 'boys',
-        name: 'رواد الفضاء',
-        gradient: 'from-indigo-600 via-blue-700 to-slate-900',
-        bgType: 'stars',
-        bgColors: ['#0F172A', '#1E1B4B', '#172554'],
-        frameColor: '#38BDF8',
-        secondaryColor: '#FACC15',
-        textColor: '#F8FAFC',
-        footerText: 'رحلة إلى النجوم 🚀🪐',
-        stickers: ['🚀', '🪐', '👨‍🚀', '⭐']
-      },
-      {
-        id: 'boys_racing',
-        category: 'boys',
-        name: 'سباق الأبطال',
-        gradient: 'from-red-600 via-slate-800 to-amber-500',
-        bgType: 'checkers',
-        bgColors: ['#18181B', '#27272A', '#18181B'],
-        frameColor: '#EF4444',
-        secondaryColor: '#FACC15',
-        textColor: '#FFFFFF',
-        footerText: 'بطل السباق الأول 🏎️🏁',
-        stickers: ['🏎️', '🏁', '🏆', '⚡']
-      },
-
-      // === كبار ومناسبات (Adults) ===
-      {
-        id: 'adults_vip',
-        category: 'adults',
-        name: 'VIP أسود وذهبي',
-        gradient: 'from-neutral-900 via-amber-700 to-neutral-900',
-        bgType: 'stars',
-        bgColors: ['#0A0A0A', '#171717', '#0A0A0A'],
-        frameColor: '#D4AF37',
-        secondaryColor: '#FDE68A',
+      adults: {
+        id: 'adults',
+        title: 'لحظة VIP مميزة',
+        subtitle: 'ذكريات خالدة بأناقة ✨',
+        bgTop: '#0A0A0A',
+        bgBottom: '#1C1917',
+        borderColor: '#D4AF37',
+        accentColor: '#FDE68A',
         textColor: '#FDE68A',
-        footerText: 'ذكرى مميزة • VIP ✨',
-        stickers: ['✨', '👑', '🥂', '💫']
-      },
-      {
-        id: 'adults_royal_white',
-        category: 'adults',
-        name: 'أبيض ملكي كلاسيك',
-        gradient: 'from-stone-100 via-amber-100 to-stone-200',
-        bgType: 'clean',
-        bgColors: ['#FFFFFF', '#FAF8F5', '#F5F0E6'],
-        frameColor: '#C5A059',
-        secondaryColor: '#8C6D3F',
-        textColor: '#4A3B22',
-        footerText: 'أجمل الذكريات معاً 🤍',
-        stickers: ['✨', '🤍', '🕊️', '✨']
-      },
-      {
-        id: 'adults_polaroid',
-        category: 'adults',
-        name: 'بولارويد أنيق',
-        gradient: 'from-slate-100 via-gray-200 to-slate-300',
-        bgType: 'clean',
-        bgColors: ['#FFFFFF', '#F8FAFC', '#F1F5F9'],
-        frameColor: '#1E293B',
-        secondaryColor: '#64748B',
-        textColor: '#0F172A',
-        footerText: 'لحظة للذكرى 📷',
-        stickers: ['📷', '🎞️', '🖤', '✨']
+        stickerLeft: '✨',
+        stickerRight: '🥂',
+        pattern: 'gold'
       }
-    ];
+    };
 
     /**
-     * تهيئة تبويبات الثيمات وتشغيل الكاميرا الضبابية في الصفحة الأولى عند التحميل
+     * Web Audio API subtle countdown & shutter sound generator (zero external assets)
      */
-    window.addEventListener('DOMContentLoaded', () => {
-      setShotCount(KIOSK.shotCount);
-      document.querySelectorAll('.cat-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          KIOSK.activeCategory = btn.dataset.cat;
-          const colors = {
-            kids: 'from-amber-500 to-orange-500',
-            girls: 'from-pink-500 to-rose-500',
-            boys: 'from-blue-600 to-cyan-500',
-            adults: 'from-amber-600 to-yellow-600'
-          };
-          document.querySelectorAll('.cat-btn').forEach(b => {
-            b.className = 'cat-btn py-2.5 px-2 rounded-xl text-xs sm:text-sm font-black transition text-slate-300 hover:text-white';
+    const SoundEngine = {
+      ctx: null,
+      unlock() {
+        try {
+          if (!this.ctx) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) {
+              this.ctx = new AudioCtx();
+            }
+          }
+          if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume().catch(() => {});
+          }
+        } catch (err) {
+          // Ignore audio errors on restricted devices
+        }
+      },
+      playBeep(freq = 700, duration = 0.12) {
+        try {
+          this.unlock();
+          if (!this.ctx) return;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + duration);
+        } catch (err) {
+          // Safe fallback
+        }
+      },
+      playShutter() {
+        try {
+          this.unlock();
+          if (!this.ctx) return;
+          const bufferSize = Math.floor(this.ctx.sampleRate * 0.08);
+          const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.35));
+          }
+          const noise = this.ctx.createBufferSource();
+          noise.buffer = buffer;
+          const gain = this.ctx.createGain();
+          gain.gain.setValueAtTime(0.18, this.ctx.currentTime);
+          noise.connect(gain);
+          gain.connect(this.ctx.destination);
+          noise.start();
+        } catch (err) {
+          // Safe fallback
+        }
+      }
+    };
+
+    /**
+     * Lock viewport gestures (pinch zoom, multi-touch pan, double-tap zoom)
+     */
+    function installViewportLocks() {
+      document.addEventListener('gesturestart', (e) => {
+        e.preventDefault();
+      }, { passive: false });
+
+      document.addEventListener('gesturechange', (e) => {
+        e.preventDefault();
+      }, { passive: false });
+
+      document.addEventListener('gestureend', (e) => {
+        e.preventDefault();
+      }, { passive: false });
+
+      document.addEventListener('touchmove', (e) => {
+        if (e.touches && e.touches.length > 1) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+
+      let lastTouchEnd = 0;
+      document.addEventListener('touchend', (e) => {
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) {
+          e.preventDefault();
+        }
+        lastTouchEnd = now;
+      }, { passive: false });
+    }
+
+    /**
+     * Simulated live camera feed renderer when real camera is unavailable or denied
+     */
+    function startSimulatedCameraLoop() {
+      if (STATE.simAnimFrame) {
+        cancelAnimationFrame(STATE.simAnimFrame);
+      }
+      const bgCanvas = document.getElementById('bgSimCanvas');
+      const liveCanvas = document.getElementById('liveSimCanvas');
+      const canvases = [bgCanvas, liveCanvas].filter(Boolean);
+
+      const renderFrame = (timeMs) => {
+        const t = timeMs * 0.001;
+        canvases.forEach((canvas) => {
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return;
+          const w = canvas.width;
+          const h = canvas.height;
+
+          const grad = ctx.createLinearGradient(0, 0, w, h);
+          grad.addColorStop(0, '#1e1b4b');
+          grad.addColorStop(0.5, '#311042');
+          grad.addColorStop(1, '#0f172a');
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, w, h);
+
+          // Moving soft orbs to simulate live studio feed
+          const orbs = [
+            { x: w * (0.3 + 0.12 * Math.sin(t * 0.9)), y: h * (0.4 + 0.1 * Math.cos(t * 0.7)), r: w * 0.22, color: 'rgba(99, 102, 241, 0.35)' },
+            { x: w * (0.72 + 0.1 * Math.cos(t * 0.8)), y: h * (0.55 + 0.12 * Math.sin(t * 0.6)), r: w * 0.24, color: 'rgba(236, 72, 153, 0.30)' },
+            { x: w * 0.5, y: h * 0.5, r: w * 0.15, color: 'rgba(56, 189, 248, 0.18)' }
+          ];
+
+          orbs.forEach((orb) => {
+            const rg = ctx.createRadialGradient(orb.x, orb.y, 10, orb.x, orb.y, orb.r);
+            rg.addColorStop(0, orb.color);
+            rg.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = rg;
+            ctx.beginPath();
+            ctx.arc(orb.x, orb.y, orb.r, 0, Math.PI * 2);
+            ctx.fill();
           });
-          btn.className = `cat-btn py-2.5 px-2 rounded-xl text-xs sm:text-sm font-black transition bg-gradient-to-r ${colors[KIOSK.activeCategory]} text-white shadow`;
-          renderThemesGrid();
+
+          // Subtle studio framing guide
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
+          ctx.lineWidth = 4;
+          ctx.strokeRect(w * 0.12, h * 0.1, w * 0.76, h * 0.8);
         });
-      });
-      renderThemesGrid();
-      initAmbientBackgroundCamera();
-    });
+
+        STATE.simAnimFrame = requestAnimationFrame(renderFrame);
+      };
+
+      STATE.simAnimFrame = requestAnimationFrame(renderFrame);
+    }
 
     /**
-     * تشغيل بث الكاميرا الخلفية الضبابية في الصفحة الأولى
+     * Ensure camera stream is initialized with graceful fallback constraints
      */
-    async function initAmbientBackgroundCamera() {
-      const bgVideo = document.getElementById('bgCameraFeed');
-      const fallback = document.getElementById('bgCameraFallback');
-      try {
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          fallback.classList.remove('hidden');
+    async function ensureCameraAccess() {
+      const bgVideo = document.getElementById('bgVideo');
+      const liveVideo = document.getElementById('liveVideo');
+      const bgSim = document.getElementById('bgSimCanvas');
+      const liveSim = document.getElementById('liveSimCanvas');
+      const startBadge = document.getElementById('startCameraBadge');
+      const modeBadge = document.getElementById('captureModeBadge');
+
+      // Reuse active live stream if still open
+      if (STATE.stream && STATE.hasLiveVideoStream) {
+        const activeTracks = STATE.stream.getVideoTracks().filter((tr) => tr.readyState === 'live');
+        if (activeTracks.length > 0 && liveVideo.videoWidth > 0) {
+          bgVideo.classList.remove('hidden');
+          liveVideo.classList.remove('hidden');
+          bgSim.classList.add('hidden');
+          liveSim.classList.add('hidden');
+          modeBadge.classList.add('hidden');
+          return true;
+        }
+      }
+
+      stopMediaStream();
+
+      if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== 'function') {
+        STATE.hasLiveVideoStream = false;
+        STATE.simulatedMode = true;
+        startSimulatedCameraLoop();
+        bgVideo.classList.add('hidden');
+        liveVideo.classList.add('hidden');
+        bgSim.classList.remove('hidden');
+        liveSim.classList.remove('hidden');
+        startBadge.textContent = 'وضع الكاميرا الافتراضية جاهز';
+        modeBadge.classList.remove('hidden');
+        return false;
+      }
+
+      const constraintCandidates = [
+        { video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false },
+        { video: { facingMode: 'user' }, audio: false },
+        { video: true, audio: false }
+      ];
+
+      for (const constraints of constraintCandidates) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia(constraints);
+          STATE.stream = stream;
+          bgVideo.srcObject = stream;
+          liveVideo.srcObject = stream;
+
+          await Promise.all([
+            bgVideo.play().catch(() => {}),
+            liveVideo.play().catch(() => {})
+          ]);
+
+          // Wait briefly for videoWidth to populate
+          await waitForVideoDimensions(liveVideo, 1200);
+
+          if (liveVideo.videoWidth > 0 || bgVideo.videoWidth > 0) {
+            STATE.hasLiveVideoStream = true;
+            STATE.simulatedMode = false;
+            bgVideo.classList.remove('hidden');
+            liveVideo.classList.remove('hidden');
+            bgSim.classList.add('hidden');
+            liveSim.classList.add('hidden');
+            startBadge.textContent = 'الكاميرا الحية متصلة';
+            modeBadge.classList.add('hidden');
+            return true;
+          }
+        } catch (err) {
+          // Try next fallback constraint
+        }
+      }
+
+      // Camera blocked, missing, or restricted -> Seamless simulated live canvas fallback
+      stopMediaStream();
+      STATE.hasLiveVideoStream = false;
+      STATE.simulatedMode = true;
+      startSimulatedCameraLoop();
+      bgVideo.classList.add('hidden');
+      liveVideo.classList.add('hidden');
+      bgSim.classList.remove('hidden');
+      liveSim.classList.remove('hidden');
+      startBadge.textContent = 'وضع المعاينة الافتراضية نشط';
+      modeBadge.classList.remove('hidden');
+      return false;
+    }
+
+    function waitForVideoDimensions(videoEl, timeoutMs = 1200) {
+      return new Promise((resolve) => {
+        if (videoEl.videoWidth > 0) {
+          resolve(true);
           return;
         }
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: false,
-          video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
-        });
-        KIOSK.bgStream = stream;
-        bgVideo.srcObject = stream;
-        bgVideo.className = KIOSK.isMirrored
-          ? 'w-full h-full object-cover ambient-blur'
-          : 'w-full h-full object-cover blur-[18px] brightness-[0.62] saturate-125 scale-105';
-        await bgVideo.play();
-        fallback.classList.add('hidden');
-      } catch (e) {
-        fallback.classList.remove('hidden');
-      }
+        const start = Date.now();
+        const check = () => {
+          if (videoEl.videoWidth > 0) {
+            resolve(true);
+          } else if (Date.now() - start >= timeoutMs) {
+            resolve(false);
+          } else {
+            requestAnimationFrame(check);
+          }
+        };
+        check();
+      });
     }
 
-    function stopAmbientBackgroundCamera() {
-      if (KIOSK.bgStream) {
-        KIOSK.bgStream.getTracks().forEach(t => t.stop());
-        KIOSK.bgStream = null;
+    function stopMediaStream() {
+      if (STATE.stream) {
+        try {
+          STATE.stream.getTracks().forEach((track) => track.stop());
+        } catch (err) {
+          // Ignore stop errors
+        }
+        STATE.stream = null;
       }
     }
 
     /**
-     * الانتقال من شاشة البداية إلى فتح الكاميرا وبدء العدّ التنازلي
+     * Switch between Screen 1 ('start'), Screen 2 ('capture'), and Screen 3 ('print')
      */
-    async function beginBoothFlow() {
-      if (KIOSK.isRunning) return;
-      SoundFX.init();
-      KIOSK.capturedPhotos = [];
-      stopAmbientBackgroundCamera();
-      showScreen('screenCamera');
-      await startCameraAndCapture();
+    function setActiveScreen(screenName) {
+      STATE.screen = screenName;
+      document.getElementById('screenStart').classList.toggle('hidden', screenName !== 'start');
+      document.getElementById('screenCapture').classList.toggle('hidden', screenName !== 'capture');
+      document.getElementById('screenPrint').classList.toggle('hidden', screenName !== 'print');
     }
 
     /**
-     * تشغيل الكاميرا وتنفيذ تسلسل الالتقاط:
-     * 6 ثوانٍ قبل أول صورة -> ثم 3 ثوانٍ بين كل صورة وأخرى
+     * Screen 1 Button Handler: Unlock audio, switch to capture screen, and run 6s -> 3s capture flow
      */
-    async function startCameraAndCapture() {
-      const video = document.getElementById('videoFeed');
-      const fallbackBox = document.getElementById('cameraFallbackBox');
-      fallbackBox.classList.add('hidden');
-      video.classList.toggle('mirror-video', KIOSK.isMirrored);
+    async function handleStartBoothClick() {
+      if (STATE.isCaptureRunning) return;
+      STATE.isCaptureRunning = true;
+      const currentSession = ++STATE.sessionId;
+      STATE.capturedPhotos = [];
+      renderCapturedThumbnails();
+
+      SoundEngine.unlock();
+      setActiveScreen('capture');
+
+      // Guarantee camera or simulated feed is ready without ever hanging
+      await ensureCameraAccess();
+      if (currentSession !== STATE.sessionId) {
+        STATE.isCaptureRunning = false;
+        return;
+      }
 
       try {
-        if (KIOSK.stream) {
-          KIOSK.stream.getTracks().forEach(t => t.stop());
-        }
-        KIOSK.stream = await navigator.mediaDevices.getUserMedia({
-          audio: false,
-          video: {
-            facingMode: 'user',
-            width: { ideal: 1920 },
-            height: { ideal: 1080 }
+        for (let shotIdx = 0; shotIdx < STATE.shotCount; shotIdx++) {
+          if (currentSession !== STATE.sessionId) break;
+
+          document.getElementById('shotProgressBadge').textContent = `الصورة ${shotIdx + 1} من ${STATE.shotCount}`;
+
+          // 6 seconds before first shot; 3 seconds between subsequent shots
+          const countdownSeconds = shotIdx === 0 ? STATE.initialCountdownSec : STATE.betweenShotsSec;
+          const labelText = shotIdx === 0 ? 'استعد! يبدأ التصوير خلال...' : `استعد للصورة ${shotIdx + 1}...`;
+
+          await runCountdown(countdownSeconds, labelText, currentSession);
+          if (currentSession !== STATE.sessionId) break;
+
+          const frameDataUrl = captureCurrentFrame();
+          STATE.capturedPhotos.push(frameDataUrl);
+          renderCapturedThumbnails();
+
+          if (shotIdx < STATE.shotCount - 1) {
+            await delayMs(450, currentSession);
           }
-        });
-        video.srcObject = KIOSK.stream;
-        await video.play();
+        }
 
-        runCaptureSequence();
+        if (currentSession === STATE.sessionId) {
+          STATE.isCaptureRunning = false;
+          await renderSelphyComposition();
+          setActiveScreen('print');
+        }
       } catch (err) {
-        console.warn('Camera error:', err);
-        fallbackBox.classList.remove('hidden');
-      }
-    }
-
-    async function runCaptureSequence() {
-      KIOSK.isRunning = true;
-      KIOSK.capturedPhotos = [];
-      updateLiveThumbs();
-
-      for (let i = 0; i < KIOSK.shotCount; i++) {
-        document.getElementById('shotIndicatorPill').textContent = `اللقطة ${i + 1} من ${KIOSK.shotCount}`;
-
-        // الصورة الأولى تنتظر 6 ثوانٍ، والصور التالية 3 ثوانٍ
-        const waitSeconds = (i === 0) ? KIOSK.initialDelaySec : KIOSK.betweenShotsSec;
-        const promptText = (i === 0)
-          ? 'استعد! يبدأ التصوير خلال...'
-          : `رائع! الصورة ${i + 1} خلال...`;
-
-        await runCountdown(waitSeconds, promptText);
-
-        // التقاط الصورة
-        const photoUrl = captureFrame();
-        KIOSK.capturedPhotos.push(photoUrl);
-        updateLiveThumbs();
-
-        if (i < KIOSK.shotCount - 1) {
-          await sleep(550);
+        STATE.isCaptureRunning = false;
+        // Even on unexpected error, allow proceeding or resetting cleanly
+        if (currentSession === STATE.sessionId && STATE.capturedPhotos.length > 0) {
+          await renderSelphyComposition();
+          setActiveScreen('print');
+        } else if (currentSession === STATE.sessionId) {
+          resetToStartScreen();
         }
       }
-
-      // إيقاف بث الكاميرا لتوفير موارد الجهاز والانتقال لشاشة الثيمات والطباعة
-      stopCameraStream();
-      KIOSK.isRunning = false;
-      SoundFX.chime();
-
-      await renderCompositeCanvas();
-      showScreen('screenResult');
     }
 
-    function runCountdown(seconds, titleText) {
-      return new Promise(resolve => {
-        const layer = document.getElementById('countdownLayer');
-        const titleEl = document.getElementById('countdownTitle');
-        const digitEl = document.getElementById('countdownDigit');
+    /**
+     * Run countdown from `seconds` down to `1`
+     */
+    function runCountdown(seconds, labelText, sessionToken) {
+      return new Promise((resolve) => {
+        const overlay = document.getElementById('countdownOverlay');
+        const labelEl = document.getElementById('countdownLabel');
+        const numEl = document.getElementById('countdownNumber');
 
-        layer.classList.remove('hidden');
-        titleEl.textContent = titleText;
-        let current = seconds;
+        overlay.classList.remove('hidden');
+        labelEl.textContent = labelText;
 
-        const step = () => {
-          if (current > 0) {
-            digitEl.textContent = current;
-            if (current === 1) {
-              titleEl.textContent = '📸 ابتسم الآن!';
-            }
-            digitEl.classList.remove('countdown-animate');
-            void digitEl.offsetWidth;
-            digitEl.classList.add('countdown-animate');
+        let remaining = seconds;
 
-            SoundFX.beep(current === 1 ? 980 : 660, 0.14);
-            current--;
-            setTimeout(step, 1000);
+        const tick = () => {
+          if (sessionToken !== STATE.sessionId) {
+            overlay.classList.add('hidden');
+            resolve();
+            return;
+          }
+
+          if (remaining > 0) {
+            numEl.textContent = String(remaining);
+            labelEl.textContent = remaining === 1 ? 'ابتسم للكاميرا! 📸' : labelText;
+
+            numEl.classList.remove('count-pop');
+            void numEl.offsetWidth;
+            numEl.classList.add('count-pop');
+
+            SoundEngine.playBeep(remaining === 1 ? 960 : 660, 0.12);
+            remaining -= 1;
+            setTimeout(tick, 1000);
           } else {
-            layer.classList.add('hidden');
+            overlay.classList.add('hidden');
             resolve();
           }
         };
-        step();
+
+        tick();
       });
     }
 
-    function captureFrame() {
-      const video = document.getElementById('videoFeed');
-      const flash = document.getElementById('flashOverlay');
+    /**
+     * Capture current frame from live <video> or fallback simulated <canvas>
+     */
+    function captureCurrentFrame() {
+      triggerCameraFlash();
+      SoundEngine.playShutter();
 
-      SoundFX.shutter();
-      flash.classList.remove('flash-active');
-      void flash.offsetWidth;
-      flash.classList.add('flash-active');
+      const liveVideo = document.getElementById('liveVideo');
+      const liveSim = document.getElementById('liveSimCanvas');
+      const offscreen = document.createElement('canvas');
+      offscreen.width = 1080;
+      offscreen.height = 720;
+      const ctx = offscreen.getContext('2d');
 
-      const c = document.createElement('canvas');
-      const w = video.videoWidth || 1280;
-      const h = video.videoHeight || 960;
-      c.width = w;
-      c.height = h;
-      const ctx = c.getContext('2d');
+      const useRealVideo = STATE.hasLiveVideoStream && liveVideo && liveVideo.videoWidth > 0 && liveVideo.videoHeight > 0;
 
       ctx.save();
-      if (KIOSK.isMirrored) {
-        ctx.translate(w, 0);
+      if (STATE.mirrorCamera) {
+        ctx.translate(offscreen.width, 0);
         ctx.scale(-1, 1);
       }
-      ctx.drawImage(video, 0, 0, w, h);
-      ctx.restore();
 
-      return c.toDataURL('image/jpeg', 0.95);
+      if (useRealVideo) {
+        drawCoverFit(ctx, liveVideo, liveVideo.videoWidth, liveVideo.videoHeight, 0, 0, offscreen.width, offscreen.height);
+      } else if (liveSim) {
+        drawCoverFit(ctx, liveSim, liveSim.width, liveSim.height, 0, 0, offscreen.width, offscreen.height);
+      } else {
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(0, 0, offscreen.width, offscreen.height);
+      }
+
+      ctx.restore();
+      return offscreen.toDataURL('image/jpeg', 0.92);
     }
 
-    function updateLiveThumbs() {
-      const row = document.getElementById('liveThumbsRow');
-      row.innerHTML = KIOSK.capturedPhotos.map((src, idx) => `
-        <div class="w-12 h-9 sm:w-16 sm:h-12 rounded-xl overflow-hidden border-2 border-emerald-400 shadow-md">
-          <img src="${src}" class="w-full h-full object-cover" alt="لقطة ${idx + 1}" />
+    function triggerCameraFlash() {
+      const flashEl = document.getElementById('flashOverlay');
+      flashEl.classList.remove('flash-burst');
+      void flashEl.offsetWidth;
+      flashEl.classList.add('flash-burst');
+    }
+
+    function renderCapturedThumbnails() {
+      const container = document.getElementById('capturedThumbnails');
+      container.innerHTML = STATE.capturedPhotos.map((src, idx) => `
+        <div class="w-11 h-8 sm:w-14 sm:h-10 rounded-lg overflow-hidden border-2 border-emerald-400 shadow">
+          <img src="${src}" alt="لقطة ${idx + 1}" class="w-full h-full object-cover" />
         </div>
       `).join('');
     }
 
-    function stopCameraStream() {
-      if (KIOSK.stream) {
-        KIOSK.stream.getTracks().forEach(track => track.stop());
-        KIOSK.stream = null;
-      }
-    }
-
     /**
-     * الطباعة المباشرة على طابعة Canon SELPHY عبر الواي فاي مع تنبيه الاستلام من الكاشير
+     * Screen 3: Select one of the 4 fixed themes and immediately update 1200x1800 print canvas
      */
-    function printDirectToSelphy() {
-      showToast('جاري الإرسال إلى طابعة Canon SELPHY • الاستلام من الكاشير');
-      setTimeout(() => {
-        window.print();
-      }, 200);
-    }
+    async function selectFixedTheme(themeKey) {
+      if (!FIXED_THEMES[themeKey]) return;
+      STATE.selectedTheme = themeKey;
 
-    /**
-     * العودة إلى شاشة البداية للزبون التالي وإعادة تشغيل الكاميرا الضبابية
-     */
-    function returnToStart() {
-      stopCameraStream();
-      KIOSK.isRunning = false;
-      KIOSK.capturedPhotos = [];
-      showScreen('screenStart');
-      initAmbientBackgroundCamera();
-    }
-
-    function showScreen(screenId) {
-      ['screenStart', 'screenCamera', 'screenResult'].forEach(id => {
-        document.getElementById(id).classList.toggle('hidden', id !== screenId);
+      const buttons = document.querySelectorAll('.theme-card-btn');
+      buttons.forEach((btn) => {
+        const isSelected = btn.getAttribute('data-theme') === themeKey;
+        if (isSelected) {
+          btn.className = 'theme-card-btn p-3.5 sm:p-4 rounded-2xl border-2 text-right transition flex items-center gap-3 bg-gradient-to-br from-indigo-600/45 to-pink-600/35 border-amber-300 text-white shadow-lg scale-[1.01]';
+        } else {
+          btn.className = 'theme-card-btn p-3.5 sm:p-4 rounded-2xl border-2 text-right transition flex items-center gap-3 bg-slate-900/75 border-white/15 hover:border-white/35 text-slate-200';
+        }
       });
+
+      await renderSelphyComposition();
     }
 
     /**
-     * دوال إعدادات المشرف ومساعدات الرسم
+     * Compose 1200x1800 px (300 DPI at 4x6 inch / 100x148 mm) portrait print sheet
      */
-    function toggleAdminSettings() {
-      document.getElementById('adminSettingsModal').classList.toggle('hidden');
-    }
+    async function renderSelphyComposition() {
+      const canvas = document.getElementById('selphyCanvas');
+      const ctx = canvas.getContext('2d');
+      const W = 1200;
+      const H = 1800;
+      canvas.width = W;
+      canvas.height = H;
 
-    function setShotCount(n) {
-      KIOSK.shotCount = n;
-      document.getElementById('cfgShots3').className = n === 3
-        ? 'px-3.5 py-1.5 rounded-xl font-extrabold bg-indigo-600 text-white'
-        : 'px-3.5 py-1.5 rounded-xl font-extrabold bg-slate-800 text-slate-300';
-      document.getElementById('cfgShots4').className = n === 4
-        ? 'px-3.5 py-1.5 rounded-xl font-extrabold bg-indigo-600 text-white'
-        : 'px-3.5 py-1.5 rounded-xl font-extrabold bg-slate-800 text-slate-300';
-    }
+      const theme = FIXED_THEMES[STATE.selectedTheme] || FIXED_THEMES.kids;
 
-    function toggleMirrorSetting() {
-      KIOSK.isMirrored = !KIOSK.isMirrored;
-      const btn = document.getElementById('cfgMirrorBtn');
-      btn.textContent = KIOSK.isMirrored ? 'مفعّل' : 'متوقف';
-      btn.className = KIOSK.isMirrored
-        ? 'px-4 py-1.5 rounded-xl font-extrabold bg-emerald-600 text-white'
-        : 'px-4 py-1.5 rounded-xl font-extrabold bg-slate-700 text-slate-300';
-      document.getElementById('videoFeed').classList.toggle('mirror-video', KIOSK.isMirrored);
-      const bgVideo = document.getElementById('bgCameraFeed');
-      if (bgVideo) {
-        bgVideo.className = KIOSK.isMirrored
-          ? 'w-full h-full object-cover ambient-blur'
-          : 'w-full h-full object-cover blur-[18px] brightness-[0.62] saturate-125 scale-105';
+      // Background gradient
+      const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+      bgGrad.addColorStop(0, theme.bgTop);
+      bgGrad.addColorStop(1, theme.bgBottom);
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, W, H);
+
+      // Decorative theme accents
+      drawThemeDecorations(ctx, W, H, theme);
+
+      // Outer frame border
+      ctx.strokeStyle = theme.borderColor;
+      ctx.lineWidth = 18;
+      roundRectPath(ctx, 28, 28, W - 56, H - 56, 36);
+      ctx.stroke();
+
+      // Header banner
+      ctx.fillStyle = theme.textColor;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = '900 54px "Cairo", sans-serif';
+      ctx.fillText(theme.title, W / 2, 108);
+
+      // Photo slots (3 vertical photos arranged cleanly inside 1200x1800 4x6 layout)
+      const count = Math.max(1, STATE.capturedPhotos.length || STATE.shotCount);
+      const topArea = 165;
+      const bottomArea = 1585;
+      const availableH = bottomArea - topArea;
+      const gap = 24;
+      const slotW = W - 150;
+      const slotH = Math.floor((availableH - gap * (count - 1)) / count);
+      const slotX = (W - slotW) / 2;
+
+      const loadedImgs = await Promise.all(
+        (STATE.capturedPhotos.length ? STATE.capturedPhotos : [createPlaceholderPhoto(theme)]).map(loadImageElement)
+      );
+
+      for (let i = 0; i < count; i++) {
+        const y = topArea + i * (slotH + gap);
+        const img = loadedImgs[i % loadedImgs.length];
+
+        ctx.save();
+        roundRectPath(ctx, slotX, y, slotW, slotH, 24);
+        ctx.clip();
+        if (img) {
+          drawCoverFit(ctx, img, img.naturalWidth || img.width, img.naturalHeight || img.height, slotX, y, slotW, slotH);
+        } else {
+          ctx.fillStyle = '#334155';
+          ctx.fillRect(slotX, y, slotW, slotH);
+        }
+        ctx.restore();
+
+        // Crisp photo frame outline
+        ctx.strokeStyle = theme.borderColor;
+        ctx.lineWidth = 6;
+        roundRectPath(ctx, slotX, y, slotW, slotH, 24);
+        ctx.stroke();
       }
+
+      // Footer caption & stickers
+      ctx.fillStyle = theme.textColor;
+      ctx.font = '800 42px "Cairo", sans-serif';
+      ctx.fillText(theme.subtitle, W / 2, 1665);
+
+      ctx.font = '700 56px sans-serif';
+      ctx.fillText(theme.stickerLeft, 130, 1665);
+      ctx.fillText(theme.stickerRight, W - 130, 1665);
+
+      const finalDataUrl = canvas.toDataURL('image/jpeg', 0.95);
+      document.getElementById('composedPreviewImg').src = finalDataUrl;
+      document.getElementById('printOnlyImg').src = finalDataUrl;
     }
 
-    function roundRect(ctx, x, y, w, h, r) {
-      ctx.beginPath();
-      ctx.moveTo(x + r, y);
-      ctx.lineTo(x + w - r, y);
-      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-      ctx.lineTo(x + w, y + h - r);
-      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-      ctx.lineTo(x + r, y + h);
-      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-      ctx.lineTo(x, y + r);
-      ctx.quadraticCurveTo(x, y, x + r, y);
-      ctx.closePath();
-    }
-
-    function drawImageCover(ctx, img, x, y, w, h) {
-      const imgR = img.width / img.height;
-      const boxR = w / h;
-      let sx = 0, sy = 0, sw = img.width, sh = img.height;
-      if (imgR > boxR) {
-        sw = img.height * boxR;
-        sx = (img.width - sw) / 2;
-      } else {
-        sh = img.width / boxR;
-        sy = (img.height - sh) / 2;
+    function drawThemeDecorations(ctx, W, H, theme) {
+      ctx.save();
+      ctx.globalAlpha = 0.16;
+      for (let i = 0; i < 24; i++) {
+        const px = ((i * 197) % (W - 120)) + 60;
+        const py = ((i * 313) % (H - 120)) + 60;
+        const r = 10 + (i % 4) * 7;
+        ctx.fillStyle = i % 2 === 0 ? theme.borderColor : theme.accentColor;
+        ctx.beginPath();
+        ctx.arc(px, py, r, 0, Math.PI * 2);
+        ctx.fill();
       }
-      ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+      ctx.restore();
     }
 
-    function loadImage(src) {
-      return new Promise((resolve, reject) => {
+    function createPlaceholderPhoto(theme) {
+      const c = document.createElement('canvas');
+      c.width = 900;
+      c.height = 600;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = theme.borderColor;
+      ctx.fillRect(0, 0, c.width, c.height);
+      return c.toDataURL('image/jpeg', 0.8);
+    }
+
+    function loadImageElement(src) {
+      return new Promise((resolve) => {
         const img = new Image();
         img.onload = () => resolve(img);
-        img.onerror = reject;
+        img.onerror = () => resolve(null);
         img.src = src;
       });
     }
 
-    function sleep(ms) {
-      return new Promise(r => setTimeout(r, ms));
+    function drawCoverFit(ctx, source, srcW, srcH, dx, dy, dw, dh) {
+      if (!srcW || !srcH) return;
+      const srcRatio = srcW / srcH;
+      const dstRatio = dw / dh;
+      let sx = 0;
+      let sy = 0;
+      let sw = srcW;
+      let sh = srcH;
+
+      if (srcRatio > dstRatio) {
+        sw = srcH * dstRatio;
+        sx = (srcW - sw) / 2;
+      } else {
+        sh = srcW / dstRatio;
+        sy = (srcH - sh) / 2;
+      }
+
+      ctx.drawImage(source, sx, sy, sw, sh, dx, dy, dw, dh);
     }
 
-    let toastTimer = null;
-    function showToast(text) {
-      const box = document.getElementById('toastBox');
-      document.getElementById('toastMessage').textContent = text;
-      box.classList.remove('opacity-0');
-      box.classList.add('opacity-100');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => {
-        box.classList.remove('opacity-100');
-        box.classList.add('opacity-0');
-      }, 3000);
+    function roundRectPath(ctx, x, y, w, h, r) {
+      const radius = Math.min(r, w / 2, h / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + w - radius, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+      ctx.lineTo(x + w, y + h - radius);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+      ctx.lineTo(x + radius, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
     }
+
+    function delayMs(ms, sessionToken) {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(sessionToken === STATE.sessionId);
+        }, ms);
+      });
+    }
+
+    /**
+     * Direct print action for Canon SELPHY Wi-Fi / AirPrint (100mm x 148mm / 4x6 inch)
+     */
+    async function triggerDirectPrint() {
+      await renderSelphyComposition();
+      showStatusToast('جاري إرسال الصورة للطباعة • الاستلام من الكاشير');
+      setTimeout(() => {
+        try {
+          window.print();
+        } catch (err) {
+          showStatusToast('يرجى استخدام خيار الطباعة من المتصفح • الاستلام من الكاشير');
+        }
+      }, 180);
+    }
+
+    /**
+     * Reset cleanly back to Screen 1 (Start Kiosk)
+     */
+    async function resetToStartScreen() {
+      STATE.sessionId += 1;
+      STATE.isCaptureRunning = false;
+      STATE.capturedPhotos = [];
+      document.getElementById('countdownOverlay').classList.add('hidden');
+      renderCapturedThumbnails();
+      setActiveScreen('start');
+      await ensureCameraAccess();
+    }
+
+    let toastTimeout = null;
+    function showStatusToast(message) {
+      const toast = document.getElementById('statusToast');
+      const textEl = document.getElementById('statusToastText');
+      textEl.textContent = message;
+      toast.classList.remove('opacity-0');
+      toast.classList.add('opacity-100');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0');
+      }, 3200);
+    }
+
+    /**
+     * Initialize Kiosk on Load
+     */
+    window.addEventListener('DOMContentLoaded', async () => {
+      installViewportLocks();
+      startSimulatedCameraLoop();
+      await selectFixedTheme('kids');
+      await ensureCameraAccess();
+    });
   </script>
 </body>
 </html>
