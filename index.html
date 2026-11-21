@@ -60,6 +60,59 @@
       transform: scaleX(-1);
     }
 
+    /* Framing guide overlay showing exact visible crop region in sharp clarity while surrounding area is blurred */
+    #framingGuideOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 15;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    #framingGuideBackdrop {
+      position: absolute;
+      inset: 0;
+      backdrop-filter: blur(11px) brightness(0.66);
+      -webkit-backdrop-filter: blur(11px) brightness(0.66);
+      background: rgba(2, 6, 23, 0.28);
+      transition: clip-path 0.2s ease;
+    }
+
+    #framingGuideClearWindow {
+      position: absolute;
+      overflow: hidden;
+      border: 2.5px solid rgba(255, 255, 255, 0.92);
+      box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.55), 0 14px 36px rgba(0, 0, 0, 0.45);
+      transition: left 0.2s ease, top 0.2s ease, width 0.2s ease, height 0.2s ease, border-radius 0.2s ease;
+    }
+
+    #framingGuideClearVideo,
+    #framingGuideClearCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+    }
+
+    #framingGuideClearVideo.mirrored,
+    #framingGuideClearCanvas.mirrored {
+      transform: scaleX(-1);
+    }
+
+    #framingGuideBadge {
+      position: absolute;
+      top: -36px;
+      right: 0;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      background: rgba(15, 23, 42, 0.82);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      color: #f8fafc;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
     /* Gentle central button pulse */
     @keyframes capturePulse {
       0%, 100% {
@@ -295,6 +348,16 @@
     <section id="captureScreen" class="hidden relative w-full h-full flex items-center justify-center bg-black overflow-hidden">
       <video id="liveVideo" autoplay playsinline webkit-playsinline="true" muted class="w-full h-full object-cover live-camera-feed mirrored hidden"></video>
       <canvas id="liveSimCanvas" width="1280" height="720" class="w-full h-full object-cover live-camera-feed mirrored hidden"></canvas>
+
+      <!-- Transparent crop-guide window: keeps exact final frame sharp while dimming/blurring outer area -->
+      <div id="framingGuideOverlay" aria-hidden="true">
+        <div id="framingGuideBackdrop"></div>
+        <div id="framingGuideClearWindow">
+          <video id="framingGuideClearVideo" autoplay playsinline webkit-playsinline="true" muted class="hidden"></video>
+          <canvas id="framingGuideClearCanvas" width="1280" height="720" class="hidden"></canvas>
+          <div id="framingGuideBadge">الجزء الذي سيظهر بالإطار</div>
+        </div>
+      </div>
 
       <!-- Shot progress indicator (1 / 3, 2 / 3, 3 / 3) -->
       <div class="fixed top-4 right-4 z-20 pointer-events-none">
@@ -777,6 +840,16 @@
         });
 
         STATE.simPhase = t;
+        const guideCan = document.getElementById('framingGuideClearCanvas');
+        if (guideCan && !guideCan.classList.contains('hidden') && liveCanvas) {
+          const gctx = guideCan.getContext('2d');
+          if (gctx) {
+            guideCan.width = liveCanvas.width;
+            guideCan.height = liveCanvas.height;
+            gctx.drawImage(liveCanvas, 0, 0);
+          }
+        }
+
         STATE.simAnimFrame = requestAnimationFrame(renderFrame);
       };
 
@@ -851,6 +924,196 @@
     }
 
     /**
+     * Compute exact normalized slot aspect ratio (`slotW / slotH`) matching the active layout & shot count
+     */
+    function getActiveSlotAspectRatio() {
+      const count = STATE.shotCount === 4 ? 4 : 3;
+      if (STATE.printLayout === 'dual_strip') {
+        const stripW = 600;
+        const stripH = 1800;
+        const padX = 28;
+        const topPad = 34;
+        const bottomHeaderH = 140;
+        const gap = 18;
+        const photoW = stripW - padX * 2;
+        const photoH = (stripH - topPad - bottomHeaderH - gap * (count - 1)) / count;
+        return Math.max(0.2, photoW / Math.max(1, photoH));
+      } else {
+        const W = 1200;
+        const H = 1800;
+        const headerHeight = 148;
+        const footerHeight = 128;
+        const sideMargin = 64;
+        const gap = count >= 4 ? 18 : 26;
+        const cellW = W - sideMargin * 2;
+        const cellH = (H - headerHeight - footerHeight - gap * (count - 1)) / count;
+        return Math.max(0.2, cellW / Math.max(1, cellH));
+      }
+    }
+
+    /**
+     * Compute the exact rectangle `(x, y, w, h)` inside a container `(containerW, containerH)`
+     * that corresponds to the cropped cover window (`targetAspect`).
+     */
+    function computeCoverGuideRect(containerW, containerH, targetAspect) {
+      const safeW = Math.max(1, containerW);
+      const safeH = Math.max(1, containerH);
+      const maxW = safeW * 0.88;
+      const maxH = safeH * 0.78;
+      const safeAspect = Math.max(0.25, Math.min(4.0, targetAspect || 1.2));
+
+      let w = maxW;
+      let h = w / safeAspect;
+      if (h > maxH) {
+        h = maxH;
+        w = h * safeAspect;
+      }
+
+      const x = (safeW - w) * 0.5;
+      const y = (safeH - h) * 0.5 + 8;
+      return { x, y, w, h };
+    }
+
+    /**
+     * Update the transparent crop-guide window so outside pixels are blurred/dimmed
+     * while the exact cropped output region stays crisp and unobstructed.
+     */
+    function updateFramingGuideOverlay(useLiveVideo, shouldMirror) {
+      const overlay = document.getElementById('framingGuideOverlay');
+      const backdrop = document.getElementById('framingGuideBackdrop');
+      const clearWin = document.getElementById('framingGuideClearWindow');
+      const clearVid = document.getElementById('framingGuideClearVideo');
+      const clearCan = document.getElementById('framingGuideClearCanvas');
+      const badge = document.getElementById('framingGuideBadge');
+      const captureEl = document.getElementById('captureScreen');
+
+      if (!overlay || !backdrop || !clearWin) return;
+      if (STATE.screen !== 'capture') {
+        overlay.classList.add('hidden');
+        return;
+      }
+      overlay.classList.remove('hidden');
+
+      const rectSource = captureEl || document.getElementById('app') || document.body;
+      const rect = rectSource.getBoundingClientRect();
+      const cw = Math.max(320, rect.width || window.innerWidth || 1280);
+      const ch = Math.max(240, rect.height || window.innerHeight || 720);
+
+      const targetAspect = getActiveSlotAspectRatio();
+      const box = computeCoverGuideRect(cw, ch, targetAspect);
+
+      const left = Math.round(box.x);
+      const top = Math.round(box.y);
+      const width = Math.round(box.w);
+      const height = Math.round(box.h);
+      const radius = 18;
+
+      backdrop.style.clipPath = `polygon(
+        0px 0px,
+        ${Math.round(cw)}px 0px,
+        ${Math.round(cw)}px ${Math.round(ch)}px,
+        0px ${Math.round(ch)}px,
+        0px 0px,
+        ${left}px ${top}px,
+        ${left}px ${top + height}px,
+        ${left + width}px ${top + height}px,
+        ${left + width}px ${top}px,
+        ${left}px ${top}px
+      )`;
+
+      clearWin.style.left = `${left}px`;
+      clearWin.style.top = `${top}px`;
+      clearWin.style.width = `${width}px`;
+      clearWin.style.height = `${height}px`;
+      clearWin.style.borderRadius = `${radius}px`;
+
+      if (badge) {
+        const layoutLabel = STATE.printLayout === 'dual_strip' ? 'شريط 2×6' : 'بوست كارد 4×6';
+        badge.textContent = `الجزء الظاهر بالإطار (${layoutLabel})`;
+      }
+
+      if (clearVid) {
+        clearVid.autoplay = true;
+        clearVid.playsInline = true;
+        clearVid.muted = true;
+        clearVid.defaultMuted = true;
+        if (STATE.stream && clearVid.srcObject !== STATE.stream) {
+          clearVid.srcObject = STATE.stream;
+        }
+        clearVid.style.left = `${-left}px`;
+        clearVid.style.top = `${-top}px`;
+        clearVid.style.width = `${Math.round(cw)}px`;
+        clearVid.style.height = `${Math.round(ch)}px`;
+        clearVid.style.objectFit = 'cover';
+        clearVid.classList.toggle('mirrored', Boolean(shouldMirror));
+        clearVid.classList.toggle('hidden', !useLiveVideo);
+        if (useLiveVideo && clearVid.paused) {
+          try {
+            const p = clearVid.play();
+            if (p && typeof p.catch === 'function') p.catch(() => {});
+          } catch (e) {}
+        }
+      }
+
+      if (clearCan) {
+        clearCan.style.left = `${-left}px`;
+        clearCan.style.top = `${-top}px`;
+        clearCan.style.width = `${Math.round(cw)}px`;
+        clearCan.style.height = `${Math.round(ch)}px`;
+        clearCan.style.objectFit = 'cover';
+        clearCan.classList.toggle('mirrored', Boolean(shouldMirror));
+        clearCan.classList.toggle('hidden', Boolean(useLiveVideo));
+      }
+    }
+
+    /**
+     * Crop captured frame to the exact target aspect ratio (`targetAspect`) before storing,
+     * matching the transparent clear framing window shown during capture.
+     */
+    function cropDataUrlToTargetAspect(dataUrl, targetAspect) {
+      return new Promise((resolve) => {
+        if (!dataUrl || !targetAspect || targetAspect <= 0) {
+          resolve(dataUrl);
+          return;
+        }
+        const img = new Image();
+        img.onload = () => {
+          const sw = img.naturalWidth || img.width;
+          const sh = img.naturalHeight || img.height;
+          if (!sw || !sh) {
+            resolve(dataUrl);
+            return;
+          }
+
+          const srcAspect = sw / sh;
+          let cropW = sw;
+          let cropH = sh;
+          let cropX = 0;
+          let cropY = 0;
+
+          if (srcAspect > targetAspect) {
+            cropW = sh * targetAspect;
+            cropX = (sw - cropW) * 0.5;
+          } else if (srcAspect < targetAspect) {
+            cropH = sw / targetAspect;
+            cropY = (sh - cropH) * 0.5;
+          }
+
+          const outCanvas = document.createElement('canvas');
+          outCanvas.width = Math.max(1, Math.round(cropW));
+          outCanvas.height = Math.max(1, Math.round(cropH));
+          const octx = outCanvas.getContext('2d');
+          octx.imageSmoothingEnabled = true;
+          octx.imageSmoothingQuality = 'high';
+          octx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, outCanvas.width, outCanvas.height);
+          resolve(outCanvas.toDataURL('image/jpeg', 0.95));
+        };
+        img.onerror = () => resolve(dataUrl);
+        img.src = dataUrl;
+      });
+    }
+
+    /**
      * Synchronize <video> vs simulated <canvas> visibility across screens
      */
     function syncCameraVisualTargets() {
@@ -911,6 +1174,7 @@
       if (bgSim) bgSim.classList.toggle('hidden', !(STATE.screen === 'start' && !useLiveVideo));
       if (liveVideo) liveVideo.classList.toggle('hidden', !(STATE.screen === 'capture' && useLiveVideo));
       if (liveSim) liveSim.classList.toggle('hidden', !(STATE.screen === 'capture' && !useLiveVideo));
+      updateFramingGuideOverlay(useLiveVideo, shouldMirror);
     }
 
     function stopExistingStreamTracks() {
@@ -1233,7 +1497,7 @@
 
     /**
      * Fill `(slotX, slotY, slotW, slotH)` edge-to-edge with zero blank gaps
-     * while preserving natural aspect ratio (`coverScale`) and centering inside rounded frame.
+     * while preserving natural aspect ratio (`cover`) and centering inside rounded frame.
      */
     function drawPhotoFittedInRect(ctx, img, slotX, slotY, slotW, slotH, options = {}) {
       if (!ctx || !img || slotW <= 0 || slotH <= 0) return;
@@ -1441,8 +1705,9 @@
 
         triggerCameraFlash();
         playShutterSound();
-        const photoDataUrl = captureFrameToDataUrl();
-        STATE.capturedPhotos.push(photoDataUrl);
+        const rawPhotoDataUrl = captureFrameToDataUrl();
+        const framedPhotoDataUrl = await cropDataUrlToTargetAspect(rawPhotoDataUrl, getActiveSlotAspectRatio());
+        STATE.capturedPhotos.push(framedPhotoDataUrl);
 
         if (shotIdx < totalShots) {
           const ok = await delayMs(180, sessionToken);
@@ -1878,7 +2143,6 @@
       selectShotCount(3);
       await selectTheme('kids');
       await selectPrintLayout('postcard');
-      await renderSelphyComposition();
       await ensureCameraReady(false);
 
       document.addEventListener('visibilitychange', () => {
@@ -1898,6 +2162,9 @@
 
       document.addEventListener('pointerdown', resumeVideoOnGesture, { passive: true });
       document.addEventListener('click', resumeVideoOnGesture, { passive: true });
+      window.addEventListener('resize', () => {
+        syncCameraVisualTargets();
+      });
     });
   </script>
 </body>
