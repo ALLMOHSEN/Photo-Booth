@@ -72,17 +72,19 @@
     #framingGuideBackdrop {
       position: absolute;
       inset: 0;
-      backdrop-filter: blur(18px) saturate(0.75) brightness(0.54);
-      -webkit-backdrop-filter: blur(18px) saturate(0.75) brightness(0.54);
-      background: rgba(2, 6, 23, 0.44);
+      backdrop-filter: blur(15px) saturate(0.88) brightness(0.62);
+      -webkit-backdrop-filter: blur(15px) saturate(0.88) brightness(0.62);
+      background: rgba(2, 6, 23, 0.34);
       transition: clip-path 0.22s ease;
     }
 
     #framingGuideClearWindow {
       position: absolute;
       overflow: hidden;
-      border: 2.5px solid rgba(255, 255, 255, 0.92);
-      box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.55), 0 14px 36px rgba(0, 0, 0, 0.45);
+      border: 2px solid rgba(255, 255, 255, 0.9);
+      outline: 2px solid rgba(251, 191, 36, 0.28);
+      outline-offset: 3px;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22), 0 14px 34px rgba(2, 6, 23, 0.48);
       transition: left 0.2s ease, top 0.2s ease, width 0.2s ease, height 0.2s ease, border-radius 0.2s ease;
     }
 
@@ -276,7 +278,7 @@
     </div>
 
     <!-- ===================================================================== -->
-    <!-- SCREEN 1: STRICTLY CLEAN START SCREEN (ONLY BLURRED BG + 3/4 + BTN)   -->
+    <!-- SCREEN 1: START SCREEN (BLURRED BG + SEPARATE 3/4 + STRIP/FULL + BTN) -->
     <!-- ===================================================================== -->
     <section id="homeScreen" class="relative w-full h-full flex items-center justify-center p-6 overflow-hidden">
       <!-- Blurred Camera Background (<video> with automatic fallback to smooth animated canvas) -->
@@ -286,23 +288,17 @@
         <div class="fixed inset-0 bg-slate-950/35"></div>
       </div>
 
-      <!-- Center Stack: 3/4 Shot Picker + Dual Strip / Single Frame Picker + Main Capture Button -->
-      <div class="relative z-10 w-full max-w-md flex flex-col items-center justify-center gap-3.5">
-        <!-- Simple 3-Shot / 4-Shot Picker with Miniature Strip Icons -->
+      <!-- Center Stack: Separate 3/4 Shot Buttons + Separate Dual Strip / Full Frame Buttons + Capture Button -->
+      <div class="relative z-10 w-full max-w-md flex flex-col items-center justify-center gap-3">
+        <!-- Separate 3 or 4 Shots Picker -->
         <div class="w-full grid grid-cols-2 gap-3 glass-panel p-2 rounded-3xl" role="group" aria-label="عدد الصور">
           <button
             id="btnShots3"
             type="button"
             data-action="select-shots"
             data-shots="3"
-            class="shot-count-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-3 transition bg-indigo-600/45 border-amber-300 text-white shadow"
+            class="shot-count-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2.5 transition bg-indigo-600/45 border-amber-300 text-white shadow"
           >
-            <svg class="w-5 h-7 shrink-0" viewBox="0 0 24 34" fill="none" aria-hidden="true">
-              <rect x="2" y="2" width="20" height="30" rx="3.5" stroke="currentColor" stroke-width="2" />
-              <rect x="5.5" y="5.5" width="13" height="6.2" rx="1.2" fill="currentColor" opacity="0.9" />
-              <rect x="5.5" y="13.8" width="13" height="6.2" rx="1.2" fill="currentColor" opacity="0.9" />
-              <rect x="5.5" y="22.1" width="13" height="6.2" rx="1.2" fill="currentColor" opacity="0.9" />
-            </svg>
             <span class="text-base sm:text-lg font-black">3 صور</span>
           </button>
 
@@ -311,39 +307,32 @@
             type="button"
             data-action="select-shots"
             data-shots="4"
-            class="shot-count-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-3 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35"
+            class="shot-count-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2.5 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35"
           >
-            <svg class="w-5 h-7 shrink-0" viewBox="0 0 24 34" fill="none" aria-hidden="true">
-              <rect x="2" y="2" width="20" height="30" rx="3.5" stroke="currentColor" stroke-width="2" />
-              <rect x="6" y="4.8" width="12" height="4.6" rx="1" fill="currentColor" opacity="0.9" />
-              <rect x="6" y="11.1" width="12" height="4.6" rx="1" fill="currentColor" opacity="0.9" />
-              <rect x="6" y="17.4" width="12" height="4.6" rx="1" fill="currentColor" opacity="0.9" />
-              <rect x="6" y="23.7" width="12" height="4.6" rx="1" fill="currentColor" opacity="0.9" />
-            </svg>
             <span class="text-base sm:text-lg font-black">4 صور</span>
           </button>
         </div>
 
-        <!-- Frame Shape Picker before capture: شريطين (2×6) or إطار واحد (4×6) -->
-        <div class="w-full grid grid-cols-2 gap-3 glass-panel p-2 rounded-3xl" role="group" aria-label="شكل الإطار قبل القص">
+        <!-- Separate Dual Strip (شريطين) or Full Frame (كاملة) Picker — Home Screen Only -->
+        <div class="w-full grid grid-cols-2 gap-3 glass-panel p-2 rounded-3xl" role="group" aria-label="نوع الإطار">
           <button
             id="btnStartDualStrip"
             type="button"
             data-action="select-layout"
             data-layout="dual_strip"
-            class="home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2.5 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35"
+            class="home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2 transition bg-indigo-600/45 border-amber-300 text-white shadow"
           >
-            <span class="text-sm sm:text-base font-black">شريطين (2×6)</span>
+            <span class="text-sm sm:text-base font-black">شريطين</span>
           </button>
 
           <button
-            id="btnStartPostcard"
+            id="btnStartFullFrame"
             type="button"
             data-action="select-layout"
             data-layout="postcard"
-            class="home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2.5 transition bg-indigo-600/45 border-amber-300 text-white shadow"
+            class="home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35"
           >
-            <span class="text-sm sm:text-base font-black">إطار واحد (4×6)</span>
+            <span class="text-sm sm:text-base font-black">كاملة</span>
           </button>
         </div>
 
@@ -358,7 +347,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
             <circle cx="12" cy="13" r="3.5" />
           </svg>
-          <span class="text-2xl sm:text-3xl font-black tracking-tight text-center leading-snug">
+          <span id="startCaptureBtnLabel" class="text-2xl sm:text-3xl font-black tracking-tight text-center leading-snug">
             أخذ صورة ذكرى بسعر 5,000 د.ع
           </span>
         </button>
@@ -398,7 +387,7 @@
     </section>
 
     <!-- ===================================================================== -->
-    <!-- SCREEN 3: THEMES + DUAL STRIP / POSTCARD + DIRECT PRINT             -->
+    <!-- SCREEN 3: THEMES + DIRECT PRINT (NO STRIP/FULL BUTTONS AFTER CAPTURE) -->
     <!-- ===================================================================== -->
     <section id="editorScreen" class="hidden relative w-full h-full p-3 sm:p-5 lg:p-6 flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch justify-center overflow-hidden">
       <!-- Left / Top Preview Column: 4x6 Canon SELPHY Composition -->
@@ -410,31 +399,14 @@
         />
       </div>
 
-      <!-- Controls Column: One-Tap Themes + Layout Toggle + Direct Print -->
+      <!-- Controls Column: One-Tap Themes + Direct Print -->
       <div class="lg:w-1/2 h-[58%] lg:h-full glass-panel rounded-3xl p-3.5 sm:p-5 lg:p-6 flex flex-col justify-between gap-2.5 overflow-hidden">
         <div class="flex flex-col gap-2.5 overflow-y-auto pr-0.5">
           <div class="flex items-center justify-between gap-2">
             <h2 class="text-base sm:text-xl font-black text-white">الثيم</h2>
-
-            <!-- Layout Switcher: بوست كارد (4×6) / شريطين (2×6) -->
-            <div class="inline-flex rounded-xl bg-slate-900/90 p-1 border border-white/15 shrink-0" role="group" aria-label="قياس الطباعة">
-              <button
-                type="button"
-                data-action="select-layout"
-                data-layout="postcard"
-                class="layout-pill-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black transition bg-indigo-600 text-white shadow"
-              >
-                بوست كارد (4×6)
-              </button>
-              <button
-                type="button"
-                data-action="select-layout"
-                data-layout="dual_strip"
-                class="layout-pill-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black transition text-slate-300 hover:text-white"
-              >
-                شريطين (2×6)
-              </button>
-            </div>
+            <span id="editorModeBadge" class="px-3 py-1 rounded-xl bg-slate-900/90 border border-white/15 text-xs sm:text-sm font-black text-amber-300">
+              3 صور • شريطين
+            </span>
           </div>
 
           <!-- Simple One-Tap Themes Grid -->
@@ -582,7 +554,7 @@
       initialCountdownSec: 6,   // 6 seconds before Shot 1
       betweenShotsSec: 3,       // 3 seconds between subsequent shots
       selectedTheme: 'kids',    // 'kids' | 'girls' | 'boys' | 'adults' | 'royal_white' | 'pastel'
-      printLayout: 'postcard',  // 'postcard' (4x6) | 'dual_strip' (شريطين 2x6)
+      printLayout: 'dual_strip',// 'dual_strip' (شريطين) | 'postcard' (كاملة) — selectable only on Screen 1
       printCopies: 1,           // Number of copies to print
       pricePerCopy: 5000,       // 5,000 IQD per print copy
       facingMode: 'user',       // 'user' | 'environment'
@@ -701,20 +673,49 @@
       }
     };
 
-    /**
-     * Select 3 or 4 shots on the home screen and update UI buttons
-     */
-    function selectShotCount(count) {
-      if (count !== 3 && count !== 4) return;
-      STATE.shotCount = count;
+    function syncHomeSelectionButtons() {
+      const shots = STATE.shotCount === 4 ? 4 : 3;
+      STATE.shotCount = shots;
 
       document.querySelectorAll('.shot-count-btn').forEach((btn) => {
         const val = Number(btn.getAttribute('data-shots'));
-        const active = val === count;
+        const active = val === shots;
         btn.className = active
-          ? 'shot-count-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-3 transition bg-indigo-600/45 border-amber-300 text-white shadow'
-          : 'shot-count-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-3 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35';
+          ? 'shot-count-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2.5 transition bg-indigo-600/45 border-amber-300 text-white shadow'
+          : 'shot-count-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2.5 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35';
       });
+
+      const layout = STATE.printLayout === 'postcard' ? 'postcard' : 'dual_strip';
+      STATE.printLayout = layout;
+
+      document.querySelectorAll('.home-layout-btn').forEach((btn) => {
+        const val = btn.getAttribute('data-layout');
+        const active = val === layout;
+        btn.className = active
+          ? 'home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2 transition bg-indigo-600/45 border-amber-300 text-white shadow'
+          : 'home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35';
+      });
+
+      const modeBadge = document.getElementById('editorModeBadge');
+      if (modeBadge) {
+        const countText = shots === 4 ? '4 صور' : '3 صور';
+        const layoutText = layout === 'postcard' ? 'كاملة' : 'شريطين';
+        modeBadge.textContent = `${countText} • ${layoutText}`;
+      }
+
+      syncCameraVisualTargets();
+    }
+
+    function selectShotCount(count) {
+      if (count !== 3 && count !== 4) return;
+      STATE.shotCount = count;
+      syncHomeSelectionButtons();
+    }
+
+    function selectHomeLayout(layoutId) {
+      if (layoutId !== 'postcard' && layoutId !== 'dual_strip') return;
+      STATE.printLayout = layoutId;
+      syncHomeSelectionButtons();
     }
 
     /**
@@ -980,9 +981,6 @@
     }
 
     /**
-     * Synchronize <video> vs simulated <canvas> visibility across screens
-     */
-        /**
      * Compute exact normalized slot aspect ratio (`slotW / slotH`) matching the active layout & shot count
      */
     function getActiveSlotAspectRatio() {
@@ -1065,8 +1063,6 @@
       const top = Math.round(box.y);
       const width = Math.round(box.w);
       const height = Math.round(box.h);
-      const right = Math.max(left, Math.round(cw - (left + width)));
-      const bottom = Math.max(top, Math.round(ch - (top + height)));
       const radius = 18;
 
       // Cut out exact inner rectangle from the blurred backdrop using polygon hole
@@ -1090,7 +1086,7 @@
       clearWin.style.borderRadius = `${radius}px`;
 
       if (badge) {
-        const layoutLabel = STATE.printLayout === 'dual_strip' ? 'شريطين 2×6' : 'إطار واحد 4×6';
+        const layoutLabel = STATE.printLayout === 'dual_strip' ? 'شريطين' : 'كاملة';
         badge.textContent = `الجزء الظاهر بالإطار (${layoutLabel})`;
       }
 
@@ -1736,6 +1732,8 @@
       STATE.sessionId += 1;
       const sessionToken = STATE.sessionId;
       STATE.capturedPhotos = [];
+      STATE.printCopies = 1;
+      updatePrintCopiesUI();
 
       const totalShots = STATE.shotCount === 4 ? 4 : 3;
       const counterEl = document.getElementById('captureShotCounter');
@@ -1819,6 +1817,15 @@
         return;
       }
 
+      if (explicitAction === 'select-layout' || buttonEl.classList.contains('home-layout-btn')) {
+        const layoutId = buttonEl.getAttribute('data-layout');
+        if (layoutId === 'postcard' || layoutId === 'dual_strip') {
+          selectHomeLayout(layoutId);
+          announceKioskStatus(layoutId === 'dual_strip' ? 'تم اختيار شريطين' : 'تم اختيار كاملة');
+        }
+        return;
+      }
+
       if (explicitAction === 'start-capture' || btnId === 'startCaptureBtn') {
         handleStartBoothClick(event);
         return;
@@ -1829,15 +1836,6 @@
         if (themeId && THEMES[themeId]) {
           selectTheme(themeId);
           announceKioskStatus(`تم اختيار ثيم ${THEMES[themeId].label}`);
-        }
-        return;
-      }
-
-      if (explicitAction === 'select-layout' || buttonEl.classList.contains('layout-pill-btn') || buttonEl.classList.contains('home-layout-btn')) {
-        const layoutId = buttonEl.getAttribute('data-layout');
-        if (layoutId === 'postcard' || layoutId === 'dual_strip') {
-          selectPrintLayout(layoutId);
-          announceKioskStatus(layoutId === 'dual_strip' ? 'تم اختيار شريطين (2×6)' : 'تم اختيار إطار واحد (4×6)');
         }
         return;
       }
@@ -2152,7 +2150,7 @@
     }
 
     /**
-     * Switch print layout between Postcard (4×6) and Dual-Strip (شريطين 2×6)
+     * Print copies counter UI
      */
     function updatePrintCopiesUI() {
       const copies = Math.max(1, Number(STATE.printCopies) || 1);
@@ -2173,31 +2171,6 @@
       const next = Math.max(1, Math.min(20, (Number(STATE.printCopies) || 1) + Number(delta || 0)));
       STATE.printCopies = next;
       updatePrintCopiesUI();
-    }
-
-    async function selectPrintLayout(layoutId) {
-      if (layoutId !== 'postcard' && layoutId !== 'dual_strip') return;
-      STATE.printLayout = layoutId;
-
-      document.querySelectorAll('.layout-pill-btn').forEach((btn) => {
-        const isSelected = btn.getAttribute('data-layout') === layoutId;
-        btn.className = isSelected
-          ? 'layout-pill-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black transition bg-indigo-600 text-white shadow'
-          : 'layout-pill-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black transition text-slate-300 hover:text-white';
-      });
-
-      document.querySelectorAll('.home-layout-btn').forEach((btn) => {
-        const isSelected = btn.getAttribute('data-layout') === layoutId;
-        btn.className = isSelected
-          ? 'home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2.5 transition bg-indigo-600/45 border-amber-300 text-white shadow'
-          : 'home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2.5 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35';
-      });
-
-      syncCameraVisualTargets();
-
-      if (STATE.screen === 'print') {
-        await renderSelphyComposition();
-      }
     }
 
     /**
@@ -2229,6 +2202,7 @@
       }
 
       setActiveScreen('start');
+      syncHomeSelectionButtons();
       await ensureCameraReady(false);
     }
 
@@ -2239,9 +2213,8 @@
       installViewportLocks();
       bindStartButtonEvents();
       startSimulatedCameraLoop();
-      selectShotCount(3);
+      syncHomeSelectionButtons();
       await selectTheme('kids');
-      await selectPrintLayout('postcard');
       updatePrintCopiesUI();
       await ensureCameraReady(false);
 
