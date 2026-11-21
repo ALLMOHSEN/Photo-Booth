@@ -54,6 +54,7 @@
     .live-camera-feed {
       filter: blur(0px) brightness(1);
       transform: scale(1);
+      transform-origin: center center;
     }
 
     .live-camera-feed.mirrored {
@@ -94,6 +95,8 @@
       top: 0;
       left: 0;
       pointer-events: none;
+      border-radius: inherit;
+      transform-origin: center center;
     }
 
     #framingGuideClearVideo.mirrored,
@@ -299,6 +302,11 @@
             data-shots="3"
             class="shot-count-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2.5 transition bg-indigo-600/45 border-amber-300 text-white shadow"
           >
+            <svg class="w-5 h-5 shrink-0 text-amber-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+              <rect x="4" y="3" width="16" height="5" rx="1.5" />
+              <rect x="4" y="9.5" width="16" height="5" rx="1.5" />
+              <rect x="4" y="16" width="16" height="5" rx="1.5" />
+            </svg>
             <span class="text-base sm:text-lg font-black">3 صور</span>
           </button>
 
@@ -309,6 +317,12 @@
             data-shots="4"
             class="shot-count-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2.5 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35"
           >
+            <svg class="w-5 h-5 shrink-0 text-sky-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+              <rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1.5" />
+              <rect x="13" y="3.5" width="7.5" height="7.5" rx="1.5" />
+              <rect x="3.5" y="13" width="7.5" height="7.5" rx="1.5" />
+              <rect x="13" y="13" width="7.5" height="7.5" rx="1.5" />
+            </svg>
             <span class="text-base sm:text-lg font-black">4 صور</span>
           </button>
         </div>
@@ -320,8 +334,12 @@
             type="button"
             data-action="select-layout"
             data-layout="dual_strip"
-            class="home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2 transition bg-indigo-600/45 border-amber-300 text-white shadow"
+            class="home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2.5 transition bg-indigo-600/45 border-amber-300 text-white shadow"
           >
+            <svg class="w-5 h-5 shrink-0 text-amber-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+              <rect x="3.5" y="3.5" width="7" height="17" rx="1.5" />
+              <rect x="13.5" y="3.5" width="7" height="17" rx="1.5" />
+            </svg>
             <span class="text-sm sm:text-base font-black">شريطين</span>
           </button>
 
@@ -330,8 +348,12 @@
             type="button"
             data-action="select-layout"
             data-layout="postcard"
-            class="home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35"
+            class="home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2.5 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35"
           >
+            <svg class="w-5 h-5 shrink-0 text-pink-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+              <rect x="3.5" y="3.5" width="17" height="17" rx="2.5" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 15l3-3 2.5 2.5 3.5-4 1.5 1.5" />
+            </svg>
             <span class="text-sm sm:text-base font-black">كاملة</span>
           </button>
         </div>
@@ -899,10 +921,16 @@
         const guideCan = document.getElementById('framingGuideClearCanvas');
         if (guideCan && !guideCan.classList.contains('hidden') && liveCanvas) {
           const gctx = guideCan.getContext('2d');
+          const rect = guideCan.getBoundingClientRect();
+          const targetW = Math.max(1, Math.round(rect.width || liveCanvas.width));
+          const targetH = Math.max(1, Math.round(rect.height || liveCanvas.height));
           if (gctx) {
-            guideCan.width = liveCanvas.width;
-            guideCan.height = liveCanvas.height;
-            gctx.drawImage(liveCanvas, 0, 0);
+            if (guideCan.width !== targetW || guideCan.height !== targetH) {
+              guideCan.width = targetW;
+              guideCan.height = targetH;
+            }
+            gctx.clearRect(0, 0, targetW, targetH);
+            gctx.drawImage(liveCanvas, 0, 0, targetW, targetH);
           }
         }
 
@@ -1059,23 +1087,23 @@
       const targetAspect = getActiveSlotAspectRatio();
       const box = computeCoverGuideRect(cw, ch, targetAspect);
 
-      const left = Math.round(box.x);
-      const top = Math.round(box.y);
-      const width = Math.round(box.w);
-      const height = Math.round(box.h);
-      const radius = 18;
+      const left = Number(box.x.toFixed(2));
+      const top = Number(box.y.toFixed(2));
+      const width = Number(box.w.toFixed(2));
+      const height = Number(box.h.toFixed(2));
+      const radius = 22;
 
       // Cut out exact inner rectangle from the blurred backdrop using polygon hole
       backdrop.style.clipPath = `polygon(
         0px 0px,
-        ${Math.round(cw)}px 0px,
-        ${Math.round(cw)}px ${Math.round(ch)}px,
-        0px ${Math.round(ch)}px,
+        ${cw}px 0px,
+        ${cw}px ${ch}px,
+        0px ${ch}px,
         0px 0px,
         ${left}px ${top}px,
-        ${left}px ${top + height}px,
-        ${left + width}px ${top + height}px,
-        ${left + width}px ${top}px,
+        ${left}px ${(top + height).toFixed(2)}px,
+        ${(left + width).toFixed(2)}px ${(top + height).toFixed(2)}px,
+        ${(left + width).toFixed(2)}px ${top}px,
         ${left}px ${top}px
       )`;
 
@@ -1100,9 +1128,10 @@
         }
         clearVid.style.left = `${-left}px`;
         clearVid.style.top = `${-top}px`;
-        clearVid.style.width = `${Math.round(cw)}px`;
-        clearVid.style.height = `${Math.round(ch)}px`;
+        clearVid.style.width = `${cw}px`;
+        clearVid.style.height = `${ch}px`;
         clearVid.style.objectFit = 'cover';
+        clearVid.style.borderRadius = '0px';
         clearVid.classList.toggle('mirrored', Boolean(shouldMirror));
         clearVid.classList.toggle('hidden', !useLiveVideo);
         if (useLiveVideo && clearVid.paused) {
@@ -1116,9 +1145,10 @@
       if (clearCan) {
         clearCan.style.left = `${-left}px`;
         clearCan.style.top = `${-top}px`;
-        clearCan.style.width = `${Math.round(cw)}px`;
-        clearCan.style.height = `${Math.round(ch)}px`;
+        clearCan.style.width = `${cw}px`;
+        clearCan.style.height = `${ch}px`;
         clearCan.style.objectFit = 'cover';
+        clearCan.style.borderRadius = '0px';
         clearCan.classList.toggle('mirrored', Boolean(shouldMirror));
         clearCan.classList.toggle('hidden', Boolean(useLiveVideo));
       }
