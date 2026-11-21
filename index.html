@@ -176,22 +176,31 @@
       display: none;
     }
 
-    /* Canon SELPHY 4x6 inch / 100mm x 148mm borderless print rules */
+    /* Canon SELPHY Postcard (100mm x 148mm / 4x6 inch) borderless print rules */
     @page {
-      size: 100mm 148mm;
-      margin: 0;
+      size: 100mm 148mm portrait;
+      margin: 0 !important;
     }
 
     @media print {
       @page {
-        size: 100mm 148mm;
+        size: 100mm 148mm portrait;
         margin: 0 !important;
+      }
+
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        box-sizing: border-box !important;
       }
 
       html, body, #app {
         width: 100mm !important;
         height: 148mm !important;
+        min-width: 100mm !important;
         min-height: 148mm !important;
+        max-width: 100mm !important;
+        max-height: 148mm !important;
         margin: 0 !important;
         padding: 0 !important;
         overflow: hidden !important;
@@ -222,6 +231,8 @@
         max-height: none !important;
         object-fit: fill !important;
         display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
       }
     }
   </style>
@@ -283,13 +294,13 @@
       </div>
     </div>
 
-    <!-- Print-only full-bleed 100mm x 148mm (4in x 6in) output -->
+    <!-- Print-only full-bleed 100mm x 148mm (Postcard 4in x 6in) output -->
     <div id="printOnlyContainer" aria-hidden="true">
-      <img id="printOnlyImg" alt="Canon SELPHY 100mm x 148mm Print" />
+      <img id="printOnlyImg" alt="Canon SELPHY Postcard 100mm x 148mm Print" />
     </div>
 
     <!-- ===================================================================== -->
-    <!-- SCREEN 1: START SCREEN (BLURRED BG + SEPARATE 3/4 + STRIP/FULL + BTN) -->
+    <!-- SCREEN 1: START SCREEN (BLURRED BG + SEPARATE 3/4 + POSTCARD/STRIP)  -->
     <!-- ===================================================================== -->
     <section id="homeScreen" class="relative w-full h-full flex items-center justify-center p-6 overflow-hidden">
       <!-- Blurred Camera Background (<video> with automatic fallback to smooth animated canvas) -->
@@ -299,7 +310,7 @@
         <div class="fixed inset-0 bg-slate-950/35"></div>
       </div>
 
-      <!-- Center Stack: Separate 3/4 Shot Buttons + Separate Dual Strip / Full Frame Buttons + Capture Button -->
+      <!-- Center Stack: Separate 3/4 Shot Buttons + Postcard/Strip Buttons + Capture Button -->
       <div class="relative z-10 w-full max-w-md flex flex-col items-center justify-center gap-3">
         <!-- Separate 3 or 4 Shots Picker -->
         <div class="w-full grid grid-cols-2 gap-3 glass-panel p-2 rounded-3xl" role="group" aria-label="عدد الصور">
@@ -335,34 +346,34 @@
           </button>
         </div>
 
-        <!-- Separate Dual Strip (شريطين) or Full Frame (كاملة) Picker — Home Screen Only -->
-        <div class="w-full grid grid-cols-2 gap-3 glass-panel p-2 rounded-3xl" role="group" aria-label="نوع الإطار">
+        <!-- Postcard (بوست كارت 10x15) or Dual Strip (شريطين) Picker — Home Screen Only -->
+        <div class="w-full grid grid-cols-2 gap-3 glass-panel p-2 rounded-3xl" role="group" aria-label="قياس الصورة">
+          <button
+            id="btnStartFullFrame"
+            type="button"
+            data-action="select-layout"
+            data-layout="postcard"
+            class="home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2 transition bg-indigo-600/45 border-amber-300 text-white shadow"
+          >
+            <svg class="w-5 h-5 shrink-0 text-pink-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+              <rect x="4.5" y="2.5" width="15" height="19" rx="2.5" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 15l3-3 2.5 2.5 3.5-4 1.5 1.5" />
+            </svg>
+            <span class="text-sm sm:text-base font-black">بوست كارت</span>
+          </button>
+
           <button
             id="btnStartDualStrip"
             type="button"
             data-action="select-layout"
             data-layout="dual_strip"
-            class="home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2.5 transition bg-indigo-600/45 border-amber-300 text-white shadow"
+            class="home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2.5 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35"
           >
             <svg class="w-5 h-5 shrink-0 text-amber-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
               <rect x="3.5" y="3.5" width="7" height="17" rx="1.5" />
               <rect x="13.5" y="3.5" width="7" height="17" rx="1.5" />
             </svg>
             <span class="text-sm sm:text-base font-black">شريطين</span>
-          </button>
-
-          <button
-            id="btnStartFullFrame"
-            type="button"
-            data-action="select-layout"
-            data-layout="postcard"
-            class="home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2.5 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35"
-          >
-            <svg class="w-5 h-5 shrink-0 text-pink-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
-              <rect x="3.5" y="3.5" width="17" height="17" rx="2.5" />
-              <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 15l3-3 2.5 2.5 3.5-4 1.5 1.5" />
-            </svg>
-            <span class="text-sm sm:text-base font-black">كاملة</span>
           </button>
         </div>
 
@@ -392,13 +403,13 @@
       <video id="liveVideo" autoplay playsinline webkit-playsinline="true" muted class="sr-only"></video>
       <canvas id="liveSimCanvas" width="1280" height="720" class="sr-only"></canvas>
 
-      <!-- Single clean capture window matching exact final output aspect ratio with blurred surround -->
+      <!-- Single clean capture window matching Postcard / layout aspect ratio with blurred surround -->
       <div id="framingGuideOverlay" aria-hidden="true">
         <div id="framingGuideBackdrop"></div>
         <div id="framingGuideClearWindow">
           <video id="framingGuideClearVideo" autoplay playsinline webkit-playsinline="true" muted class="hidden"></video>
           <canvas id="framingGuideClearCanvas" width="1280" height="720" class="hidden"></canvas>
-          <div id="framingGuideBadge">قياس الصورة النهائية</div>
+          <div id="framingGuideBadge">بوست كارت 10×15 سم</div>
         </div>
       </div>
 
@@ -418,25 +429,26 @@
     </section>
 
     <!-- ===================================================================== -->
-    <!-- SCREEN 3: THEMES + DIRECT PRINT (NO STRIP/FULL BUTTONS AFTER CAPTURE) -->
+    <!-- SCREEN 3: THEMES + DIRECT PRINT (POSTCARD 100mm x 148mm)            -->
     <!-- ===================================================================== -->
     <section id="editorScreen" class="hidden relative w-full h-full p-3 sm:p-5 lg:p-6 flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch justify-center overflow-hidden">
-      <!-- Left / Top Preview Column: 4x6 Canon SELPHY Composition -->
-      <div class="lg:w-1/2 h-[42%] lg:h-full glass-panel rounded-3xl p-3 sm:p-5 flex items-center justify-center relative overflow-hidden">
+      <!-- Left / Top Preview Column: Postcard (100mm x 148mm / 2:3) Composition -->
+      <div class="lg:w-1/2 h-[44%] lg:h-full glass-panel rounded-3xl p-3 sm:p-5 flex flex-col items-center justify-center gap-2 relative overflow-hidden">
         <img
           id="composedPreviewImg"
-          alt="معاينة الصورة النهائية"
+          alt="معاينة البوست كارت النهائي"
+          style="aspect-ratio: 100 / 148;"
           class="max-h-full w-auto rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.85)] border-2 border-white/20 object-contain"
         />
       </div>
 
       <!-- Controls Column: One-Tap Themes + Direct Print -->
-      <div class="lg:w-1/2 h-[58%] lg:h-full glass-panel rounded-3xl p-3.5 sm:p-5 lg:p-6 flex flex-col justify-between gap-2.5 overflow-hidden">
+      <div class="lg:w-1/2 h-[56%] lg:h-full glass-panel rounded-3xl p-3.5 sm:p-5 lg:p-6 flex flex-col justify-between gap-2.5 overflow-hidden">
         <div class="flex flex-col gap-2.5 overflow-y-auto pr-0.5">
           <div class="flex items-center justify-between gap-2">
             <h2 class="text-base sm:text-xl font-black text-white">الثيم</h2>
             <span id="editorModeBadge" class="px-3 py-1 rounded-xl bg-slate-900/90 border border-white/15 text-xs sm:text-sm font-black text-amber-300">
-              3 صور • شريطين
+              3 صور • بوست كارت
             </span>
           </div>
 
@@ -508,7 +520,7 @@
         <div class="flex flex-col gap-2 pt-2 border-t border-white/10 shrink-0">
           <div class="w-full flex items-center justify-between gap-3 bg-slate-900/85 border border-white/15 rounded-2xl px-3.5 py-2">
             <div class="flex flex-col text-right">
-              <span class="text-xs font-bold text-slate-300">عدد الطبعات (5,000 د.ع للطبعة)</span>
+              <span class="text-xs font-bold text-slate-300">عدد الطبعات (5,000 د.ع للطبعة • 10×15 سم)</span>
               <span id="printTotalPriceLabel" class="text-sm sm:text-base font-black text-amber-300">المجموع: 5,000 د.ع</span>
             </div>
 
@@ -547,7 +559,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V5a1 1 0 011-1h3M20 8V5a1 1 0 00-1-1h-3M4 16v3a1 1 0 001 1h3M20 16v3a1 1 0 01-1 1h-3" />
               <rect x="7" y="7" width="10" height="10" rx="1.5" />
             </svg>
-            <span>معاينة بكامل الشاشة قبل الطباعة</span>
+            <span>معاينة بوست كارت بكامل الشاشة</span>
           </button>
 
           <button
@@ -558,6 +570,10 @@
           >
             <span id="btnDirectPrintLabel">طباعة فورية — 5,000 د.ع</span>
           </button>
+
+          <div class="text-[11px] font-bold text-slate-400 text-center leading-snug">
+            لإخفاء رابط الموقع وعدد الصفحات من نافذة المتصفح: أوقف خيار «الرؤوس والتذييلات / Headers and footers» واجعل الهوامش «بلا / None».
+          </div>
 
           <button
             id="btnFinishReset"
@@ -589,7 +605,7 @@
       <div class="w-full max-w-5xl flex items-center justify-between gap-3 shrink-0">
         <div class="flex items-center gap-2.5">
           <span class="px-3.5 py-1.5 rounded-2xl bg-indigo-600/35 border border-amber-300/60 text-amber-200 text-xs sm:text-sm font-black">
-            معاينة كاملة قبل الطباعة
+            معاينة بوست كارت (10×15 سم)
           </span>
           <span id="fullScreenPreviewMeta" class="text-xs sm:text-sm font-bold text-slate-300"></span>
         </div>
@@ -617,17 +633,18 @@
       <div class="flex-1 w-full max-w-5xl min-h-0 flex items-center justify-center py-3 overflow-hidden">
         <img
           id="fullScreenComposedImg"
-          alt="معاينة الصورة كاملة قبل الطباعة"
+          alt="معاينة البوست كارت كاملة قبل الطباعة"
+          style="aspect-ratio: 100 / 148;"
           class="max-w-full max-h-full w-auto h-auto rounded-3xl shadow-[0_24px_70px_rgba(0,0,0,0.9)] border-2 border-white/25 object-contain"
         />
       </div>
 
-      <div class="text-xs font-bold text-slate-400 shrink-0">
-        اضغط على «إغلاق المعاينة» للعودة إلى الثيمات أو «طباعة فورية» للإرسال إلى الطابعة
+      <div class="text-xs font-bold text-slate-400 shrink-0 text-center">
+        قياس بوست كارت 100×148 مم (4×6 إنش) — لإخفاء رابط الموقع وعدد الصفحات عطّل «الرؤوس والتذييلات» في نافذة الطباعة
       </div>
     </div>
 
-    <!-- 1200x1800 px (100mm x 148mm / 4x6 inch at 300 DPI) Canon SELPHY Canvas -->
+    <!-- 1200x1800 px (100mm x 148mm / Postcard 4x6 inch at 300 DPI) Canon SELPHY Canvas -->
     <canvas id="selphyCanvas" width="1200" height="1800" class="hidden"></canvas>
   </div>
 
@@ -641,7 +658,7 @@
       initialCountdownSec: 6,   // 6 seconds before Shot 1
       betweenShotsSec: 3,       // 3 seconds between subsequent shots
       selectedTheme: 'kids',    // 'kids' | 'girls' | 'boys' | 'adults' | 'royal_white' | 'pastel'
-      printLayout: 'dual_strip',// 'dual_strip' (شريطين) | 'postcard' (كاملة) — selectable only on Screen 1
+      printLayout: 'postcard',  // 'postcard' (بوست كارت 100mm x 148mm) | 'dual_strip' (شريطين)
       printCopies: 1,           // Number of copies to print
       pricePerCopy: 5000,       // 5,000 IQD per print copy
       facingMode: 'user',       // 'user' | 'environment'
@@ -667,7 +684,7 @@
     };
 
     /**
-     * Theme Definitions for 1200x1800 (100mm x 148mm / 4x6 inch at 300 DPI) Print Canvas
+     * Theme Definitions for 1200x1800 (100mm x 148mm / Postcard 4x6 inch at 300 DPI) Print Canvas
      */
     const THEMES = {
       kids: {
@@ -858,7 +875,7 @@
           : 'shot-count-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2.5 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35';
       });
 
-      const layout = STATE.printLayout === 'postcard' ? 'postcard' : 'dual_strip';
+      const layout = STATE.printLayout === 'dual_strip' ? 'dual_strip' : 'postcard';
       STATE.printLayout = layout;
 
       document.querySelectorAll('.home-layout-btn').forEach((btn) => {
@@ -866,13 +883,13 @@
         const active = val === layout;
         btn.className = active
           ? 'home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2 transition bg-indigo-600/45 border-amber-300 text-white shadow'
-          : 'home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35';
+          : 'home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2.5 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35';
       });
 
       const modeBadge = document.getElementById('editorModeBadge');
       if (modeBadge) {
         const countText = shots === 4 ? '4 صور' : '3 صور';
-        const layoutText = layout === 'postcard' ? 'كاملة' : 'شريطين';
+        const layoutText = layout === 'postcard' ? 'بوست كارت' : 'شريطين';
         modeBadge.textContent = `${countText} • ${layoutText}`;
       }
 
@@ -1127,7 +1144,7 @@
     }
 
     /**
-     * Compute exact normalized slot aspect ratio (`slotW / slotH`) matching the active layout & shot count
+     * Compute exact normalized slot aspect ratio (`slotW / slotH`) matching the active Postcard / strip layout
      */
     function getActiveSlotAspectRatio() {
       const count = STATE.shotCount === 4 ? 4 : 3;
@@ -1142,6 +1159,7 @@
         const photoH = (stripH - topPad - bottomHeaderH - gap * (count - 1)) / count;
         return Math.max(0.2, photoW / Math.max(1, photoH));
       } else {
+        // Postcard (100mm x 148mm / 2:3) photo slot aspect ratio
         const W = 1200;
         const H = 1800;
         const headerHeight = 148;
@@ -1165,14 +1183,15 @@
 
     /**
      * Compute the exact rectangle `(x, y, w, h)` inside a container `(containerW, containerH)`
-     * that matches the exact final photo aspect ratio (`targetAspect`) with generous room so surroundings stay blurred.
+     * matching Postcard (100mm x 148mm) / active layout aspect ratio with generous room so surroundings stay blurred.
      */
     function computeCoverGuideRect(containerW, containerH, targetAspect) {
       const safeW = Math.max(1, containerW);
       const safeH = Math.max(1, containerH);
       const maxW = safeW * 0.72;
       const maxH = safeH * 0.68;
-      const safeAspect = Math.max(0.25, Math.min(4.0, targetAspect || 1.2));
+      const effectiveAspect = STATE.printLayout === 'postcard' ? (100 / 148) : (targetAspect || 1.2);
+      const safeAspect = Math.max(0.25, Math.min(4.0, effectiveAspect));
 
       let w = maxW;
       let h = w / safeAspect;
@@ -1187,7 +1206,7 @@
     }
 
     /**
-     * Update the single clean capture window matching exact output photo dimensions
+     * Update the single clean capture window matching Postcard / layout dimensions
      * while the surrounding backdrop remains blurred without duplicate feeds.
      */
     function updateFramingGuideOverlay(useLiveVideo, shouldMirror) {
@@ -1230,8 +1249,7 @@
       clearWin.style.borderRadius = '28px';
 
       if (badge) {
-        const ratioText = targetAspect >= 1 ? `${targetAspect.toFixed(2)}:1` : `1:${(1 / targetAspect).toFixed(2)}`;
-        badge.textContent = `قياس الصورة (${ratioText})`;
+        badge.textContent = STATE.printLayout === 'postcard' ? 'بوست كارت 10×15 سم' : 'شريطين 10×15 سم';
       }
 
       if (clearVid) {
@@ -1965,7 +1983,7 @@
         const layoutId = buttonEl.getAttribute('data-layout');
         if (layoutId === 'postcard' || layoutId === 'dual_strip') {
           selectHomeLayout(layoutId);
-          announceKioskStatus(layoutId === 'dual_strip' ? 'تم اختيار شريطين' : 'تم اختيار كاملة');
+          announceKioskStatus(layoutId === 'postcard' ? 'تم اختيار بوست كارت' : 'تم اختيار شريطين');
         }
         return;
       }
@@ -1993,7 +2011,7 @@
       }
 
       if (explicitAction === 'open-fullscreen-preview' || btnId === 'btnOpenFullScreenPreview') {
-        announceKioskStatus('فتح المعاينة الكاملة قبل الطباعة', true);
+        announceKioskStatus('فتح معاينة البوست كارت', true);
         openFullScreenPreview();
         return;
       }
@@ -2004,7 +2022,7 @@
       }
 
       if (explicitAction === 'direct-print' || btnId === 'btnDirectPrint') {
-        announceKioskStatus('جاري تجهيز الطباعة — الاستلام من الكاشير', true);
+        announceKioskStatus('جاري تجهيز طباعة البوست كارت — الاستلام من الكاشير', true);
         triggerDirectPrint();
         return;
       }
@@ -2367,7 +2385,7 @@
     }
 
     /**
-     * Render 1200x1800 px (100mm x 148mm / 4x6 inch at 300 DPI) Canon SELPHY composition
+     * Render 1200x1800 px (100mm x 148mm / Postcard 4x6 inch at 300 DPI) Canon SELPHY composition
      */
     async function renderSelphyComposition() {
       const canvas = document.getElementById('selphyCanvas');
@@ -2395,10 +2413,10 @@
       if (loadedImages.length === 0) {
         const fallbackCanvas = document.createElement('canvas');
         fallbackCanvas.width = 1200;
-        fallbackCanvas.height = 800;
+        fallbackCanvas.height = 1800;
         const fctx = fallbackCanvas.getContext('2d');
         fctx.fillStyle = '#1e293b';
-        fctx.fillRect(0, 0, 1200, 800);
+        fctx.fillRect(0, 0, 1200, 1800);
         const fallbackImg = await loadImageElement(fallbackCanvas.toDataURL('image/jpeg'));
         loadedImages.push(fallbackImg);
       }
@@ -2562,7 +2580,7 @@
     }
 
     /**
-     * Direct print trigger calibrated for Canon SELPHY (4in x 6in / 100mm x 148mm)
+     * Direct print trigger calibrated for Canon SELPHY Postcard (4in x 6in / 100mm x 148mm)
      */
     async function triggerDirectPrint() {
       await renderSelphyComposition();
@@ -2577,7 +2595,7 @@
       const metaEl = document.getElementById('fullScreenPreviewMeta');
       const fsPrintBtnLabel = document.getElementById('btnFullScreenPrintLabel');
       const themeObj = THEMES[STATE.selectedTheme] || THEMES.kids;
-      const layoutLabel = STATE.printLayout === 'postcard' ? 'كاملة' : 'شريطين';
+      const layoutLabel = STATE.printLayout === 'postcard' ? 'بوست كارت' : 'شريطين';
       const copies = Math.max(1, Number(STATE.printCopies) || 1);
       const total = copies * (Number(STATE.pricePerCopy) || 5000);
       if (metaEl) {
