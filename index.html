@@ -72,10 +72,10 @@
     #framingGuideBackdrop {
       position: absolute;
       inset: 0;
-      backdrop-filter: blur(11px) brightness(0.66);
-      -webkit-backdrop-filter: blur(11px) brightness(0.66);
-      background: rgba(2, 6, 23, 0.28);
-      transition: clip-path 0.2s ease;
+      backdrop-filter: blur(18px) saturate(0.75) brightness(0.54);
+      -webkit-backdrop-filter: blur(18px) saturate(0.75) brightness(0.54);
+      background: rgba(2, 6, 23, 0.44);
+      transition: clip-path 0.22s ease;
     }
 
     #framingGuideClearWindow {
@@ -286,8 +286,8 @@
         <div class="fixed inset-0 bg-slate-950/35"></div>
       </div>
 
-      <!-- Center Stack: 3/4 Shot Picker + Main Capture Button -->
-      <div class="relative z-10 w-full max-w-md flex flex-col items-center justify-center gap-4">
+      <!-- Center Stack: 3/4 Shot Picker + Dual Strip / Single Frame Picker + Main Capture Button -->
+      <div class="relative z-10 w-full max-w-md flex flex-col items-center justify-center gap-3.5">
         <!-- Simple 3-Shot / 4-Shot Picker with Miniature Strip Icons -->
         <div class="w-full grid grid-cols-2 gap-3 glass-panel p-2 rounded-3xl" role="group" aria-label="عدد الصور">
           <button
@@ -321,6 +321,29 @@
               <rect x="6" y="23.7" width="12" height="4.6" rx="1" fill="currentColor" opacity="0.9" />
             </svg>
             <span class="text-base sm:text-lg font-black">4 صور</span>
+          </button>
+        </div>
+
+        <!-- Frame Shape Picker before capture: شريطين (2×6) or إطار واحد (4×6) -->
+        <div class="w-full grid grid-cols-2 gap-3 glass-panel p-2 rounded-3xl" role="group" aria-label="شكل الإطار قبل القص">
+          <button
+            id="btnStartDualStrip"
+            type="button"
+            data-action="select-layout"
+            data-layout="dual_strip"
+            class="home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2.5 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35"
+          >
+            <span class="text-sm sm:text-base font-black">شريطين (2×6)</span>
+          </button>
+
+          <button
+            id="btnStartPostcard"
+            type="button"
+            data-action="select-layout"
+            data-layout="postcard"
+            class="home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2.5 transition bg-indigo-600/45 border-amber-300 text-white shadow"
+          >
+            <span class="text-sm sm:text-base font-black">إطار واحد (4×6)</span>
           </button>
         </div>
 
@@ -480,13 +503,44 @@
 
         <!-- Primary Print & Reset Actions -->
         <div class="flex flex-col gap-2 pt-2 border-t border-white/10 shrink-0">
+          <div class="w-full flex items-center justify-between gap-3 bg-slate-900/85 border border-white/15 rounded-2xl px-3.5 py-2">
+            <div class="flex flex-col text-right">
+              <span class="text-xs font-bold text-slate-300">عدد الطبعات (5,000 د.ع للطبعة)</span>
+              <span id="printTotalPriceLabel" class="text-sm sm:text-base font-black text-amber-300">المجموع: 5,000 د.ع</span>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <button
+                id="btnDecCopies"
+                type="button"
+                data-action="change-copies"
+                data-delta="-1"
+                aria-label="تقليل عدد الطبعات"
+                class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 border border-white/15 text-white font-black text-lg flex items-center justify-center transition"
+              >
+                -
+              </button>
+              <span id="printCopiesValue" class="min-w-[2rem] text-center text-base sm:text-lg font-black text-white">1</span>
+              <button
+                id="btnIncCopies"
+                type="button"
+                data-action="change-copies"
+                data-delta="1"
+                aria-label="زيادة عدد الطبعات"
+                class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 border border-white/15 text-white font-black text-lg flex items-center justify-center transition"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
           <button
             id="btnDirectPrint"
             type="button"
             data-action="direct-print"
             class="w-full py-4 px-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 active:scale-[0.98] text-white font-black text-base sm:text-lg shadow-xl transition flex items-center justify-center gap-2"
           >
-            <span>طباعة فورية — الاستلام من الكاشير</span>
+            <span id="btnDirectPrintLabel">طباعة فورية — 5,000 د.ع</span>
           </button>
 
           <button
@@ -529,6 +583,8 @@
       betweenShotsSec: 3,       // 3 seconds between subsequent shots
       selectedTheme: 'kids',    // 'kids' | 'girls' | 'boys' | 'adults' | 'royal_white' | 'pastel'
       printLayout: 'postcard',  // 'postcard' (4x6) | 'dual_strip' (شريطين 2x6)
+      printCopies: 1,           // Number of copies to print
+      pricePerCopy: 5000,       // 5,000 IQD per print copy
       facingMode: 'user',       // 'user' | 'environment'
       mirrorCamera: true,
       stream: null,
@@ -839,7 +895,6 @@
           ctx.restore();
         });
 
-        STATE.simPhase = t;
         const guideCan = document.getElementById('framingGuideClearCanvas');
         if (guideCan && !guideCan.classList.contains('hidden') && liveCanvas) {
           const gctx = guideCan.getContext('2d');
@@ -850,6 +905,7 @@
           }
         }
 
+        STATE.simPhase = t;
         STATE.simAnimFrame = requestAnimationFrame(renderFrame);
       };
 
@@ -924,6 +980,9 @@
     }
 
     /**
+     * Synchronize <video> vs simulated <canvas> visibility across screens
+     */
+        /**
      * Compute exact normalized slot aspect ratio (`slotW / slotH`) matching the active layout & shot count
      */
     function getActiveSlotAspectRatio() {
@@ -1006,8 +1065,11 @@
       const top = Math.round(box.y);
       const width = Math.round(box.w);
       const height = Math.round(box.h);
+      const right = Math.max(left, Math.round(cw - (left + width)));
+      const bottom = Math.max(top, Math.round(ch - (top + height)));
       const radius = 18;
 
+      // Cut out exact inner rectangle from the blurred backdrop using polygon hole
       backdrop.style.clipPath = `polygon(
         0px 0px,
         ${Math.round(cw)}px 0px,
@@ -1028,7 +1090,7 @@
       clearWin.style.borderRadius = `${radius}px`;
 
       if (badge) {
-        const layoutLabel = STATE.printLayout === 'dual_strip' ? 'شريط 2×6' : 'بوست كارد 4×6';
+        const layoutLabel = STATE.printLayout === 'dual_strip' ? 'شريطين 2×6' : 'إطار واحد 4×6';
         badge.textContent = `الجزء الظاهر بالإطار (${layoutLabel})`;
       }
 
@@ -1113,9 +1175,6 @@
       });
     }
 
-    /**
-     * Synchronize <video> vs simulated <canvas> visibility across screens
-     */
     function syncCameraVisualTargets() {
       const bgVideo = document.getElementById('bgVideo');
       const bgSim = document.getElementById('bgSimCanvas');
@@ -1774,12 +1833,20 @@
         return;
       }
 
-      if (explicitAction === 'select-layout' || buttonEl.classList.contains('layout-pill-btn')) {
+      if (explicitAction === 'select-layout' || buttonEl.classList.contains('layout-pill-btn') || buttonEl.classList.contains('home-layout-btn')) {
         const layoutId = buttonEl.getAttribute('data-layout');
         if (layoutId === 'postcard' || layoutId === 'dual_strip') {
           selectPrintLayout(layoutId);
-          announceKioskStatus(layoutId === 'dual_strip' ? 'تم اختيار شريطين (2×6)' : 'تم اختيار بوست كارد (4×6)');
+          announceKioskStatus(layoutId === 'dual_strip' ? 'تم اختيار شريطين (2×6)' : 'تم اختيار إطار واحد (4×6)');
         }
+        return;
+      }
+
+      if (explicitAction === 'change-copies') {
+        const delta = Number(buttonEl.getAttribute('data-delta')) || 0;
+        changePrintCopies(delta);
+        const total = (Number(STATE.printCopies) || 1) * (Number(STATE.pricePerCopy) || 5000);
+        announceKioskStatus(`عدد الطبعات ${STATE.printCopies} والمجموع ${total.toLocaleString('en-US')} دينار عراقي`);
         return;
       }
 
@@ -2087,6 +2154,27 @@
     /**
      * Switch print layout between Postcard (4×6) and Dual-Strip (شريطين 2×6)
      */
+    function updatePrintCopiesUI() {
+      const copies = Math.max(1, Number(STATE.printCopies) || 1);
+      const unitPrice = Number(STATE.pricePerCopy) || 5000;
+      const totalPrice = copies * unitPrice;
+      const formattedTotal = `${totalPrice.toLocaleString('en-US')} د.ع`;
+
+      const countEl = document.getElementById('printCopiesValue');
+      const totalEl = document.getElementById('printTotalPriceLabel');
+      const printBtnLabel = document.getElementById('btnDirectPrintLabel');
+
+      if (countEl) countEl.textContent = String(copies);
+      if (totalEl) totalEl.textContent = `المجموع: ${formattedTotal}`;
+      if (printBtnLabel) printBtnLabel.textContent = `طباعة فورية (${copies}) — ${formattedTotal}`;
+    }
+
+    function changePrintCopies(delta) {
+      const next = Math.max(1, Math.min(20, (Number(STATE.printCopies) || 1) + Number(delta || 0)));
+      STATE.printCopies = next;
+      updatePrintCopiesUI();
+    }
+
     async function selectPrintLayout(layoutId) {
       if (layoutId !== 'postcard' && layoutId !== 'dual_strip') return;
       STATE.printLayout = layoutId;
@@ -2097,6 +2185,15 @@
           ? 'layout-pill-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black transition bg-indigo-600 text-white shadow'
           : 'layout-pill-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black transition text-slate-300 hover:text-white';
       });
+
+      document.querySelectorAll('.home-layout-btn').forEach((btn) => {
+        const isSelected = btn.getAttribute('data-layout') === layoutId;
+        btn.className = isSelected
+          ? 'home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2.5 transition bg-indigo-600/45 border-amber-300 text-white shadow'
+          : 'home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2.5 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35';
+      });
+
+      syncCameraVisualTargets();
 
       if (STATE.screen === 'print') {
         await renderSelphyComposition();
@@ -2123,6 +2220,8 @@
       STATE.isCaptureRunning = false;
       STATE.isStartingSequence = false;
       STATE.capturedPhotos = [];
+      STATE.printCopies = 1;
+      updatePrintCopiesUI();
 
       const overlay = document.getElementById('countdownOverlay');
       if (overlay) {
@@ -2143,6 +2242,7 @@
       selectShotCount(3);
       await selectTheme('kids');
       await selectPrintLayout('postcard');
+      updatePrintCopiesUI();
       await ensureCameraReady(false);
 
       document.addEventListener('visibilitychange', () => {
