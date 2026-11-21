@@ -50,7 +50,7 @@
       transform: scaleX(-1) scale(1.08);
     }
 
-    /* Unblurred live camera feed during capture */
+    /* Unblurred live camera feed inside capture window */
     .live-camera-feed {
       filter: blur(0px) brightness(1);
       transform: scale(1);
@@ -61,41 +61,45 @@
       transform: scaleX(-1);
     }
 
-    /* Framing guide overlay: exact output photo aspect ratio in sharp clarity with blurred surroundings */
+    /* Clean single-layer capture stage: blurred surround + single sharp output window */
     #framingGuideOverlay {
       position: fixed;
       inset: 0;
       z-index: 15;
       pointer-events: none;
       overflow: hidden;
+      background: radial-gradient(circle at center, rgba(15, 23, 42, 0.25) 0%, rgba(2, 6, 23, 0.72) 100%);
     }
 
     #framingGuideBackdrop {
       position: absolute;
       inset: 0;
-      backdrop-filter: blur(18px) saturate(0.85) brightness(0.54);
-      -webkit-backdrop-filter: blur(18px) saturate(0.85) brightness(0.54);
-      background: rgba(2, 6, 23, 0.42);
+      backdrop-filter: blur(18px) saturate(0.85) brightness(0.56);
+      -webkit-backdrop-filter: blur(18px) saturate(0.85) brightness(0.56);
+      background: rgba(2, 6, 23, 0.36);
       transition: mask-image 0.22s ease, -webkit-mask-image 0.22s ease;
     }
 
     #framingGuideClearWindow {
       position: absolute;
       overflow: hidden;
-      border-radius: 26px;
-      border: 2px solid rgba(255, 255, 255, 0.78);
+      border-radius: 28px;
+      border: 2px solid rgba(255, 255, 255, 0.72);
+      background: #090d1a;
       box-shadow:
-        0 0 0 9999px rgba(2, 6, 23, 0.22),
-        0 0 44px 14px rgba(2, 6, 23, 0.48),
-        inset 0 0 24px rgba(255, 255, 255, 0.14);
+        0 24px 70px rgba(0, 0, 0, 0.65),
+        0 0 0 1px rgba(255, 255, 255, 0.14),
+        inset 0 0 24px rgba(255, 255, 255, 0.1);
       transition: left 0.2s ease, top 0.2s ease, width 0.2s ease, height 0.2s ease, border-radius 0.2s ease;
     }
 
     #framingGuideClearVideo,
     #framingGuideClearCanvas {
       position: absolute;
-      top: 0;
-      left: 0;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
       pointer-events: none;
       transform-origin: center center;
     }
@@ -114,7 +118,7 @@
       background: rgba(15, 23, 42, 0.78);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.28);
+      border: 1px solid rgba(255, 255, 255, 0.24);
       color: #f8fafc;
       font-size: 12px;
       font-weight: 800;
@@ -383,11 +387,12 @@
     <!-- ===================================================================== -->
     <!-- SCREEN 2: FULL-SCREEN UNBLURRED CAPTURE (6s INITIAL -> 3s BETWEEN)   -->
     <!-- ===================================================================== -->
-    <section id="captureScreen" class="hidden relative w-full h-full flex items-center justify-center bg-black overflow-hidden">
-      <video id="liveVideo" autoplay playsinline webkit-playsinline="true" muted class="w-full h-full object-cover live-camera-feed mirrored hidden"></video>
-      <canvas id="liveSimCanvas" width="1280" height="720" class="w-full h-full object-cover live-camera-feed mirrored hidden"></canvas>
+    <section id="captureScreen" class="hidden relative w-full h-full flex items-center justify-center bg-slate-950 overflow-hidden">
+      <!-- Hidden reference feed used solely as capture source -->
+      <video id="liveVideo" autoplay playsinline webkit-playsinline="true" muted class="sr-only"></video>
+      <canvas id="liveSimCanvas" width="1280" height="720" class="sr-only"></canvas>
 
-      <!-- Exact-ratio clear window matching the final photo frame while surrounding area stays blurred -->
+      <!-- Single clean capture window matching exact final output aspect ratio with blurred surround -->
       <div id="framingGuideOverlay" aria-hidden="true">
         <div id="framingGuideBackdrop"></div>
         <div id="framingGuideClearWindow">
@@ -1008,6 +1013,45 @@
       }
     }
 
+    function drawStudioFallbackOnContext(ctx, w, h, t) {
+      if (!ctx || w <= 0 || h <= 0) return;
+
+      const grad = ctx.createLinearGradient(0, 0, w, h);
+      grad.addColorStop(0, '#1e1b4b');
+      grad.addColorStop(0.5, '#3b0764');
+      grad.addColorStop(1, '#0f172a');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+
+      const orbs = [
+        { x: w * (0.3 + 0.12 * Math.sin(t * 0.85)), y: h * (0.4 + 0.1 * Math.cos(t * 0.65)), r: w * 0.24, color: 'rgba(99, 102, 241, 0.36)' },
+        { x: w * (0.72 + 0.1 * Math.cos(t * 0.75)), y: h * (0.55 + 0.12 * Math.sin(t * 0.6)), r: w * 0.25, color: 'rgba(236, 72, 153, 0.32)' },
+        { x: w * 0.5, y: h * 0.48, r: w * 0.16, color: 'rgba(56, 189, 248, 0.2)' }
+      ];
+
+      orbs.forEach((orb) => {
+        const rg = ctx.createRadialGradient(orb.x, orb.y, 10, orb.x, orb.y, orb.r);
+        rg.addColorStop(0, orb.color);
+        rg.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = rg;
+        ctx.beginPath();
+        ctx.arc(orb.x, orb.y, orb.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.4, h * 0.13, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.ellipse(w * 0.5, h * 0.74, h * 0.22, h * 0.16, 0, Math.PI, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
     /**
      * Smooth animated studio canvas fallback when camera stream is unavailable or blocked
      */
@@ -1018,65 +1062,29 @@
 
       const bgCanvas = document.getElementById('bgSimCanvas');
       const liveCanvas = document.getElementById('liveSimCanvas');
-      const canvases = [bgCanvas, liveCanvas].filter(Boolean);
+      const guideCan = document.getElementById('framingGuideClearCanvas');
 
       const renderFrame = (timeMs) => {
         const t = timeMs * 0.001;
-        canvases.forEach((canvas) => {
+
+        [bgCanvas, liveCanvas].filter(Boolean).forEach((canvas) => {
           const ctx = canvas.getContext('2d');
-          if (!ctx) return;
-          const w = canvas.width;
-          const h = canvas.height;
-
-          const grad = ctx.createLinearGradient(0, 0, w, h);
-          grad.addColorStop(0, '#1e1b4b');
-          grad.addColorStop(0.5, '#3b0764');
-          grad.addColorStop(1, '#0f172a');
-          ctx.fillStyle = grad;
-          ctx.fillRect(0, 0, w, h);
-
-          const orbs = [
-            { x: w * (0.3 + 0.12 * Math.sin(t * 0.85)), y: h * (0.4 + 0.1 * Math.cos(t * 0.65)), r: w * 0.24, color: 'rgba(99, 102, 241, 0.36)' },
-            { x: w * (0.72 + 0.1 * Math.cos(t * 0.75)), y: h * (0.55 + 0.12 * Math.sin(t * 0.6)), r: w * 0.25, color: 'rgba(236, 72, 153, 0.32)' },
-            { x: w * 0.5, y: h * 0.48, r: w * 0.16, color: 'rgba(56, 189, 248, 0.2)' }
-          ];
-
-          orbs.forEach((orb) => {
-            const rg = ctx.createRadialGradient(orb.x, orb.y, 10, orb.x, orb.y, orb.r);
-            rg.addColorStop(0, orb.color);
-            rg.addColorStop(1, 'rgba(0, 0, 0, 0)');
-            ctx.fillStyle = rg;
-            ctx.beginPath();
-            ctx.arc(orb.x, orb.y, orb.r, 0, Math.PI * 2);
-            ctx.fill();
-          });
-
-          ctx.save();
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
-          ctx.lineWidth = 3;
-          ctx.beginPath();
-          ctx.arc(w * 0.5, h * 0.4, h * 0.13, 0, Math.PI * 2);
-          ctx.stroke();
-
-          ctx.beginPath();
-          ctx.ellipse(w * 0.5, h * 0.74, h * 0.22, h * 0.16, 0, Math.PI, Math.PI * 2);
-          ctx.stroke();
-          ctx.restore();
+          if (ctx) {
+            drawStudioFallbackOnContext(ctx, canvas.width, canvas.height, t);
+          }
         });
 
-        const guideCan = document.getElementById('framingGuideClearCanvas');
-        if (guideCan && !guideCan.classList.contains('hidden') && liveCanvas) {
+        if (guideCan && !guideCan.classList.contains('hidden')) {
           const gctx = guideCan.getContext('2d');
           const rect = guideCan.getBoundingClientRect();
-          const targetW = Math.max(1, Math.round(rect.width || liveCanvas.width));
-          const targetH = Math.max(1, Math.round(rect.height || liveCanvas.height));
+          const targetW = Math.max(1, Math.round(rect.width || liveCanvas?.width || 1280));
+          const targetH = Math.max(1, Math.round(rect.height || liveCanvas?.height || 720));
           if (gctx) {
             if (guideCan.width !== targetW || guideCan.height !== targetH) {
               guideCan.width = targetW;
               guideCan.height = targetH;
             }
-            gctx.clearRect(0, 0, targetW, targetH);
-            gctx.drawImage(liveCanvas, 0, 0, targetW, targetH);
+            drawStudioFallbackOnContext(gctx, targetW, targetH, t);
           }
         }
 
@@ -1099,43 +1107,7 @@
       offCanvas.width = width;
       offCanvas.height = height;
       const ctx = offCanvas.getContext('2d');
-      if (!ctx) return offCanvas;
-
-      const grad = ctx.createLinearGradient(0, 0, width, height);
-      grad.addColorStop(0, '#1e1b4b');
-      grad.addColorStop(0.5, '#3b0764');
-      grad.addColorStop(1, '#0f172a');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, width, height);
-
-      const orbs = [
-        { x: width * (0.3 + 0.12 * Math.sin(t * 0.85)), y: height * (0.4 + 0.1 * Math.cos(t * 0.65)), r: width * 0.24, color: 'rgba(99, 102, 241, 0.36)' },
-        { x: width * (0.72 + 0.1 * Math.cos(t * 0.75)), y: height * (0.55 + 0.12 * Math.sin(t * 0.6)), r: width * 0.25, color: 'rgba(236, 72, 153, 0.32)' },
-        { x: width * 0.5, y: height * 0.48, r: width * 0.16, color: 'rgba(56, 189, 248, 0.2)' }
-      ];
-
-      orbs.forEach((orb) => {
-        const rg = ctx.createRadialGradient(orb.x, orb.y, 10, orb.x, orb.y, orb.r);
-        rg.addColorStop(0, orb.color);
-        rg.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = rg;
-        ctx.beginPath();
-        ctx.arc(orb.x, orb.y, orb.r, 0, Math.PI * 2);
-        ctx.fill();
-      });
-
-      ctx.save();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.16)';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.arc(width * 0.5, height * 0.4, height * 0.13, 0, Math.PI * 2);
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.ellipse(width * 0.5, height * 0.74, height * 0.22, height * 0.16, 0, Math.PI, Math.PI * 2);
-      ctx.stroke();
-      ctx.restore();
-
+      drawStudioFallbackOnContext(ctx, width, height, t);
       return offCanvas;
     }
 
@@ -1215,8 +1187,8 @@
     }
 
     /**
-     * Update the exact-aspect framing guide window so the exact cropped photo region is sharp
-     * while the entire surrounding area stays blurred.
+     * Update the single clean capture window matching exact output photo dimensions
+     * while the surrounding backdrop remains blurred without duplicate feeds.
      */
     function updateFramingGuideOverlay(useLiveVideo, shouldMirror) {
       const overlay = document.getElementById('framingGuideOverlay');
@@ -1246,22 +1218,16 @@
       const top = Number(box.y.toFixed(2));
       const width = Number(box.w.toFixed(2));
       const height = Number(box.h.toFixed(2));
-      const centerX = (left + width * 0.5).toFixed(2);
-      const centerY = (top + height * 0.5).toFixed(2);
-      const rx = Math.max(40, Math.round(width * 0.52));
-      const ry = Math.max(40, Math.round(height * 0.52));
 
-      // Keep the exact photo rectangle clear on the blurred backdrop while blurring everything around it
-      const clearHoleMask = `radial-gradient(ellipse ${rx}px ${ry}px at ${centerX}px ${centerY}px, transparent 88%, rgba(0, 0, 0, 0.88) 97%, rgba(0, 0, 0, 1) 100%)`;
       backdrop.style.clipPath = 'none';
-      backdrop.style.webkitMaskImage = clearHoleMask;
-      backdrop.style.maskImage = clearHoleMask;
+      backdrop.style.webkitMaskImage = 'none';
+      backdrop.style.maskImage = 'none';
 
       clearWin.style.left = `${left}px`;
       clearWin.style.top = `${top}px`;
       clearWin.style.width = `${width}px`;
       clearWin.style.height = `${height}px`;
-      clearWin.style.borderRadius = '26px';
+      clearWin.style.borderRadius = '28px';
 
       if (badge) {
         const ratioText = targetAspect >= 1 ? `${targetAspect.toFixed(2)}:1` : `1:${(1 / targetAspect).toFixed(2)}`;
@@ -1276,12 +1242,11 @@
         if (STATE.stream && clearVid.srcObject !== STATE.stream) {
           clearVid.srcObject = STATE.stream;
         }
-        clearVid.style.left = `${-Math.round(left)}px`;
-        clearVid.style.top = `${-Math.round(top)}px`;
-        clearVid.style.width = `${Math.round(cw)}px`;
-        clearVid.style.height = `${Math.round(ch)}px`;
+        clearVid.style.left = '0px';
+        clearVid.style.top = '0px';
+        clearVid.style.width = '100%';
+        clearVid.style.height = '100%';
         clearVid.style.objectFit = 'cover';
-        clearVid.style.borderRadius = '0px';
         clearVid.classList.toggle('mirrored', Boolean(shouldMirror));
         clearVid.classList.toggle('hidden', !useLiveVideo);
         if (useLiveVideo && clearVid.paused) {
@@ -1293,12 +1258,11 @@
       }
 
       if (clearCan) {
-        clearCan.style.left = `${-Math.round(left)}px`;
-        clearCan.style.top = `${-Math.round(top)}px`;
-        clearCan.style.width = `${Math.round(cw)}px`;
-        clearCan.style.height = `${Math.round(ch)}px`;
+        clearCan.style.left = '0px';
+        clearCan.style.top = '0px';
+        clearCan.style.width = '100%';
+        clearCan.style.height = '100%';
         clearCan.style.objectFit = 'cover';
-        clearCan.style.borderRadius = '0px';
         clearCan.classList.toggle('mirrored', Boolean(shouldMirror));
         clearCan.classList.toggle('hidden', Boolean(useLiveVideo));
       }
@@ -1407,8 +1371,6 @@
 
       if (bgVideo) bgVideo.classList.toggle('hidden', !(STATE.screen === 'start' && useLiveVideo));
       if (bgSim) bgSim.classList.toggle('hidden', !(STATE.screen === 'start' && !useLiveVideo));
-      if (liveVideo) liveVideo.classList.toggle('hidden', !(STATE.screen === 'capture' && useLiveVideo));
-      if (liveSim) liveSim.classList.toggle('hidden', !(STATE.screen === 'capture' && !useLiveVideo));
       updateFramingGuideOverlay(useLiveVideo, shouldMirror);
     }
 
