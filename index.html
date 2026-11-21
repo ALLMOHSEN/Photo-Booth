@@ -55,7 +55,7 @@
       filter: blur(0px) brightness(1);
       transform: scale(1);
       transform-origin: center center;
-      border-radius: 18px;
+      border-radius: 34px;
     }
 
     .live-camera-feed.mirrored {
@@ -83,10 +83,8 @@
     #framingGuideClearWindow {
       position: absolute;
       overflow: hidden;
-      border: 2px solid rgba(255, 255, 255, 0.9);
-      outline: 2px solid rgba(251, 191, 36, 0.28);
-      outline-offset: 3px;
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22), 0 14px 34px rgba(2, 6, 23, 0.48);
+      border: 1.5px solid rgba(255, 255, 255, 0.55);
+      box-shadow: 0 0 28px 12px rgba(2, 6, 23, 0.36), inset 0 0 26px rgba(255, 255, 255, 0.16), 0 16px 40px rgba(2, 6, 23, 0.42);
       transition: left 0.2s ease, top 0.2s ease, width 0.2s ease, height 0.2s ease, border-radius 0.2s ease;
     }
 
@@ -96,7 +94,7 @@
       top: 0;
       left: 0;
       pointer-events: none;
-      border-radius: 18px;
+      border-radius: 34px;
       transform-origin: center center;
     }
 
@@ -530,6 +528,19 @@
           </div>
 
           <button
+            id="btnOpenFullScreenPreview"
+            type="button"
+            data-action="open-fullscreen-preview"
+            class="w-full py-3 px-5 rounded-2xl bg-indigo-600/80 hover:bg-indigo-500 active:scale-[0.98] border border-amber-300/40 text-white font-black text-sm sm:text-base shadow-lg transition flex items-center justify-center gap-2"
+          >
+            <svg class="w-5 h-5 shrink-0 text-amber-300" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V5a1 1 0 011-1h3M20 8V5a1 1 0 00-1-1h-3M4 16v3a1 1 0 001 1h3M20 16v3a1 1 0 01-1 1h-3" />
+              <rect x="7" y="7" width="10" height="10" rx="1.5" />
+            </svg>
+            <span>معاينة بكامل الشاشة قبل الطباعة</span>
+          </button>
+
+          <button
             id="btnDirectPrint"
             type="button"
             data-action="direct-print"
@@ -562,6 +573,49 @@
       id="kioskStatusToast"
       class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-2xl bg-slate-950/90 border border-emerald-400/50 text-emerald-200 text-xs sm:text-sm font-black shadow-2xl pointer-events-none"
     ></div>
+
+    <!-- Full-Screen Pre-Print Preview Modal -->
+    <div id="fullScreenPreviewModal" class="hidden fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-xl flex flex-col items-center justify-between p-3 sm:p-5 select-none">
+      <div class="w-full max-w-5xl flex items-center justify-between gap-3 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <span class="px-3.5 py-1.5 rounded-2xl bg-indigo-600/35 border border-amber-300/60 text-amber-200 text-xs sm:text-sm font-black">
+            معاينة كاملة قبل الطباعة
+          </span>
+          <span id="fullScreenPreviewMeta" class="text-xs sm:text-sm font-bold text-slate-300"></span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button
+            id="btnFullScreenPrint"
+            type="button"
+            data-action="direct-print"
+            class="px-4 py-2 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white text-xs sm:text-sm font-black shadow-lg transition"
+          >
+            <span id="btnFullScreenPrintLabel">طباعة فورية</span>
+          </button>
+          <button
+            id="btnCloseFullScreenPreview"
+            type="button"
+            data-action="close-fullscreen-preview"
+            class="px-4 py-2 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-white/20 text-white text-xs sm:text-sm font-black transition"
+          >
+            إغلاق المعاينة
+          </button>
+        </div>
+      </div>
+
+      <div class="flex-1 w-full max-w-5xl min-h-0 flex items-center justify-center py-3 overflow-hidden">
+        <img
+          id="fullScreenComposedImg"
+          alt="معاينة الصورة كاملة قبل الطباعة"
+          class="max-w-full max-h-full w-auto h-auto rounded-3xl shadow-[0_24px_70px_rgba(0,0,0,0.9)] border-2 border-white/25 object-contain"
+        />
+      </div>
+
+      <div class="text-xs font-bold text-slate-400 shrink-0">
+        اضغط على «إغلاق المعاينة» للعودة إلى الثيمات أو «طباعة فورية» للإرسال إلى الطابعة
+      </div>
+    </div>
 
     <!-- 1200x1800 px (100mm x 148mm / 4x6 inch at 300 DPI) Canon SELPHY Canvas -->
     <canvas id="selphyCanvas" width="1200" height="1800" class="hidden"></canvas>
@@ -1102,9 +1156,8 @@
       const top = Number(box.y.toFixed(2));
       const width = Number(box.w.toFixed(2));
       const height = Number(box.h.toFixed(2));
-      const radius = 18;
+      const radius = 34;
 
-      // Cut out exact inner rectangle from the blurred backdrop using polygon hole
       backdrop.style.clipPath = `polygon(
         0px 0px,
         ${cw}px 0px,
@@ -1142,7 +1195,7 @@
         clearVid.style.width = `${Math.round(cw)}px`;
         clearVid.style.height = `${Math.round(ch)}px`;
         clearVid.style.objectFit = 'cover';
-        clearVid.style.borderRadius = '18px';
+        clearVid.style.borderRadius = '34px';
         clearVid.classList.toggle('mirrored', Boolean(shouldMirror));
         clearVid.classList.toggle('hidden', !useLiveVideo);
         if (useLiveVideo && clearVid.paused) {
@@ -1159,7 +1212,7 @@
         clearCan.style.width = `${Math.round(cw)}px`;
         clearCan.style.height = `${Math.round(ch)}px`;
         clearCan.style.objectFit = 'cover';
-        clearCan.style.borderRadius = '18px';
+        clearCan.style.borderRadius = '34px';
         clearCan.classList.toggle('mirrored', Boolean(shouldMirror));
         clearCan.classList.toggle('hidden', Boolean(useLiveVideo));
       }
@@ -1739,6 +1792,7 @@
      * Start capture flow: 6s initial countdown -> Shot 1 -> 3s wait between shots
      */
     async function runCountdown(seconds, sessionToken) {
+      closeFullScreenPreview();
       const overlay = document.getElementById('countdownOverlay');
       const numEl = document.getElementById('countdownNumber');
       if (!overlay || !numEl) return false;
@@ -1887,6 +1941,17 @@
         changePrintCopies(delta);
         const total = (Number(STATE.printCopies) || 1) * (Number(STATE.pricePerCopy) || 5000);
         announceKioskStatus(`عدد الطبعات ${STATE.printCopies} والمجموع ${total.toLocaleString('en-US')} دينار عراقي`);
+        return;
+      }
+
+      if (explicitAction === 'open-fullscreen-preview' || btnId === 'btnOpenFullScreenPreview') {
+        announceKioskStatus('فتح المعاينة الكاملة قبل الطباعة', true);
+        openFullScreenPreview();
+        return;
+      }
+
+      if (explicitAction === 'close-fullscreen-preview' || btnId === 'btnCloseFullScreenPreview') {
+        closeFullScreenPreview();
         return;
       }
 
@@ -2089,7 +2154,6 @@
       ctx.clip();
 
       drawThemeBackground(ctx, theme, stripW, stripH, variantSeed);
-      // Re-draw shifted into strip coordinates
       const tempCan = document.createElement('canvas');
       tempCan.width = stripW;
       tempCan.height = stripH;
@@ -2206,7 +2270,6 @@
         ctx.fillText(`${theme.stickerLeft}  ${theme.topCaption}  ${theme.stickerRight}`, W / 2, 90);
 
         if (count === 4) {
-          // 2 photos on top row, 2 photos underneath ("2 تحت 2")
           const cols = 2;
           const rows = 2;
           const gapX = 26;
@@ -2268,9 +2331,12 @@
 
       const dataUrl = canvas.toDataURL('image/jpeg', 0.96);
       const previewImg = document.getElementById('composedPreviewImg');
+      const fullScreenImg = document.getElementById('fullScreenComposedImg');
       const printImg = document.getElementById('printOnlyImg');
       if (previewImg) previewImg.src = dataUrl;
+      if (fullScreenImg) fullScreenImg.src = dataUrl;
       if (printImg) printImg.src = dataUrl;
+      syncFullScreenPreviewMeta();
     }
 
     function countGapForShots(shotCount) {
@@ -2331,6 +2397,37 @@
           window.print();
         } catch (err) {}
       }, 100);
+    }
+
+    function syncFullScreenPreviewMeta() {
+      const metaEl = document.getElementById('fullScreenPreviewMeta');
+      const fsPrintBtnLabel = document.getElementById('btnFullScreenPrintLabel');
+      const themeObj = THEMES[STATE.selectedTheme] || THEMES.kids;
+      const layoutLabel = STATE.printLayout === 'postcard' ? 'كاملة' : 'شريطين';
+      const copies = Math.max(1, Number(STATE.printCopies) || 1);
+      const total = copies * (Number(STATE.pricePerCopy) || 5000);
+      if (metaEl) {
+        metaEl.textContent = `${STATE.shotCount} صور • ${layoutLabel} • ثيم ${themeObj.label} • ${copies} نسخة`;
+      }
+      if (fsPrintBtnLabel) {
+        fsPrintBtnLabel.textContent = `طباعة فورية (${copies}) — ${total.toLocaleString('en-US')} د.ع`;
+      }
+    }
+
+    async function openFullScreenPreview() {
+      await renderSelphyComposition();
+      syncFullScreenPreviewMeta();
+      const modal = document.getElementById('fullScreenPreviewModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+      }
+    }
+
+    function closeFullScreenPreview() {
+      const modal = document.getElementById('fullScreenPreviewModal');
+      if (modal) {
+        modal.classList.add('hidden');
+      }
     }
 
     /**
