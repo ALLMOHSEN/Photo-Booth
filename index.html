@@ -1232,67 +1232,41 @@
     }
 
     /**
-     * Exact FIT (contain) photo placement inside a slot frame `(slotX, slotY, slotW, slotH)`
-     * with full aspect preservation, zero cropping, zero distortion, and neat centered mat padding.
+     * Fill `(slotX, slotY, slotW, slotH)` edge-to-edge with zero blank gaps
+     * while preserving natural aspect ratio (`coverScale`) and centering inside rounded frame.
      */
     function drawPhotoFittedInRect(ctx, img, slotX, slotY, slotW, slotH, options = {}) {
       if (!ctx || !img || slotW <= 0 || slotH <= 0) return;
 
       const radius = typeof options.radius === 'number' ? options.radius : 22;
-      const matColor = options.matColor || '#1e293b';
-      const borderColor = options.borderColor || 'rgba(255, 255, 255, 0.75)';
+      const borderColor = options.borderColor || 'rgba(255, 255, 255, 0.85)';
       const borderWidth = typeof options.borderWidth === 'number' ? options.borderWidth : 4;
-      const padRatio = typeof options.padRatio === 'number' ? options.padRatio : 0.045;
-      const minPad = typeof options.minPad === 'number' ? options.minPad : 10;
-
-      ctx.save();
-      roundRectPath(ctx, slotX, slotY, slotW, slotH, radius);
-      ctx.fillStyle = matColor;
-      ctx.fill();
-      ctx.clip();
-
-      const matGrad = ctx.createLinearGradient(slotX, slotY, slotX, slotY + slotH);
-      matGrad.addColorStop(0, 'rgba(255, 255, 255, 0.14)');
-      matGrad.addColorStop(1, 'rgba(0, 0, 0, 0.14)');
-      ctx.fillStyle = matGrad;
-      ctx.fillRect(slotX, slotY, slotW, slotH);
-
-      const pad = Math.max(minPad, Math.min(slotW, slotH) * padRatio);
-      const innerX = slotX + pad;
-      const innerY = slotY + pad;
-      const innerW = Math.max(12, slotW - pad * 2);
-      const innerH = Math.max(12, slotH - pad * 2);
 
       const imgW = img.naturalWidth || img.width || 1200;
       const imgH = img.naturalHeight || img.height || 800;
-      const fitScale = Math.min(innerW / imgW, innerH / imgH);
-      const drawW = Math.max(1, imgW * fitScale);
-      const drawH = Math.max(1, imgH * fitScale);
-      const drawX = innerX + (innerW - drawW) * 0.5;
-      const drawY = innerY + (innerH - drawH) * 0.5;
+      const coverScale = Math.max(slotW / imgW, slotH / imgH);
+      const drawW = Math.max(1, imgW * coverScale);
+      const drawH = Math.max(1, imgH * coverScale);
+      const drawX = slotX + (slotW - drawW) * 0.5;
+      const drawY = slotY + (slotH - drawH) * 0.5;
 
-      const photoRadius = Math.max(8, radius - 6);
       ctx.save();
-      roundRectPath(ctx, drawX, drawY, drawW, drawH, photoRadius);
+      roundRectPath(ctx, slotX, slotY, slotW, slotH, radius);
       ctx.clip();
+
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(img, 0, 0, imgW, imgH, drawX, drawY, drawW, drawH);
       ctx.restore();
 
-      ctx.strokeStyle = borderColor;
-      ctx.lineWidth = Math.max(2, borderWidth * 0.7);
-      roundRectPath(ctx, drawX, drawY, drawW, drawH, photoRadius);
-      ctx.stroke();
-
-      ctx.restore();
-
-      ctx.save();
-      ctx.strokeStyle = borderColor;
-      ctx.lineWidth = borderWidth;
-      roundRectPath(ctx, slotX, slotY, slotW, slotH, radius);
-      ctx.stroke();
-      ctx.restore();
+      if (borderWidth > 0) {
+        ctx.save();
+        ctx.strokeStyle = borderColor;
+        ctx.lineWidth = borderWidth;
+        roundRectPath(ctx, slotX, slotY, slotW, slotH, radius);
+        ctx.stroke();
+        ctx.restore();
+      }
     }
 
     function triggerCameraFlash() {
@@ -1702,12 +1676,9 @@
           photoW,
           photoH,
           {
-            matColor: theme.matColor,
             borderColor: theme.accentColor,
             borderWidth: 3.5,
-            radius: 16,
-            padRatio: 0.045,
-            minPad: 8
+            radius: 16
           }
         );
       }
@@ -1804,12 +1775,9 @@
             cellW,
             cellH,
             {
-              matColor: theme.matColor,
               borderColor: theme.accentColor,
               borderWidth: 4.5,
-              radius: 22,
-              padRatio: 0.045,
-              minPad: 12
+              radius: 22
             }
           );
         }
@@ -1910,6 +1878,7 @@
       selectShotCount(3);
       await selectTheme('kids');
       await selectPrintLayout('postcard');
+      await renderSelphyComposition();
       await ensureCameraReady(false);
 
       document.addEventListener('visibilitychange', () => {
