@@ -55,6 +55,7 @@
       filter: blur(0px) brightness(1);
       transform: scale(1);
       transform-origin: center center;
+      border-radius: 18px;
     }
 
     .live-camera-feed.mirrored {
@@ -95,7 +96,7 @@
       top: 0;
       left: 0;
       pointer-events: none;
-      border-radius: inherit;
+      border-radius: 18px;
       transform-origin: center center;
     }
 
@@ -594,6 +595,7 @@
       isCaptureRunning: false,
       isStartingSequence: false,
       sessionId: 0,             // Monotonic session token to cancel stale loops
+      themeVariantSeed: Math.floor(Math.random() * 10000),
       simAnimFrame: null,
       simPhase: 0,
       audioCtx: null
@@ -1029,7 +1031,16 @@
         const headerHeight = 148;
         const footerHeight = 128;
         const sideMargin = 64;
-        const gap = count >= 4 ? 18 : 26;
+        if (count === 4) {
+          const cols = 2;
+          const rows = 2;
+          const gapX = 26;
+          const gapY = 26;
+          const cellW = (W - sideMargin * 2 - gapX * (cols - 1)) / cols;
+          const cellH = (H - headerHeight - footerHeight - gapY * (rows - 1)) / rows;
+          return Math.max(0.2, cellW / Math.max(1, cellH));
+        }
+        const gap = 26;
         const cellW = W - sideMargin * 2;
         const cellH = (H - headerHeight - footerHeight - gap * (count - 1)) / count;
         return Math.max(0.2, cellW / Math.max(1, cellH));
@@ -1091,7 +1102,7 @@
       const top = Number(box.y.toFixed(2));
       const width = Number(box.w.toFixed(2));
       const height = Number(box.h.toFixed(2));
-      const radius = 22;
+      const radius = 18;
 
       // Cut out exact inner rectangle from the blurred backdrop using polygon hole
       backdrop.style.clipPath = `polygon(
@@ -1126,12 +1137,12 @@
         if (STATE.stream && clearVid.srcObject !== STATE.stream) {
           clearVid.srcObject = STATE.stream;
         }
-        clearVid.style.left = `${-left}px`;
-        clearVid.style.top = `${-top}px`;
-        clearVid.style.width = `${cw}px`;
-        clearVid.style.height = `${ch}px`;
+        clearVid.style.left = `${-Math.round(left)}px`;
+        clearVid.style.top = `${-Math.round(top)}px`;
+        clearVid.style.width = `${Math.round(cw)}px`;
+        clearVid.style.height = `${Math.round(ch)}px`;
         clearVid.style.objectFit = 'cover';
-        clearVid.style.borderRadius = '0px';
+        clearVid.style.borderRadius = '18px';
         clearVid.classList.toggle('mirrored', Boolean(shouldMirror));
         clearVid.classList.toggle('hidden', !useLiveVideo);
         if (useLiveVideo && clearVid.paused) {
@@ -1143,12 +1154,12 @@
       }
 
       if (clearCan) {
-        clearCan.style.left = `${-left}px`;
-        clearCan.style.top = `${-top}px`;
-        clearCan.style.width = `${cw}px`;
-        clearCan.style.height = `${ch}px`;
+        clearCan.style.left = `${-Math.round(left)}px`;
+        clearCan.style.top = `${-Math.round(top)}px`;
+        clearCan.style.width = `${Math.round(cw)}px`;
+        clearCan.style.height = `${Math.round(ch)}px`;
         clearCan.style.objectFit = 'cover';
-        clearCan.style.borderRadius = '0px';
+        clearCan.style.borderRadius = '18px';
         clearCan.classList.toggle('mirrored', Boolean(shouldMirror));
         clearCan.classList.toggle('hidden', Boolean(useLiveVideo));
       }
@@ -1763,6 +1774,7 @@
       const sessionToken = STATE.sessionId;
       STATE.capturedPhotos = [];
       STATE.printCopies = 1;
+      STATE.themeVariantSeed = Math.floor(Math.random() * 100000);
       updatePrintCopiesUI();
 
       const totalShots = STATE.shotCount === 4 ? 4 : 3;
@@ -1925,70 +1937,139 @@
       });
     }
 
+    function createSeededRng(seedVal) {
+      let s = (Number(seedVal) || 1) % 2147483647;
+      if (s <= 0) s += 2147483646;
+      return () => {
+        s = (s * 16807) % 2147483647;
+        return (s - 1) / 2147483646;
+      };
+    }
+
+    function drawCuteStar(ctx, cx, cy, outerR, innerR, color) {
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      for (let i = 0; i < 10; i++) {
+        const r = i % 2 === 0 ? outerR : innerR;
+        const angle = -Math.PI / 2 + (i * Math.PI) / 5;
+        const x = cx + Math.cos(angle) * r;
+        const y = cy + Math.sin(angle) * r;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawCuteHeart(ctx, cx, cy, size, color) {
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      const topCurveHeight = size * 0.3;
+      ctx.moveTo(cx, cy + topCurveHeight);
+      ctx.bezierCurveTo(cx, cy, cx - size / 2, cy, cx - size / 2, cy + topCurveHeight);
+      ctx.bezierCurveTo(cx - size / 2, cy + (size + topCurveHeight) / 2, cx, cy + (size + topCurveHeight) / 1.25, cx, cy + size);
+      ctx.bezierCurveTo(cx, cy + (size + topCurveHeight) / 1.25, cx + size / 2, cy + (size + topCurveHeight) / 2, cx + size / 2, cy + topCurveHeight);
+      ctx.bezierCurveTo(cx + size / 2, cy, cx, cy, cx, cy + topCurveHeight);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawCuteFlower(ctx, cx, cy, r, petalColor, centerColor) {
+      ctx.save();
+      for (let i = 0; i < 6; i++) {
+        const angle = (i * Math.PI) / 3;
+        const px = cx + Math.cos(angle) * (r * 0.65);
+        const py = cy + Math.sin(angle) * (r * 0.65);
+        ctx.fillStyle = petalColor;
+        ctx.beginPath();
+        ctx.arc(px, py, r * 0.45, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.fillStyle = centerColor;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.36, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawCuteSparkle(ctx, cx, cy, r, color) {
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - r);
+      ctx.quadraticCurveTo(cx, cy, cx + r, cy);
+      ctx.quadraticCurveTo(cx, cy, cx, cy + r);
+      ctx.quadraticCurveTo(cx, cy, cx - r, cy);
+      ctx.quadraticCurveTo(cx, cy, cx, cy - r);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
     /**
-     * Draw rich vector-drawn background accents and borders for each theme on 1200x1800 canvas
+     * Draw cute theme background illustrations that vary each time per theme
      */
-    function drawThemeBackground(ctx, theme, width, height) {
+    function drawThemeBackground(ctx, theme, width, height, variantSeed = 0) {
+      const rng = createSeededRng(variantSeed + theme.id.split('').reduce((a, b) => a + b.charCodeAt(0) * 31, 17));
       const grad = ctx.createLinearGradient(0, 0, width * 0.25, height);
       grad.addColorStop(0, theme.bgTop);
       grad.addColorStop(1, theme.bgBottom);
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, width, height);
 
-      ctx.save();
-      if (theme.pattern === 'stars') {
-        ctx.fillStyle = 'rgba(245, 158, 11, 0.14)';
-        for (let y = 140; y < height - 100; y += 220) {
-          for (let x = 110; x < width; x += 240) {
+      const itemCount = 14 + Math.floor(rng() * 8);
+      for (let i = 0; i < itemCount; i++) {
+        const marginX = 36;
+        const marginY = 48;
+        const x = marginX + rng() * Math.max(40, width - marginX * 2);
+        const y = marginY + rng() * Math.max(40, height - marginY * 2);
+        const scale = 0.75 + rng() * 0.9;
+
+        if (theme.pattern === 'stars') {
+          if (i % 2 === 0) {
+            drawCuteStar(ctx, x, y, 22 * scale, 10 * scale, 'rgba(245, 158, 11, 0.24)');
+          } else {
+            ctx.save();
+            ctx.fillStyle = 'rgba(56, 189, 248, 0.22)';
             ctx.beginPath();
-            ctx.arc(x + ((y / 220) % 2) * 60, y, 16, 0, Math.PI * 2);
+            ctx.ellipse(x, y, 16 * scale, 21 * scale, 0, 0, Math.PI * 2);
             ctx.fill();
+            ctx.strokeStyle = 'rgba(245, 158, 11, 0.35)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(x, y + 21 * scale);
+            ctx.lineTo(x - 6 * scale, y + 38 * scale);
+            ctx.stroke();
+            ctx.restore();
           }
+        } else if (theme.pattern === 'hearts') {
+          if (i % 2 === 0) {
+            drawCuteHeart(ctx, x, y, 28 * scale, 'rgba(236, 72, 153, 0.22)');
+          } else {
+            drawCuteSparkle(ctx, x, y, 20 * scale, 'rgba(244, 63, 94, 0.24)');
+          }
+        } else if (theme.pattern === 'neon') {
+          if (i % 2 === 0) {
+            drawCuteSparkle(ctx, x, y, 22 * scale, 'rgba(34, 211, 238, 0.26)');
+          } else {
+            drawCuteStar(ctx, x, y, 18 * scale, 8 * scale, 'rgba(96, 165, 250, 0.24)');
+          }
+        } else if (theme.pattern === 'gold') {
+          drawCuteSparkle(ctx, x, y, 22 * scale, 'rgba(250, 204, 21, 0.24)');
+        } else if (theme.pattern === 'pastel') {
+          if (i % 2 === 0) {
+            drawCuteFlower(ctx, x, y, 24 * scale, 'rgba(192, 132, 252, 0.26)', 'rgba(251, 191, 36, 0.34)');
+          } else {
+            drawCuteHeart(ctx, x, y, 24 * scale, 'rgba(52, 211, 153, 0.22)');
+          }
+        } else {
+          drawCuteSparkle(ctx, x, y, 20 * scale, 'rgba(197, 160, 89, 0.24)');
         }
-      } else if (theme.pattern === 'hearts') {
-        ctx.strokeStyle = 'rgba(236, 72, 153, 0.18)';
-        ctx.lineWidth = 3;
-        for (let y = 160; y < height - 120; y += 260) {
-          ctx.beginPath();
-          ctx.arc(105, y, 36, 0, Math.PI * 2);
-          ctx.arc(width - 105, y + 80, 44, 0, Math.PI * 2);
-          ctx.stroke();
-        }
-      } else if (theme.pattern === 'neon') {
-        ctx.strokeStyle = 'rgba(6, 182, 212, 0.16)';
-        ctx.lineWidth = 2;
-        for (let x = 70; x < width; x += 110) {
-          ctx.beginPath();
-          ctx.moveTo(x, 0);
-          ctx.lineTo(x, height);
-          ctx.stroke();
-        }
-        ctx.strokeStyle = 'rgba(59, 130, 246, 0.22)';
-        ctx.lineWidth = 4;
-        ctx.strokeRect(46, 46, width - 92, height - 92);
-      } else if (theme.pattern === 'gold') {
-        ctx.strokeStyle = 'rgba(234, 179, 8, 0.28)';
-        ctx.lineWidth = 3;
-        ctx.strokeRect(48, 48, width - 96, height - 96);
-        ctx.strokeRect(62, 62, width - 124, height - 124);
-      } else if (theme.pattern === 'pastel') {
-        ctx.fillStyle = 'rgba(167, 139, 250, 0.16)';
-        ctx.beginPath();
-        ctx.arc(160, 220, 150, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = 'rgba(52, 211, 153, 0.16)';
-        ctx.beginPath();
-        ctx.arc(width - 150, height - 220, 170, 0, Math.PI * 2);
-        ctx.fill();
-      } else if (theme.pattern === 'classic') {
-        ctx.strokeStyle = 'rgba(197, 160, 89, 0.35)';
-        ctx.lineWidth = 3;
-        ctx.strokeRect(46, 46, width - 92, height - 92);
-        ctx.strokeStyle = 'rgba(197, 160, 89, 0.18)';
-        ctx.lineWidth = 1.5;
-        ctx.strokeRect(60, 60, width - 120, height - 120);
       }
-      ctx.restore();
 
       ctx.save();
       ctx.strokeStyle = theme.borderColor;
@@ -2001,17 +2082,20 @@
     /**
      * Render single 2x6 photo strip (600x1800 px) for dual-strip (شريطين) mode
      */
-    function renderSingleStrip(ctx, theme, images, stripX, stripY, stripW, stripH) {
+    function renderSingleStrip(ctx, theme, images, stripX, stripY, stripW, stripH, variantSeed = 0) {
       ctx.save();
       ctx.beginPath();
       ctx.rect(stripX, stripY, stripW, stripH);
       ctx.clip();
 
-      const grad = ctx.createLinearGradient(stripX, stripY, stripX, stripY + stripH);
-      grad.addColorStop(0, theme.bgTop);
-      grad.addColorStop(1, theme.bgBottom);
-      ctx.fillStyle = grad;
-      ctx.fillRect(stripX, stripY, stripW, stripH);
+      drawThemeBackground(ctx, theme, stripW, stripH, variantSeed);
+      // Re-draw shifted into strip coordinates
+      const tempCan = document.createElement('canvas');
+      tempCan.width = stripW;
+      tempCan.height = stripH;
+      const tctx = tempCan.getContext('2d');
+      drawThemeBackground(tctx, theme, stripW, stripH, variantSeed);
+      ctx.drawImage(tempCan, stripX, stripY);
 
       ctx.strokeStyle = theme.borderColor;
       ctx.lineWidth = 8;
@@ -2063,6 +2147,7 @@
 
       const ctx = canvas.getContext('2d');
       const theme = THEMES[STATE.selectedTheme] || THEMES.kids;
+      const variantSeed = STATE.themeVariantSeed || 1;
 
       const sources = STATE.capturedPhotos.length > 0
         ? STATE.capturedPhotos
@@ -2094,8 +2179,8 @@
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, W, H);
 
-        renderSingleStrip(ctx, theme, loadedImages, 0, 0, 600, H);
-        renderSingleStrip(ctx, theme, loadedImages, 600, 0, 600, H);
+        renderSingleStrip(ctx, theme, loadedImages, 0, 0, 600, H, variantSeed);
+        renderSingleStrip(ctx, theme, loadedImages, 600, 0, 600, H, variantSeed + 97);
 
         ctx.save();
         ctx.setLineDash([12, 10]);
@@ -2107,12 +2192,11 @@
         ctx.stroke();
         ctx.restore();
       } else {
-        drawThemeBackground(ctx, theme, W, H);
+        drawThemeBackground(ctx, theme, W, H, variantSeed);
 
         const headerHeight = 148;
         const footerHeight = 128;
         const sideMargin = 64;
-        const gap = countGapForShots(loadedImages.length);
         const count = loadedImages.length;
 
         ctx.fillStyle = theme.textColor;
@@ -2121,25 +2205,58 @@
         ctx.textBaseline = 'middle';
         ctx.fillText(`${theme.stickerLeft}  ${theme.topCaption}  ${theme.stickerRight}`, W / 2, 90);
 
-        const availH = H - headerHeight - footerHeight - gap * (count - 1);
-        const cellH = availH / count;
-        const cellW = W - sideMargin * 2;
+        if (count === 4) {
+          // 2 photos on top row, 2 photos underneath ("2 تحت 2")
+          const cols = 2;
+          const rows = 2;
+          const gapX = 26;
+          const gapY = 26;
+          const availW = W - sideMargin * 2 - gapX * (cols - 1);
+          const availH = H - headerHeight - footerHeight - gapY * (rows - 1);
+          const cellW = availW / cols;
+          const cellH = availH / rows;
 
-        for (let i = 0; i < count; i++) {
-          const y = headerHeight + i * (cellH + gap);
-          drawPhotoFittedInRect(
-            ctx,
-            loadedImages[i],
-            sideMargin,
-            y,
-            cellW,
-            cellH,
-            {
-              borderColor: theme.accentColor,
-              borderWidth: 4.5,
-              radius: 22
-            }
-          );
+          for (let i = 0; i < 4; i++) {
+            const col = i % cols;
+            const row = Math.floor(i / cols);
+            const x = sideMargin + col * (cellW + gapX);
+            const y = headerHeight + row * (cellH + gapY);
+            drawPhotoFittedInRect(
+              ctx,
+              loadedImages[i],
+              x,
+              y,
+              cellW,
+              cellH,
+              {
+                borderColor: theme.accentColor,
+                borderWidth: 4.5,
+                radius: 22
+              }
+            );
+          }
+        } else {
+          const gap = countGapForShots(count);
+          const availH = H - headerHeight - footerHeight - gap * (count - 1);
+          const cellH = availH / count;
+          const cellW = W - sideMargin * 2;
+
+          for (let i = 0; i < count; i++) {
+            const y = headerHeight + i * (cellH + gap);
+            drawPhotoFittedInRect(
+              ctx,
+              loadedImages[i],
+              sideMargin,
+              y,
+              cellW,
+              cellH,
+              {
+                borderColor: theme.accentColor,
+                borderWidth: 4.5,
+                radius: 22
+              }
+            );
+          }
         }
 
         ctx.fillStyle = theme.textColor;
@@ -2166,6 +2283,7 @@
     async function selectTheme(themeId) {
       if (!THEMES[themeId]) return;
       STATE.selectedTheme = themeId;
+      STATE.themeVariantSeed = ((Number(STATE.themeVariantSeed) || 1) + 7919) % 1000000;
 
       document.querySelectorAll('.theme-pill-btn').forEach((btn) => {
         const isSelected = btn.getAttribute('data-theme') === themeId;
