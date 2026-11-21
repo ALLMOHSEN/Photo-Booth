@@ -176,15 +176,15 @@
       display: none;
     }
 
-    /* Canon SELPHY Postcard (100mm x 148mm / 4x6 inch) borderless print rules */
+    /* Full-bleed borderless print rules for Windows + Canon SELPHY */
     @page {
-      size: 100mm 148mm portrait;
+      size: 100mm 148mm;
       margin: 0 !important;
     }
 
     @media print {
       @page {
-        size: 100mm 148mm portrait;
+        size: 100mm 148mm;
         margin: 0 !important;
       }
 
@@ -195,16 +195,14 @@
       }
 
       html, body, #app {
-        width: 100mm !important;
-        height: 148mm !important;
-        min-width: 100mm !important;
-        min-height: 148mm !important;
-        max-width: 100mm !important;
-        max-height: 148mm !important;
+        width: 100% !important;
+        height: 100% !important;
+        min-width: 0 !important;
+        min-height: 0 !important;
         margin: 0 !important;
         padding: 0 !important;
         overflow: hidden !important;
-        background: #ffffff !important;
+        background: transparent !important;
       }
 
       #app > *:not(#printOnlyContainer) {
@@ -214,19 +212,18 @@
       #printOnlyContainer {
         display: block !important;
         position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100mm !important;
-        height: 148mm !important;
+        inset: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
         margin: 0 !important;
         padding: 0 !important;
-        background: #ffffff !important;
+        background: transparent !important;
         z-index: 999999 !important;
       }
 
       #printOnlyImg {
-        width: 100mm !important;
-        height: 148mm !important;
+        width: 100% !important;
+        height: 100% !important;
         max-width: none !important;
         max-height: none !important;
         object-fit: fill !important;
@@ -294,9 +291,9 @@
       </div>
     </div>
 
-    <!-- Print-only full-bleed 100mm x 148mm (Postcard 4in x 6in) output -->
+    <!-- Print-only full-bleed borderless output -->
     <div id="printOnlyContainer" aria-hidden="true">
-      <img id="printOnlyImg" alt="Canon SELPHY Postcard 100mm x 148mm Print" />
+      <img id="printOnlyImg" alt="Canon SELPHY Postcard Borderless Print" />
     </div>
 
     <!-- ===================================================================== -->
@@ -367,7 +364,7 @@
             type="button"
             data-action="select-layout"
             data-layout="dual_strip"
-            class="home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2.5 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35"
+            class="home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35"
           >
             <svg class="w-5 h-5 shrink-0 text-amber-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
               <rect x="3.5" y="3.5" width="7" height="17" rx="1.5" />
@@ -572,7 +569,7 @@
           </button>
 
           <div class="text-[11px] font-bold text-slate-400 text-center leading-snug">
-            لإخفاء رابط الموقع وعدد الصفحات من نافذة المتصفح: أوقف خيار «الرؤوس والتذييلات / Headers and footers» واجعل الهوامش «بلا / None».
+            لإزالة الحواف البيضاء بالكامل في Windows: فعّل «Borderless» في إعدادات الطابعة واجعل «Margins: None» وأوقف «Headers and footers».
           </div>
 
           <button
@@ -640,7 +637,7 @@
       </div>
 
       <div class="text-xs font-bold text-slate-400 shrink-0 text-center">
-        قياس بوست كارت 100×148 مم (4×6 إنش) — لإخفاء رابط الموقع وعدد الصفحات عطّل «الرؤوس والتذييلات» في نافذة الطباعة
+        قياس بوست كارت 100×148 مم (4×6 إنش) — للطباعة بدون حواف بيضاء فعّل «Borderless» في تعريف الطابعة على Windows
       </div>
     </div>
 
@@ -883,7 +880,7 @@
         const active = val === layout;
         btn.className = active
           ? 'home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2 transition bg-indigo-600/45 border-amber-300 text-white shadow'
-          : 'home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2.5 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35';
+          : 'home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35';
       });
 
       const modeBadge = document.getElementById('editorModeBadge');
