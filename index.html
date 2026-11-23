@@ -16,7 +16,7 @@
   <style id="dynamicPageStyle">
     @page {
       size: auto;
-      margin: 0mm;
+      margin: 0;
     }
   </style>
 
@@ -149,11 +149,11 @@
       display: none;
     }
 
-    /* Printer-driven full fit rules: scales cleanly to the selected printer paper with zero cropping */
+    /* Adaptive full-page fit for any paper size & iOS Safari print compatibility */
     @media print {
       @page {
         size: auto;
-        margin: 0mm;
+        margin: 0;
       }
 
       * {
@@ -164,16 +164,20 @@
 
       html, body {
         width: 100% !important;
-        height: 100% !important;
-        min-width: 0 !important;
+        height: auto !important;
         min-height: 0 !important;
         margin: 0 !important;
         padding: 0 !important;
-        overflow: hidden !important;
+        overflow: visible !important;
         background: #ffffff !important;
       }
 
-      #app {
+      #app,
+      #fullScreenPreviewModal,
+      #cameraDiagModal,
+      #cameraStatusBadge,
+      #kioskStatusToast,
+      #flashOverlay {
         display: none !important;
       }
 
@@ -181,24 +185,21 @@
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        position: fixed !important;
-        inset: 0 !important;
-        width: 100% !important;
-        height: 100% !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
-        overflow: hidden !important;
         background: #ffffff !important;
-        page-break-before: avoid !important;
-        page-break-after: avoid !important;
         page-break-inside: avoid !important;
         break-inside: avoid !important;
       }
 
       #printOnlyImg {
         display: block !important;
-        width: 100% !important;
-        height: 100% !important;
+        width: auto !important;
+        height: auto !important;
         max-width: 100% !important;
         max-height: 100% !important;
         object-fit: contain !important;
@@ -212,7 +213,7 @@
   </style>
 </head>
 <body>
-  <!-- Printer-sized full output container (zero cropping on any printer paper size) -->
+  <!-- Printer-sized full output container (adapts to any paper size on desktop & iOS Safari) -->
   <div id="printOnlyContainer" aria-hidden="true">
     <img id="printOnlyImg" alt="Full Uncropped Printer Output" />
   </div>
@@ -804,7 +805,7 @@
     function applyPrinterPageRule() {
       const dynStyle = document.getElementById('dynamicPageStyle');
       if (dynStyle) {
-        dynStyle.textContent = `@page { size: auto; margin: 0mm; }`;
+        dynStyle.textContent = `@page { size: auto; margin: 0; }`;
       }
       const badge = document.getElementById('editorModeBadge');
       if (badge) {
@@ -1044,15 +1045,15 @@
       const count = STATE.shotCount === 4 ? 4 : 3;
       const W = 1200;
       const H = 1800;
-      const headerHeight = Math.round(H * 0.11);
-      const footerHeight = Math.round(H * 0.14);
+      const topHeaderSpace = Math.round(H * 0.088);
+      const bottomCaptionSpace = Math.round(H * 0.082);
       const sideMargin = Math.round(W * 0.085);
 
       if (STATE.printLayout === 'dual_strip') {
         const stripW = W * 0.5;
-        const padX = Math.round(stripW * 0.075);
-        const topPad = Math.round(H * 0.048);
-        const bottomSpace = Math.round(H * 0.145);
+        const padX = Math.round(stripW * 0.085);
+        const topPad = Math.round(H * 0.068);
+        const bottomSpace = Math.round(H * 0.125);
         const gap = Math.round(H * 0.012);
         const photoW = stripW - padX * 2;
         const photoH = (H - topPad - bottomSpace - gap * (count - 1)) / count;
@@ -1060,16 +1061,16 @@
       }
 
       if (count === 4) {
-        const gapX = Math.round(W * 0.026);
-        const gapY = Math.round(H * 0.018);
+        const gapX = Math.round(W * 0.024);
+        const gapY = Math.round(H * 0.016);
         const cellW = (W - sideMargin * 2 - gapX) / 2;
-        const cellH = (H - headerHeight - footerHeight - gapY) / 2;
+        const cellH = (H - Math.round(H * 0.08) - topHeaderSpace - bottomCaptionSpace - gapY) / 2;
         return Math.max(0.2, cellW / Math.max(1, cellH));
       }
 
-      const gap = Math.round(H * 0.016);
+      const gap = Math.round(H * 0.015);
       const cellW = W - sideMargin * 2;
-      const cellH = (H - headerHeight - footerHeight - gap * (count - 1)) / count;
+      const cellH = (H - Math.round(H * 0.08) - topHeaderSpace - bottomCaptionSpace - gap * (count - 1)) / count;
       return Math.max(0.2, cellW / Math.max(1, cellH));
     }
 
@@ -1909,20 +1910,19 @@
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, width, height);
 
-      const safeInsetX = Math.max(48, Math.round(width * 0.055));
-      const safeInsetY = Math.max(58, Math.round(height * 0.04));
-      const footerZoneH = Math.max(108, Math.round(height * 0.09));
-      const gapBetweenFrameAndFooter = Math.max(20, Math.round(height * 0.016));
-
+      const safeInsetX = Math.max(44, Math.round(width * 0.05));
+      const safeInsetY = Math.max(48, Math.round(height * 0.032));
       const frameX = safeInsetX;
       const frameY = safeInsetY;
-      const frameW = width - safeInsetX * 2;
-      const frameH = Math.max(160, height - safeInsetY - footerZoneH - gapBetweenFrameAndFooter - Math.round(height * 0.032));
+      const frameW = Math.max(120, width - safeInsetX * 2);
+      const frameH = Math.max(220, height - safeInsetY * 2);
 
+      const footerInnerPad = Math.max(14, Math.round(height * 0.012));
+      const footerZoneH = Math.max(76, Math.min(126, Math.round(frameH * 0.072)));
       const footerRect = {
-        x: safeInsetX,
-        y: frameY + frameH + gapBetweenFrameAndFooter,
-        w: frameW,
+        x: frameX + Math.max(16, Math.round(frameW * 0.035)),
+        y: frameY + frameH - footerZoneH - footerInnerPad,
+        w: Math.max(80, frameW - Math.max(32, Math.round(frameW * 0.07))),
         h: footerZoneH
       };
 
@@ -1992,16 +1992,16 @@
     function drawFooterCaptionCleanly(ctx, theme, text, footerRect, baseFontSize) {
       if (!ctx || !footerRect || footerRect.w <= 10 || footerRect.h <= 10) return;
       ctx.save();
-      roundRectPath(ctx, footerRect.x + 8, footerRect.y + 4, footerRect.w - 16, footerRect.h - 8, 20);
-      ctx.fillStyle = theme.matColor || 'rgba(255, 255, 255, 0.65)';
-      ctx.globalAlpha = 0.55;
+      roundRectPath(ctx, footerRect.x, footerRect.y, footerRect.w, footerRect.h, 18);
+      ctx.fillStyle = theme.matColor || 'rgba(255, 255, 255, 0.75)';
+      ctx.globalAlpha = 0.72;
       ctx.fill();
       ctx.globalAlpha = 1;
 
-      const maxTextW = Math.max(60, footerRect.w - 40);
-      let fontSize = Math.min(baseFontSize, Math.round(footerRect.h * 0.44));
+      const maxTextW = Math.max(50, footerRect.w - 28);
+      let fontSize = Math.min(baseFontSize, Math.round(footerRect.h * 0.46));
       ctx.font = `800 ${fontSize}px Cairo, sans-serif`;
-      while (fontSize > 16 && ctx.measureText(text).width > maxTextW) {
+      while (fontSize > 14 && ctx.measureText(text).width > maxTextW) {
         fontSize -= 2;
         ctx.font = `800 ${fontSize}px Cairo, sans-serif`;
       }
@@ -2009,7 +2009,7 @@
       ctx.fillStyle = theme.textColor;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(text, footerRect.x + footerRect.w * 0.5, footerRect.y + footerRect.h * 0.5 + 2);
+      ctx.fillText(text, footerRect.x + footerRect.w * 0.5, footerRect.y + footerRect.h * 0.5 + 1);
       ctx.restore();
     }
 
@@ -2068,25 +2068,25 @@
       const { frameRect, footerRect } = drawThemeBackground(tctx, theme, stripW, stripH, variantSeed);
       ctx.drawImage(tempCan, stripX, stripY);
 
-      const padX = Math.round(stripW * 0.085);
-      const topPad = Math.round(frameRect.y + stripH * 0.025);
-      const bottomLimit = frameRect.y + frameRect.h - Math.round(stripH * 0.025);
+      const padX = Math.max(24, Math.round(stripW * 0.085));
+      const topPad = frameRect.y + Math.round(stripH * 0.022);
+      const bottomLimit = stripY + footerRect.y - Math.round(stripH * 0.016);
       const gap = Math.round(stripH * 0.012);
       const count = images.length;
       const availH = Math.max(90, bottomLimit - topPad - gap * (count - 1));
       const photoH = availH / count;
       const photoW = Math.max(60, stripW - padX * 2);
+      const centeredX = stripX + Math.round((stripW - photoW) * 0.5);
       const drawnPhotoRects = [];
 
       for (let i = 0; i < count; i++) {
-        const px = stripX + padX;
         const py = topPad + i * (photoH + gap);
-        drawPhotoFittedInRect(ctx, images[i], px, py, photoW, photoH, {
+        drawPhotoFittedInRect(ctx, images[i], centeredX, py, photoW, photoH, {
           borderColor: theme.accentColor,
           borderWidth: 3.5,
           radius: 16
         });
-        drawnPhotoRects.push({ x: px, y: py, w: photoW, h: photoH });
+        drawnPhotoRects.push({ x: centeredX, y: py, w: photoW, h: photoH });
       }
 
       drawThemeStickersOverPhotos(ctx, theme, drawnPhotoRects, variantSeed + 313);
@@ -2101,7 +2101,7 @@
           w: footerRect.w,
           h: footerRect.h
         },
-        Math.round(stripW * 0.044)
+        Math.round(stripW * 0.042)
       );
 
       ctx.restore();
@@ -2163,39 +2163,41 @@
       } else {
         const { frameRect, footerRect } = drawThemeBackground(ctx, theme, W, H, variantSeed);
 
-        const topHeaderSpace = Math.round(H * 0.088);
-        const sideMargin = frameRect.x + Math.round(W * 0.032);
+        const topHeaderSpace = Math.round(H * 0.072);
+        const innerSidePad = Math.round(frameRect.w * 0.045);
         const count = loadedImages.length;
         const drawnPhotoRects = [];
 
         ctx.fillStyle = theme.textColor;
-        const headerFontPx = Math.max(24, Math.round(W * 0.032));
+        const headerFontPx = Math.max(24, Math.round(W * 0.031));
         ctx.font = `900 ${headerFontPx}px Cairo, sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(
           `${theme.stickerLeft}  ${captions.topCaption}  ${theme.stickerRight}`,
           W * 0.5,
-          frameRect.y + topHeaderSpace * 0.56
+          frameRect.y + topHeaderSpace * 0.55
         );
 
-        const photosTopY = frameRect.y + topHeaderSpace;
-        const photosBottomY = frameRect.y + frameRect.h - Math.round(H * 0.024);
+        const photosTopY = frameRect.y + topHeaderSpace + Math.round(H * 0.008);
+        const photosBottomY = footerRect.y - Math.round(H * 0.016);
         const availPhotosH = Math.max(120, photosBottomY - photosTopY);
+        const fullContentW = Math.max(120, frameRect.w - innerSidePad * 2);
 
         if (count === 4) {
           const cols = 2;
           const rows = 2;
           const gapX = Math.round(W * 0.024);
           const gapY = Math.round(H * 0.016);
-          const availW = Math.max(80, (frameRect.x + frameRect.w - sideMargin) - sideMargin - gapX);
-          const cellW = availW / cols;
+          const cellW = (fullContentW - gapX) / cols;
           const cellH = Math.max(60, (availPhotosH - gapY) / rows);
+          const gridTotalW = cellW * cols + gapX;
+          const gridStartX = Math.round((W - gridTotalW) * 0.5);
 
           for (let i = 0; i < 4; i++) {
             const col = i % cols;
             const row = Math.floor(i / cols);
-            const x = sideMargin + col * (cellW + gapX);
+            const x = gridStartX + col * (cellW + gapX);
             const y = photosTopY + row * (cellH + gapY);
             drawPhotoFittedInRect(ctx, loadedImages[i], x, y, cellW, cellH, {
               borderColor: theme.accentColor,
@@ -2207,16 +2209,17 @@
         } else {
           const gap = Math.round(H * 0.015);
           const cellH = Math.max(70, (availPhotosH - gap * (count - 1)) / count);
-          const cellW = Math.max(80, (frameRect.x + frameRect.w - sideMargin) - sideMargin);
+          const cellW = fullContentW;
+          const centeredX = Math.round((W - cellW) * 0.5);
 
           for (let i = 0; i < count; i++) {
             const y = photosTopY + i * (cellH + gap);
-            drawPhotoFittedInRect(ctx, loadedImages[i], sideMargin, y, cellW, cellH, {
+            drawPhotoFittedInRect(ctx, loadedImages[i], centeredX, y, cellW, cellH, {
               borderColor: theme.accentColor,
               borderWidth: 4.5,
               radius: 22
             });
-            drawnPhotoRects.push({ x: sideMargin, y, w: cellW, h: cellH });
+            drawnPhotoRects.push({ x: centeredX, y, w: cellW, h: cellH });
           }
         }
 
@@ -2298,11 +2301,9 @@
     async function triggerDirectPrint() {
       applyPrinterPageRule();
       await renderSelphyComposition();
-      setTimeout(() => {
-        try {
-          window.print();
-        } catch (err) {}
-      }, 120);
+      try {
+        window.print();
+      } catch (err) {}
     }
 
     function syncFullScreenPreviewMeta() {
