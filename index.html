@@ -176,73 +176,71 @@
       display: none;
     }
 
-    /* Calibrated 100mm x 148mm print rules for both Mobile & Windows */
+    /* Universal Postcard 100mm x 148mm (4x6 in) Print Rules for Mobile & Windows */
     @page {
       size: 100mm 148mm;
-      margin: 0 !important;
+      margin: 0;
     }
 
     @media print {
-      @page {
-        size: 100mm 148mm;
-        margin: 0 !important;
-      }
-
       * {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
         box-sizing: border-box !important;
       }
 
-      html, body, #app {
-        width: 100mm !important;
-        height: 148mm !important;
+      html, body {
+        width: 100% !important;
+        height: 100% !important;
         min-width: 0 !important;
         min-height: 0 !important;
-        max-width: 100mm !important;
-        max-height: 148mm !important;
         margin: 0 !important;
         padding: 0 !important;
         overflow: hidden !important;
-        background: transparent !important;
+        background: #ffffff !important;
       }
 
-      #app > *:not(#printOnlyContainer) {
+      #app {
         display: none !important;
       }
 
       #printOnlyContainer {
-        display: block !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
         position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        bottom: 0 !important;
-        width: 100mm !important;
-        height: 148mm !important;
-        max-width: 100mm !important;
-        max-height: 148mm !important;
+        inset: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
         overflow: hidden !important;
-        background: transparent !important;
-        z-index: 999999 !important;
+        background: #ffffff !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
       }
 
       #printOnlyImg {
         display: block !important;
-        width: 100mm !important;
-        height: 148mm !important;
-        max-width: 100mm !important;
-        max-height: 148mm !important;
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100vw !important;
+        max-height: 100vh !important;
         object-fit: contain !important;
-        margin: 0 !important;
+        margin: 0 auto !important;
         padding: 0 !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
       }
     }
   </style>
 </head>
 <body>
+  <!-- Print-only container outside #app so mobile & Windows print engines never inherit viewport height locks -->
+  <div id="printOnlyContainer" aria-hidden="true">
+    <img id="printOnlyImg" alt="Canon SELPHY Postcard Borderless Print" />
+  </div>
+
   <div id="app" class="relative w-full h-full overflow-hidden">
 
     <!-- Full-screen flash overlay on photo capture -->
@@ -299,23 +297,18 @@
       </div>
     </div>
 
-    <!-- Print-only full-bleed borderless output -->
-    <div id="printOnlyContainer" aria-hidden="true">
-      <img id="printOnlyImg" alt="Canon SELPHY Postcard Borderless Print" />
-    </div>
-
     <!-- ===================================================================== -->
     <!-- SCREEN 1: START SCREEN (BLURRED BG + SEPARATE 3/4 + POSTCARD/STRIP)  -->
     <!-- ===================================================================== -->
     <section id="homeScreen" class="relative w-full h-full flex items-center justify-center p-6 overflow-hidden">
-      <!-- Blurred Camera Background (<video> with automatic fallback to smooth animated canvas) -->
+      <!-- Blurred Camera Background -->
       <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         <video id="bgVideo" autoplay playsinline webkit-playsinline="true" muted class="w-full h-full object-cover blurred-camera-bg mirrored hidden"></video>
         <canvas id="bgSimCanvas" width="1280" height="720" class="w-full h-full object-cover blurred-camera-bg"></canvas>
         <div class="fixed inset-0 bg-slate-950/35"></div>
       </div>
 
-      <!-- Center Stack: Separate 3/4 Shot Buttons + Postcard/Strip Buttons + Capture Button -->
+      <!-- Center Stack -->
       <div class="relative z-10 w-full max-w-md flex flex-col items-center justify-center gap-3">
         <!-- Separate 3 or 4 Shots Picker -->
         <div class="w-full grid grid-cols-2 gap-3 glass-panel p-2 rounded-3xl" role="group" aria-label="عدد الصور">
@@ -351,7 +344,7 @@
           </button>
         </div>
 
-        <!-- Postcard (بوست كارت 10x15) or Dual Strip (شريطين) Picker — Home Screen Only -->
+        <!-- Postcard (بوست كارت 10x15) or Dual Strip (شريطين) Picker -->
         <div class="w-full grid grid-cols-2 gap-3 glass-panel p-2 rounded-3xl" role="group" aria-label="قياس الصورة">
           <button
             id="btnStartFullFrame"
@@ -404,11 +397,9 @@
     <!-- SCREEN 2: FULL-SCREEN UNBLURRED CAPTURE (6s INITIAL -> 3s BETWEEN)   -->
     <!-- ===================================================================== -->
     <section id="captureScreen" class="hidden relative w-full h-full flex items-center justify-center bg-slate-950 overflow-hidden">
-      <!-- Hidden reference feed used solely as capture source -->
       <video id="liveVideo" autoplay playsinline webkit-playsinline="true" muted class="sr-only"></video>
       <canvas id="liveSimCanvas" width="1280" height="720" class="sr-only"></canvas>
 
-      <!-- Single clean capture window matching Postcard / layout aspect ratio with blurred surround -->
       <div id="framingGuideOverlay" aria-hidden="true">
         <div id="framingGuideBackdrop"></div>
         <div id="framingGuideClearWindow">
@@ -418,14 +409,12 @@
         </div>
       </div>
 
-      <!-- Shot progress indicator (1 / 3, 2 / 3, 3 / 3) -->
       <div class="fixed top-4 right-4 z-20 pointer-events-none">
         <div id="captureShotCounter" class="px-4 py-2 rounded-2xl bg-slate-950/75 border border-white/20 text-sm sm:text-base font-black text-white shadow-lg">
           1 / 3
         </div>
       </div>
 
-      <!-- Countdown Overlay -->
       <div id="countdownOverlay" class="hidden fixed inset-0 z-20 flex flex-col items-center justify-center pointer-events-none bg-black/20">
         <div id="countdownNumber" class="count-pop text-8xl sm:text-[9rem] font-black text-white drop-shadow-[0_10px_35px_rgba(0,0,0,0.85)] leading-none">
           6
@@ -437,8 +426,8 @@
     <!-- SCREEN 3: THEMES + DIRECT PRINT (POSTCARD 100mm x 148mm)            -->
     <!-- ===================================================================== -->
     <section id="editorScreen" class="hidden relative w-full h-full p-3 sm:p-5 lg:p-6 flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch justify-center overflow-hidden">
-      <!-- Left / Top Preview Column: Postcard (100mm x 148mm / 2:3) Composition -->
-      <div class="lg:w-1/2 h-[44%] lg:h-full glass-panel rounded-3xl p-3 sm:p-5 flex flex-col items-center justify-center gap-2 relative overflow-hidden">
+      <!-- Left / Top Preview Column -->
+      <div class="lg:w-1/2 h-[42%] lg:h-full glass-panel rounded-3xl p-3 sm:p-5 flex flex-col items-center justify-center gap-2 relative overflow-hidden">
         <img
           id="composedPreviewImg"
           alt="معاينة البوست كارت النهائي"
@@ -447,8 +436,8 @@
         />
       </div>
 
-      <!-- Controls Column: One-Tap Themes + Direct Print -->
-      <div class="lg:w-1/2 h-[56%] lg:h-full glass-panel rounded-3xl p-3.5 sm:p-5 lg:p-6 flex flex-col justify-between gap-2.5 overflow-hidden">
+      <!-- Controls Column -->
+      <div class="lg:w-1/2 h-[58%] lg:h-full glass-panel rounded-3xl p-3.5 sm:p-5 lg:p-6 flex flex-col justify-between gap-2.5 overflow-hidden">
         <div class="flex flex-col gap-2.5 overflow-y-auto pr-0.5">
           <div class="flex items-center justify-between gap-2">
             <h2 class="text-base sm:text-xl font-black text-white">الثيم</h2>
@@ -521,7 +510,7 @@
           </div>
         </div>
 
-        <!-- Primary Print & Reset Actions -->
+        <!-- Primary Print, Save Image & Reset Actions -->
         <div class="flex flex-col gap-2 pt-2 border-t border-white/10 shrink-0">
           <div class="w-full flex items-center justify-between gap-3 bg-slate-900/85 border border-white/15 rounded-2xl px-3.5 py-2">
             <div class="flex flex-col text-right">
@@ -554,37 +543,40 @@
             </div>
           </div>
 
-          <button
-            id="btnOpenFullScreenPreview"
-            type="button"
-            data-action="open-fullscreen-preview"
-            class="w-full py-3 px-5 rounded-2xl bg-indigo-600/80 hover:bg-indigo-500 active:scale-[0.98] border border-amber-300/40 text-white font-black text-sm sm:text-base shadow-lg transition flex items-center justify-center gap-2"
-          >
-            <svg class="w-5 h-5 shrink-0 text-amber-300" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V5a1 1 0 011-1h3M20 8V5a1 1 0 00-1-1h-3M4 16v3a1 1 0 001 1h3M20 16v3a1 1 0 01-1 1h-3" />
-              <rect x="7" y="7" width="10" height="10" rx="1.5" />
-            </svg>
-            <span>معاينة بوست كارت بكامل الشاشة</span>
-          </button>
+          <div class="grid grid-cols-2 gap-2">
+            <button
+              id="btnOpenFullScreenPreview"
+              type="button"
+              data-action="open-fullscreen-preview"
+              class="py-2.5 px-3 rounded-2xl bg-indigo-600/80 hover:bg-indigo-500 active:scale-[0.98] border border-amber-300/40 text-white font-black text-xs sm:text-sm shadow-lg transition flex items-center justify-center gap-1.5"
+            >
+              <span>معاينة كاملة</span>
+            </button>
+
+            <button
+              id="btnDownloadImage"
+              type="button"
+              data-action="download-image"
+              class="py-2.5 px-3 rounded-2xl bg-sky-600/85 hover:bg-sky-500 active:scale-[0.98] border border-sky-300/40 text-white font-black text-xs sm:text-sm shadow-lg transition flex items-center justify-center gap-1.5"
+            >
+              <span>حفظ الصورة (10×15)</span>
+            </button>
+          </div>
 
           <button
             id="btnDirectPrint"
             type="button"
             data-action="direct-print"
-            class="w-full py-4 px-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 active:scale-[0.98] text-white font-black text-base sm:text-lg shadow-xl transition flex items-center justify-center gap-2"
+            class="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 active:scale-[0.98] text-white font-black text-base sm:text-lg shadow-xl transition flex items-center justify-center gap-2"
           >
             <span id="btnDirectPrintLabel">طباعة فورية — 5,000 د.ع</span>
           </button>
-
-          <div class="text-[11px] font-bold text-slate-400 text-center leading-snug">
-            مضبوط للهاتف و Windows بقياس 100×148 مم: فعّل «Borderless» في إعدادات الطابعة، و«Margins: None» مع «Scale: 100%» في نافذة الطباعة.
-          </div>
 
           <button
             id="btnFinishReset"
             type="button"
             data-action="reset-kiosk"
-            class="w-full py-3.5 px-5 rounded-2xl bg-slate-800 hover:bg-slate-700 active:scale-[0.98] border border-white/15 text-slate-100 font-extrabold text-sm sm:text-base transition flex items-center justify-center gap-2"
+            class="w-full py-3 px-5 rounded-2xl bg-slate-800 hover:bg-slate-700 active:scale-[0.98] border border-white/15 text-slate-100 font-extrabold text-sm sm:text-base transition flex items-center justify-center gap-2"
           >
             <span>بدء من جديد</span>
           </button>
@@ -593,12 +585,7 @@
     </section>
 
     <!-- Accessible live status announcer & subtle print confirmation toast -->
-    <div
-      id="kioskLiveStatus"
-      role="status"
-      aria-live="polite"
-      class="sr-only"
-    ></div>
+    <div id="kioskLiveStatus" role="status" aria-live="polite" class="sr-only"></div>
 
     <div
       id="kioskStatusToast"
@@ -645,7 +632,7 @@
       </div>
 
       <div class="text-xs font-bold text-slate-400 shrink-0 text-center">
-        قياس بوست كارت 100×148 مم (4×6 إنش) — متوازن للهاتف و Windows بدون هوامش أو اقتصاص
+        قياس 1200×1800 بكسل (100×148 مم) — في الهاتف اختر مقاس 4×6 / Postcard، وفي Windows فعّل Borderless و Margins: None
       </div>
     </div>
 
@@ -654,19 +641,16 @@
   </div>
 
   <script>
-    /**
-     * Kiosk State & Configuration
-     */
     const STATE = {
-      screen: 'start',          // 'start' | 'capture' | 'print'
-      shotCount: 3,             // 3 or 4 photos per session
-      initialCountdownSec: 6,   // 6 seconds before Shot 1
-      betweenShotsSec: 3,       // 3 seconds between subsequent shots
-      selectedTheme: 'kids',    // 'kids' | 'girls' | 'boys' | 'adults' | 'royal_white' | 'pastel'
-      printLayout: 'postcard',  // 'postcard' (بوست كارت 100mm x 148mm) | 'dual_strip' (شريطين)
-      printCopies: 1,           // Number of copies to print
-      pricePerCopy: 5000,       // 5,000 IQD per print copy
-      facingMode: 'user',       // 'user' | 'environment'
+      screen: 'start',
+      shotCount: 3,
+      initialCountdownSec: 6,
+      betweenShotsSec: 3,
+      selectedTheme: 'kids',
+      printLayout: 'postcard',
+      printCopies: 1,
+      pricePerCopy: 5000,
+      facingMode: 'user',
       mirrorCamera: true,
       stream: null,
       hasLiveVideoStream: false,
@@ -677,10 +661,10 @@
         explanation: '',
         suggestion: ''
       },
-      capturedPhotos: [],       // Captured frame Data URLs
+      capturedPhotos: [],
       isCaptureRunning: false,
       isStartingSequence: false,
-      sessionId: 0,             // Monotonic session token to cancel stale loops
+      sessionId: 0,
       themeVariantSeed: Math.floor(Math.random() * 100000) + 1,
       themeCaptionClickIndex: {},
       simAnimFrame: null,
@@ -688,9 +672,6 @@
       audioCtx: null
     };
 
-    /**
-     * Theme Definitions for 1200x1800 (100mm x 148mm / Postcard 4x6 inch at 300 DPI) Print Canvas
-     */
     const THEMES = {
       kids: {
         id: 'kids',
@@ -913,98 +894,57 @@
       syncHomeSelectionButtons();
     }
 
-    /**
-     * Lock viewport against pinch-zoom, multi-touch pan, double-tap zoom, and context menus
-     */
     function installViewportLocks() {
-      document.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-      });
-
-      document.addEventListener('gesturestart', (e) => {
-        e.preventDefault();
-      }, { passive: false });
-
-      document.addEventListener('gesturechange', (e) => {
-        e.preventDefault();
-      }, { passive: false });
-
-      document.addEventListener('gestureend', (e) => {
-        e.preventDefault();
-      }, { passive: false });
+      document.addEventListener('contextmenu', (e) => e.preventDefault());
+      document.addEventListener('gesturestart', (e) => e.preventDefault(), { passive: false });
+      document.addEventListener('gesturechange', (e) => e.preventDefault(), { passive: false });
+      document.addEventListener('gestureend', (e) => e.preventDefault(), { passive: false });
 
       document.addEventListener('touchmove', (e) => {
-        if (e.target && e.target.closest && e.target.closest('#themesGrid')) {
-          return;
-        }
-        if (e.touches && e.touches.length > 1) {
-          e.preventDefault();
-        }
+        if (e.target && e.target.closest && e.target.closest('#themesGrid')) return;
+        if (e.touches && e.touches.length > 1) e.preventDefault();
       }, { passive: false });
 
       let lastTouchEnd = 0;
       document.addEventListener('touchend', (e) => {
-        if (e.target && e.target.closest && e.target.closest('button, [role="button"]')) {
-          return;
-        }
+        if (e.target && e.target.closest && e.target.closest('button, [role="button"]')) return;
         const now = Date.now();
-        if (now - lastTouchEnd <= 300) {
-          e.preventDefault();
-        }
+        if (now - lastTouchEnd <= 300) e.preventDefault();
         lastTouchEnd = now;
       }, { passive: false });
     }
 
-    /**
-     * Web Audio API Shutter & Countdown Tones (no external audio files)
-     */
     function playCountdownTone(isFinalBeat = false) {
       try {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
         if (!AudioContextClass) return;
-
-        if (!STATE.audioCtx) {
-          STATE.audioCtx = new AudioContextClass();
-        }
-        if (STATE.audioCtx.state === 'suspended') {
-          STATE.audioCtx.resume().catch(() => {});
-        }
+        if (!STATE.audioCtx) STATE.audioCtx = new AudioContextClass();
+        if (STATE.audioCtx.state === 'suspended') STATE.audioCtx.resume().catch(() => {});
 
         const ctx = STATE.audioCtx;
         const now = ctx.currentTime;
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
-
         osc.type = 'sine';
         osc.frequency.setValueAtTime(isFinalBeat ? 880 : 620, now);
-
         gain.gain.setValueAtTime(0.08, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
-
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.start(now);
         osc.stop(now + 0.12);
-      } catch (err) {
-        // Ignore audio errors when restricted
-      }
+      } catch (err) {}
     }
 
     function playShutterSound() {
       try {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
         if (!AudioContextClass) return;
-
-        if (!STATE.audioCtx) {
-          STATE.audioCtx = new AudioContextClass();
-        }
-        if (STATE.audioCtx.state === 'suspended') {
-          STATE.audioCtx.resume().catch(() => {});
-        }
+        if (!STATE.audioCtx) STATE.audioCtx = new AudioContextClass();
+        if (STATE.audioCtx.state === 'suspended') STATE.audioCtx.resume().catch(() => {});
 
         const ctx = STATE.audioCtx;
         const now = ctx.currentTime;
-
         const bufferSize = Math.floor(ctx.sampleRate * 0.09);
         const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
         const data = noiseBuffer.getChannelData(0);
@@ -1014,12 +954,10 @@
 
         const noise = ctx.createBufferSource();
         noise.buffer = noiseBuffer;
-
         const filter = ctx.createBiquadFilter();
         filter.type = 'bandpass';
         filter.frequency.setValueAtTime(1800, now);
         filter.Q.setValueAtTime(1.2, now);
-
         const gain = ctx.createGain();
         gain.gain.setValueAtTime(0.45, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.085);
@@ -1027,17 +965,13 @@
         noise.connect(filter);
         filter.connect(gain);
         gain.connect(ctx.destination);
-
         noise.start(now);
         noise.stop(now + 0.09);
-      } catch (err) {
-        // Ignore audio errors if restricted by browser policy
-      }
+      } catch (err) {}
     }
 
     function drawStudioFallbackOnContext(ctx, w, h, t) {
       if (!ctx || w <= 0 || h <= 0) return;
-
       const grad = ctx.createLinearGradient(0, 0, w, h);
       grad.addColorStop(0, '#1e1b4b');
       grad.addColorStop(0.5, '#3b0764');
@@ -1074,26 +1008,17 @@
       ctx.restore();
     }
 
-    /**
-     * Smooth animated studio canvas fallback when camera stream is unavailable or blocked
-     */
     function startSimulatedCameraLoop() {
-      if (STATE.simAnimFrame) {
-        cancelAnimationFrame(STATE.simAnimFrame);
-      }
-
+      if (STATE.simAnimFrame) cancelAnimationFrame(STATE.simAnimFrame);
       const bgCanvas = document.getElementById('bgSimCanvas');
       const liveCanvas = document.getElementById('liveSimCanvas');
       const guideCan = document.getElementById('framingGuideClearCanvas');
 
       const renderFrame = (timeMs) => {
         const t = timeMs * 0.001;
-
         [bgCanvas, liveCanvas].filter(Boolean).forEach((canvas) => {
           const ctx = canvas.getContext('2d');
-          if (ctx) {
-            drawStudioFallbackOnContext(ctx, canvas.width, canvas.height, t);
-          }
+          if (ctx) drawStudioFallbackOnContext(ctx, canvas.width, canvas.height, t);
         });
 
         if (guideCan && !guideCan.classList.contains('hidden')) {
@@ -1117,14 +1042,8 @@
       STATE.simAnimFrame = requestAnimationFrame(renderFrame);
     }
 
-    /**
-     * Render a live animated studio frame onto an offscreen canvas when no hardware frame is ready
-     */
     function renderFallbackStudioFrame(width = 1280, height = 720, phaseSec = null) {
-      const t = typeof phaseSec === 'number'
-        ? phaseSec
-        : (STATE.simPhase || (performance.now() * 0.001));
-
+      const t = typeof phaseSec === 'number' ? phaseSec : (STATE.simPhase || (performance.now() * 0.001));
       const offCanvas = document.createElement('canvas');
       offCanvas.width = width;
       offCanvas.height = height;
@@ -1133,14 +1052,11 @@
       return offCanvas;
     }
 
-    /**
-     * Switch between 'start' | 'capture' | 'print' screens
-     */
     function setActiveScreen(target) {
       STATE.screen = target;
-      const homeEl = document.getElementById('homeScreen') || document.getElementById('screenStart');
+      const homeEl = document.getElementById('homeScreen');
       const captureEl = document.getElementById('captureScreen');
-      const editorEl = document.getElementById('editorScreen') || document.getElementById('screenPrint');
+      const editorEl = document.getElementById('editorScreen');
 
       if (homeEl) homeEl.classList.toggle('hidden', target !== 'start');
       if (captureEl) captureEl.classList.toggle('hidden', target !== 'capture');
@@ -1148,9 +1064,6 @@
       syncCameraVisualTargets();
     }
 
-    /**
-     * Compute exact normalized slot aspect ratio (`slotW / slotH`) matching the active Postcard / strip layout
-     */
     function getActiveSlotAspectRatio() {
       const count = STATE.shotCount === 4 ? 4 : 3;
       if (STATE.printLayout === 'dual_strip') {
@@ -1185,10 +1098,6 @@
       }
     }
 
-    /**
-     * Compute the exact rectangle `(x, y, w, h)` inside a container `(containerW, containerH)`
-     * matching Postcard (100mm x 148mm) / active layout aspect ratio with generous room so surroundings stay blurred.
-     */
     function computeCoverGuideRect(containerW, containerH, targetAspect) {
       const safeW = Math.max(1, containerW);
       const safeH = Math.max(1, containerH);
@@ -1209,10 +1118,6 @@
       return { x, y, w, h };
     }
 
-    /**
-     * Update the single clean capture window matching Postcard / layout dimensions
-     * while the surrounding backdrop remains blurred without duplicate feeds.
-     */
     function updateFramingGuideOverlay(useLiveVideo, shouldMirror) {
       const overlay = document.getElementById('framingGuideOverlay');
       const backdrop = document.getElementById('framingGuideBackdrop');
@@ -1237,19 +1142,10 @@
       const targetAspect = getActiveSlotAspectRatio();
       const box = computeCoverGuideRect(cw, ch, targetAspect);
 
-      const left = Number(box.x.toFixed(2));
-      const top = Number(box.y.toFixed(2));
-      const width = Number(box.w.toFixed(2));
-      const height = Number(box.h.toFixed(2));
-
-      backdrop.style.clipPath = 'none';
-      backdrop.style.webkitMaskImage = 'none';
-      backdrop.style.maskImage = 'none';
-
-      clearWin.style.left = `${left}px`;
-      clearWin.style.top = `${top}px`;
-      clearWin.style.width = `${width}px`;
-      clearWin.style.height = `${height}px`;
+      clearWin.style.left = `${Number(box.x.toFixed(2))}px`;
+      clearWin.style.top = `${Number(box.y.toFixed(2))}px`;
+      clearWin.style.width = `${Number(box.w.toFixed(2))}px`;
+      clearWin.style.height = `${Number(box.h.toFixed(2))}px`;
       clearWin.style.borderRadius = '28px';
 
       if (badge) {
@@ -1264,11 +1160,6 @@
         if (STATE.stream && clearVid.srcObject !== STATE.stream) {
           clearVid.srcObject = STATE.stream;
         }
-        clearVid.style.left = '0px';
-        clearVid.style.top = '0px';
-        clearVid.style.width = '100%';
-        clearVid.style.height = '100%';
-        clearVid.style.objectFit = 'cover';
         clearVid.classList.toggle('mirrored', Boolean(shouldMirror));
         clearVid.classList.toggle('hidden', !useLiveVideo);
         if (useLiveVideo && clearVid.paused) {
@@ -1280,20 +1171,11 @@
       }
 
       if (clearCan) {
-        clearCan.style.left = '0px';
-        clearCan.style.top = '0px';
-        clearCan.style.width = '100%';
-        clearCan.style.height = '100%';
-        clearCan.style.objectFit = 'cover';
         clearCan.classList.toggle('mirrored', Boolean(shouldMirror));
         clearCan.classList.toggle('hidden', Boolean(useLiveVideo));
       }
     }
 
-    /**
-     * Crop captured frame to the exact target aspect ratio (`targetAspect`) before storing,
-     * matching the exact framing window shown during capture.
-     */
     function cropDataUrlToTargetAspect(dataUrl, targetAspect) {
       return new Promise((resolve) => {
         if (!dataUrl || !targetAspect || targetAspect <= 0) {
@@ -1368,17 +1250,13 @@
         vid.setAttribute('muted', '');
 
         if (hasActiveStream) {
-          if (vid.srcObject !== STATE.stream) {
-            vid.srcObject = STATE.stream;
-          }
+          if (vid.srcObject !== STATE.stream) vid.srcObject = STATE.stream;
           vid.classList.toggle('mirrored', shouldMirror);
           if (vid.paused || vid.readyState < 2) {
             Promise.resolve().then(() => {
               try {
                 const playPromise = vid.play();
-                if (playPromise && typeof playPromise.catch === 'function') {
-                  playPromise.catch(() => {});
-                }
+                if (playPromise && typeof playPromise.catch === 'function') playPromise.catch(() => {});
               } catch (e) {}
             });
           }
@@ -1386,9 +1264,7 @@
       });
 
       [bgSim, liveSim].forEach((sim) => {
-        if (sim) {
-          sim.classList.toggle('mirrored', shouldMirror);
-        }
+        if (sim) sim.classList.toggle('mirrored', shouldMirror);
       });
 
       if (bgVideo) bgVideo.classList.toggle('hidden', !(STATE.screen === 'start' && useLiveVideo));
@@ -1399,9 +1275,7 @@
     function stopExistingStreamTracks() {
       if (STATE.stream && typeof STATE.stream.getTracks === 'function') {
         STATE.stream.getTracks().forEach((track) => {
-          try {
-            track.stop();
-          } catch (e) {}
+          try { track.stop(); } catch (e) {}
         });
       }
       STATE.stream = null;
@@ -1422,34 +1296,19 @@
         vid.playsInline = true;
         vid.muted = true;
         vid.defaultMuted = true;
-        vid.setAttribute('autoplay', '');
-        vid.setAttribute('playsinline', '');
-        vid.setAttribute('webkit-playsinline', '');
-        vid.setAttribute('muted', '');
         vid.classList.toggle('mirrored', shouldMirror);
-
-        if (vid.srcObject !== stream) {
-          vid.srcObject = stream;
-        }
+        if (vid.srcObject !== stream) vid.srcObject = stream;
 
         const ensurePlaying = () => {
-          if (vid.srcObject !== stream) {
-            vid.srcObject = stream;
-          }
-          if (vid.videoWidth > 0 && vid.videoHeight > 0) {
-            STATE.hasLiveVideoStream = true;
-          }
+          if (vid.srcObject !== stream) vid.srcObject = stream;
+          if (vid.videoWidth > 0 && vid.videoHeight > 0) STATE.hasLiveVideoStream = true;
           try {
             const playPromise = vid.play();
             if (playPromise && typeof playPromise.then === 'function') {
               playPromise.then(() => {
-                if (vid.videoWidth > 0 && vid.videoHeight > 0) {
-                  STATE.hasLiveVideoStream = true;
-                }
+                if (vid.videoWidth > 0 && vid.videoHeight > 0) STATE.hasLiveVideoStream = true;
                 syncCameraVisualTargets();
-              }).catch(() => {
-                syncCameraVisualTargets();
-              });
+              }).catch(() => syncCameraVisualTargets());
             } else {
               syncCameraVisualTargets();
             }
@@ -1458,19 +1317,8 @@
           }
         };
 
-        vid.onloadedmetadata = () => {
-          if (vid.videoWidth > 0 && vid.videoHeight > 0) {
-            STATE.hasLiveVideoStream = true;
-          }
-          ensurePlaying();
-        };
-        vid.oncanplay = () => {
-          if (vid.videoWidth > 0 && vid.videoHeight > 0) {
-            STATE.hasLiveVideoStream = true;
-          }
-          ensurePlaying();
-        };
-
+        vid.onloadedmetadata = ensurePlaying;
+        vid.oncanplay = ensurePlaying;
         ensurePlaying();
       });
 
@@ -1481,23 +1329,12 @@
       if (navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function') {
         return navigator.mediaDevices.getUserMedia(constraints);
       }
-
-      const legacyGetUserMedia =
-        navigator.getUserMedia ||
-        navigator.webkitGetUserMedia ||
-        navigator.mozGetUserMedia ||
-        navigator.msGetUserMedia;
-
+      const legacyGetUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
       if (typeof legacyGetUserMedia === 'function') {
         return new Promise((resolve, reject) => {
-          try {
-            legacyGetUserMedia.call(navigator, constraints, resolve, reject);
-          } catch (err) {
-            reject(err);
-          }
+          try { legacyGetUserMedia.call(navigator, constraints, resolve, reject); } catch (err) { reject(err); }
         });
       }
-
       return Promise.reject(new Error('Camera API unavailable'));
     }
 
@@ -1508,15 +1345,11 @@
           const devices = await navigator.mediaDevices.enumerateDevices();
           if (Array.isArray(devices)) {
             devices.forEach((dev) => {
-              if (dev && dev.kind === 'videoinput' && dev.deviceId) {
-                deviceIds.push(dev.deviceId);
-              }
+              if (dev && dev.kind === 'videoinput' && dev.deviceId) deviceIds.push(dev.deviceId);
             });
           }
         }
-      } catch (err) {
-        // Ignore device enumeration restrictions in sandboxed/embedded frames
-      }
+      } catch (err) {}
       return deviceIds;
     }
 
@@ -1526,35 +1359,20 @@
         { audio: false, video: { facingMode: facingMode } },
         { audio: false, video: true }
       ];
-
       let lastErr = new Error('Camera stream request failed');
-
       for (const constraints of constraintSteps) {
         try {
           const stream = await requestRawMediaStream(constraints);
-          if (stream) {
-            return stream;
-          }
-        } catch (err) {
-          lastErr = err || lastErr;
-        }
+          if (stream) return stream;
+        } catch (err) { lastErr = err || lastErr; }
       }
-
       const videoDeviceIds = await getEnumeratedVideoDeviceIds();
       for (const deviceId of videoDeviceIds) {
         try {
-          const stream = await requestRawMediaStream({
-            audio: false,
-            video: { deviceId: { exact: deviceId } }
-          });
-          if (stream) {
-            return stream;
-          }
-        } catch (err) {
-          lastErr = err || lastErr;
-        }
+          const stream = await requestRawMediaStream({ audio: false, video: { deviceId: { exact: deviceId } } });
+          if (stream) return stream;
+        } catch (err) { lastErr = err || lastErr; }
       }
-
       throw lastErr;
     }
 
@@ -1590,29 +1408,16 @@
 
       if (!forceRestart && STATE.stream && existingLiveTracks.length > 0) {
         attachStreamToVideos(STATE.stream);
-        const bgVideo = document.getElementById('bgVideo');
-        const liveVideo = document.getElementById('liveVideo');
-        if (
-          (liveVideo && liveVideo.videoWidth > 0 && liveVideo.videoHeight > 0) ||
-          (bgVideo && bgVideo.videoWidth > 0 && bgVideo.videoHeight > 0)
-        ) {
-          STATE.hasLiveVideoStream = true;
-        }
         syncCameraVisualTargets();
         updateCameraBadgeAndDiagnostics();
         return STATE.stream;
       }
 
-      if (STATE.isInitializingCamera && !forceRestart) {
-        return STATE.stream;
-      }
+      if (STATE.isInitializingCamera && !forceRestart) return STATE.stream;
 
       STATE.isInitializingCamera = true;
       try {
-        if (forceRestart || STATE.stream) {
-          stopExistingStreamTracks();
-        }
-
+        if (forceRestart || STATE.stream) stopExistingStreamTracks();
         const stream = await requestUserMediaWithFallbacks(STATE.facingMode);
         STATE.stream = stream;
         STATE.hasLiveVideoStream = true;
@@ -1632,34 +1437,15 @@
     async function unlockVideoPlaybackOnGesture() {
       const bgVideo = document.getElementById('bgVideo');
       const liveVideo = document.getElementById('liveVideo');
-      const targets = [liveVideo, bgVideo].filter(Boolean);
-
-      for (const vid of targets) {
-        vid.autoplay = true;
-        vid.playsInline = true;
-        vid.muted = true;
-        vid.defaultMuted = true;
-        vid.setAttribute('autoplay', '');
-        vid.setAttribute('playsinline', '');
-        vid.setAttribute('webkit-playsinline', '');
-        vid.setAttribute('muted', '');
-
-        if (STATE.stream && vid.srcObject !== STATE.stream) {
-          vid.srcObject = STATE.stream;
-        }
-
+      for (const vid of [liveVideo, bgVideo].filter(Boolean)) {
+        if (STATE.stream && vid.srcObject !== STATE.stream) vid.srcObject = STATE.stream;
         if (vid.srcObject) {
           try {
             await vid.play();
-            if (vid.videoWidth > 0 && vid.videoHeight > 0) {
-              STATE.hasLiveVideoStream = true;
-            }
-          } catch (err) {
-            // Keep graceful fallback when hardware camera is unavailable or blocked
-          }
+            if (vid.videoWidth > 0 && vid.videoHeight > 0) STATE.hasLiveVideoStream = true;
+          } catch (err) {}
         }
       }
-
       syncCameraVisualTargets();
     }
 
@@ -1667,7 +1453,6 @@
       const hasLiveTrack = STATE.stream && typeof STATE.stream.getVideoTracks === 'function'
         ? STATE.stream.getVideoTracks().some((t) => t.readyState === 'live')
         : false;
-
       if (!forceRestart && hasLiveTrack && STATE.stream) {
         attachStreamToVideos(STATE.stream);
         await unlockVideoPlaybackOnGesture();
@@ -1681,15 +1466,11 @@
     function openCameraDiagnostics(show = true) {
       const modal = document.getElementById('cameraDiagModal');
       if (!modal) return;
-      if (show) {
-        updateCameraBadgeAndDiagnostics(STATE.lastCameraError && STATE.lastCameraError.code ? { name: STATE.lastCameraError.code } : null);
-      }
+      if (show) updateCameraBadgeAndDiagnostics(STATE.lastCameraError?.code ? { name: STATE.lastCameraError.code } : null);
       modal.classList.toggle('hidden', !show);
     }
 
-    function closeCameraDiagnostics() {
-      openCameraDiagnostics(false);
-    }
+    function closeCameraDiagnostics() { openCameraDiagnostics(false); }
 
     async function toggleFacingModeAndRestart() {
       STATE.facingMode = STATE.facingMode === 'user' ? 'environment' : 'user';
@@ -1698,29 +1479,18 @@
 
     function announceKioskStatus(message, showToast = false) {
       const liveRegion = document.getElementById('kioskLiveStatus');
-      if (liveRegion) {
-        liveRegion.textContent = message;
-      }
-
+      if (liveRegion) liveRegion.textContent = message;
       if (!showToast) return;
       const toast = document.getElementById('kioskStatusToast');
       if (!toast) return;
       toast.textContent = message;
       toast.classList.remove('hidden');
-
       clearTimeout(announceKioskStatus._toastTimer);
-      announceKioskStatus._toastTimer = setTimeout(() => {
-        toast.classList.add('hidden');
-      }, 2400);
+      announceKioskStatus._toastTimer = setTimeout(() => toast.classList.add('hidden'), 2400);
     }
 
-    /**
-     * Fill `(slotX, slotY, slotW, slotH)` edge-to-edge with zero blank gaps
-     * while preserving natural aspect ratio (`cover`) and centering inside rounded frame.
-     */
     function drawPhotoFittedInRect(ctx, img, slotX, slotY, slotW, slotH, options = {}) {
       if (!ctx || !img || slotW <= 0 || slotH <= 0) return;
-
       const radius = typeof options.radius === 'number' ? options.radius : 22;
       const borderColor = options.borderColor || 'rgba(255, 255, 255, 0.85)';
       const borderWidth = typeof options.borderWidth === 'number' ? options.borderWidth : 4;
@@ -1736,7 +1506,6 @@
       ctx.save();
       roundRectPath(ctx, slotX, slotY, slotW, slotH, radius);
       ctx.clip();
-
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(img, 0, 0, imgW, imgH, drawX, drawY, drawW, drawH);
@@ -1761,17 +1530,9 @@
     }
 
     function delayMs(ms, sessionToken) {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve(sessionToken === STATE.sessionId);
-        }, ms);
-      });
+      return new Promise((resolve) => setTimeout(() => resolve(sessionToken === STATE.sessionId), ms));
     }
 
-    /**
-     * Capture a full-frame photo from live video (`liveVideo` then `bgVideo` when readyState >= 2)
-     * or render a live animated studio fallback frame onto an offscreen canvas.
-     */
     function captureFrameToDataUrl() {
       const liveVideo = document.getElementById('liveVideo');
       const bgVideo = document.getElementById('bgVideo');
@@ -1831,10 +1592,7 @@
         sctx.drawImage(safeFallback, 0, 0, outW, outH);
       }
 
-      if (isHardwareVideo) {
-        STATE.hasLiveVideoStream = true;
-      }
-
+      if (isHardwareVideo) STATE.hasLiveVideoStream = true;
       return snapCanvas.toDataURL('image/jpeg', 0.94);
     }
 
@@ -1858,15 +1616,11 @@
       ctx.closePath();
     }
 
-    /**
-     * Start capture flow: 6s initial countdown -> Shot 1 -> 3s wait between shots
-     */
     async function runCountdown(seconds, sessionToken) {
       closeFullScreenPreview();
       const overlay = document.getElementById('countdownOverlay');
       const numEl = document.getElementById('countdownNumber');
       if (!overlay || !numEl) return false;
-
       overlay.classList.remove('hidden');
 
       for (let s = seconds; s >= 1; s--) {
@@ -1915,9 +1669,7 @@
           return;
         }
 
-        if (counterEl) {
-          counterEl.textContent = `${shotIdx} / ${totalShots}`;
-        }
+        if (counterEl) counterEl.textContent = `${shotIdx} / ${totalShots}`;
 
         const waitSec = shotIdx === 1 ? STATE.initialCountdownSec : STATE.betweenShotsSec;
         const completed = await runCountdown(waitSec, sessionToken);
@@ -1952,18 +1704,13 @@
     }
 
     function handleStartBoothClick(event) {
-      if (event && typeof event.stopPropagation === 'function') {
-        event.stopPropagation();
-      }
+      if (event && typeof event.stopPropagation === 'function') event.stopPropagation();
       unlockVideoPlaybackOnGesture().catch(() => {});
       if (STATE.isStartingSequence || STATE.isCaptureRunning) return;
       STATE.isStartingSequence = true;
       announceKioskStatus(`بدء التقاط ${STATE.shotCount} صور`);
-
       try {
-        startPhotoSequence().finally(() => {
-          STATE.isStartingSequence = false;
-        });
+        startPhotoSequence().finally(() => { STATE.isStartingSequence = false; });
       } catch (err) {
         STATE.isStartingSequence = false;
       }
@@ -1971,13 +1718,11 @@
 
     function dispatchButtonAction(buttonEl, event) {
       if (!buttonEl || buttonEl.disabled) return;
-
       const explicitAction = buttonEl.getAttribute('data-action');
       const btnId = buttonEl.id || '';
 
       if (explicitAction === 'select-shots' || buttonEl.classList.contains('shot-count-btn')) {
-        const rawShots = Number(buttonEl.getAttribute('data-shots'));
-        const shots = rawShots === 4 ? 4 : 3;
+        const shots = Number(buttonEl.getAttribute('data-shots')) === 4 ? 4 : 3;
         selectShotCount(shots);
         announceKioskStatus(`تم اختيار ${shots} صور`);
         return;
@@ -2020,6 +1765,11 @@
         return;
       }
 
+      if (explicitAction === 'download-image' || btnId === 'btnDownloadImage') {
+        downloadComposedImage();
+        return;
+      }
+
       if (explicitAction === 'close-fullscreen-preview' || btnId === 'btnCloseFullScreenPreview') {
         closeFullScreenPreview();
         return;
@@ -2043,14 +1793,11 @@
       appRoot.dataset.kioskButtonsBound = '1';
 
       const recentActivations = new WeakMap();
-
       const activateOnce = (buttonEl, event) => {
         if (!buttonEl) return;
         const now = Date.now();
         const lastAt = recentActivations.get(buttonEl) || 0;
-        if (now - lastAt < 380) {
-          return;
-        }
+        if (now - lastAt < 380) return;
         recentActivations.set(buttonEl, now);
         dispatchButtonAction(buttonEl, event);
       };
@@ -2059,9 +1806,7 @@
         if (event.touches && event.touches.length > 0) return;
         const target = event.target && event.target.closest ? event.target.closest('button, [role="button"]') : null;
         if (!target || !appRoot.contains(target)) return;
-        if (event.cancelable) {
-          event.preventDefault();
-        }
+        if (event.cancelable) event.preventDefault();
         activateOnce(target, event);
       }, { passive: false });
 
@@ -2186,9 +1931,6 @@
       ctx.restore();
     }
 
-    /**
-     * Draw cute theme background illustrations + soft clouds/bokeh inside Borderless safe area
-     */
     function drawThemeBackground(ctx, theme, width, height, variantSeed = 0) {
       const rng = createSeededRng(variantSeed + theme.id.split('').reduce((a, b) => a + b.charCodeAt(0) * 31, 17));
       const grad = ctx.createLinearGradient(0, 0, width * 0.25, height);
@@ -2227,45 +1969,25 @@
 
         if (theme.pattern === 'stars') {
           const mode = i % 3;
-          if (mode === 0) {
-            drawCuteStar(ctx, 0, 0, 22 * scale, 10 * scale, 'rgba(245, 158, 11, 0.28)');
-          } else if (mode === 1) {
-            drawCuteBalloon(ctx, 0, 0, 0.85 * scale, 'rgba(56, 189, 248, 0.26)', 'rgba(245, 158, 11, 0.35)');
-          } else {
-            drawCuteSparkle(ctx, 0, 0, 18 * scale, 'rgba(251, 146, 60, 0.26)');
-          }
+          if (mode === 0) drawCuteStar(ctx, 0, 0, 22 * scale, 10 * scale, 'rgba(245, 158, 11, 0.28)');
+          else if (mode === 1) drawCuteBalloon(ctx, 0, 0, 0.85 * scale, 'rgba(56, 189, 248, 0.26)', 'rgba(245, 158, 11, 0.35)');
+          else drawCuteSparkle(ctx, 0, 0, 18 * scale, 'rgba(251, 146, 60, 0.26)');
         } else if (theme.pattern === 'hearts') {
-          if (i % 3 === 0) {
-            drawCuteHeart(ctx, 0, 0, 28 * scale, 'rgba(236, 72, 153, 0.25)');
-          } else if (i % 3 === 1) {
-            drawCuteFlower(ctx, 0, 0, 20 * scale, 'rgba(244, 114, 182, 0.25)', 'rgba(253, 224, 71, 0.35)');
-          } else {
-            drawCuteSparkle(ctx, 0, 0, 20 * scale, 'rgba(244, 63, 94, 0.24)');
-          }
+          if (i % 3 === 0) drawCuteHeart(ctx, 0, 0, 28 * scale, 'rgba(236, 72, 153, 0.25)');
+          else if (i % 3 === 1) drawCuteFlower(ctx, 0, 0, 20 * scale, 'rgba(244, 114, 182, 0.25)', 'rgba(253, 224, 71, 0.35)');
+          else drawCuteSparkle(ctx, 0, 0, 20 * scale, 'rgba(244, 63, 94, 0.24)');
         } else if (theme.pattern === 'neon') {
-          if (i % 2 === 0) {
-            drawCuteSparkle(ctx, 0, 0, 22 * scale, 'rgba(34, 211, 238, 0.28)');
-          } else {
-            drawCuteStar(ctx, 0, 0, 19 * scale, 8.5 * scale, 'rgba(96, 165, 250, 0.26)');
-          }
+          if (i % 2 === 0) drawCuteSparkle(ctx, 0, 0, 22 * scale, 'rgba(34, 211, 238, 0.28)');
+          else drawCuteStar(ctx, 0, 0, 19 * scale, 8.5 * scale, 'rgba(96, 165, 250, 0.26)');
         } else if (theme.pattern === 'gold') {
-          if (i % 3 === 0) {
-            drawCuteCrown(ctx, 0, 0, 0.85 * scale, 'rgba(250, 204, 21, 0.25)');
-          } else {
-            drawCuteSparkle(ctx, 0, 0, 22 * scale, 'rgba(250, 204, 21, 0.25)');
-          }
+          if (i % 3 === 0) drawCuteCrown(ctx, 0, 0, 0.85 * scale, 'rgba(250, 204, 21, 0.25)');
+          else drawCuteSparkle(ctx, 0, 0, 22 * scale, 'rgba(250, 204, 21, 0.25)');
         } else if (theme.pattern === 'pastel') {
-          if (i % 2 === 0) {
-            drawCuteFlower(ctx, 0, 0, 24 * scale, 'rgba(192, 132, 252, 0.28)', 'rgba(251, 191, 36, 0.35)');
-          } else {
-            drawCuteHeart(ctx, 0, 0, 24 * scale, 'rgba(52, 211, 153, 0.24)');
-          }
+          if (i % 2 === 0) drawCuteFlower(ctx, 0, 0, 24 * scale, 'rgba(192, 132, 252, 0.28)', 'rgba(251, 191, 36, 0.35)');
+          else drawCuteHeart(ctx, 0, 0, 24 * scale, 'rgba(52, 211, 153, 0.24)');
         } else {
-          if (i % 3 === 0) {
-            drawCuteCrown(ctx, 0, 0, 0.8 * scale, 'rgba(197, 160, 89, 0.24)');
-          } else {
-            drawCuteSparkle(ctx, 0, 0, 20 * scale, 'rgba(197, 160, 89, 0.26)');
-          }
+          if (i % 3 === 0) drawCuteCrown(ctx, 0, 0, 0.8 * scale, 'rgba(197, 160, 89, 0.24)');
+          else drawCuteSparkle(ctx, 0, 0, 20 * scale, 'rgba(197, 160, 89, 0.26)');
         }
         ctx.restore();
       }
@@ -2278,12 +2000,8 @@
       ctx.restore();
     }
 
-    /**
-     * Draw cute stickers over photo corners/edges with randomized placement, scale, and tilt each time
-     */
     function drawThemeStickersOverPhotos(ctx, theme, photoRects, variantSeed = 0) {
       if (!ctx || !theme || !Array.isArray(photoRects) || photoRects.length === 0) return;
-
       const palette = Array.isArray(theme.overlayStickers) && theme.overlayStickers.length > 0
         ? theme.overlayStickers
         : [theme.stickerLeft, theme.stickerRight, '✨'];
@@ -2300,9 +2018,7 @@
 
         const firstIdx = Math.floor(rng() * cornerChoices.length);
         let secondIdx = Math.floor(rng() * cornerChoices.length);
-        if (secondIdx === firstIdx) {
-          secondIdx = (firstIdx + 2) % cornerChoices.length;
-        }
+        if (secondIdx === firstIdx) secondIdx = (firstIdx + 2) % cornerChoices.length;
 
         [firstIdx, secondIdx].forEach((cIdx, sPos) => {
           const spot = cornerChoices[cIdx];
@@ -2318,20 +2034,14 @@
           ctx.font = `900 ${fontPx}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", Cairo, sans-serif`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-
           ctx.shadowColor = 'rgba(255, 255, 255, 0.85)';
           ctx.shadowBlur = 10;
-          ctx.shadowOffsetX = 0;
-          ctx.shadowOffsetY = 0;
           ctx.fillText(stickerChar, 0, 0);
           ctx.restore();
         });
       });
     }
 
-    /**
-     * Render single 2x6 photo strip (600x1800 px) for dual-strip (شريطين) mode
-     */
     function renderSingleStrip(ctx, theme, captions, images, stripX, stripY, stripW, stripH, variantSeed = 0) {
       ctx.save();
       ctx.beginPath();
@@ -2362,19 +2072,11 @@
       for (let i = 0; i < count; i++) {
         const px = stripX + padX;
         const py = topPad + i * (photoH + gap);
-        drawPhotoFittedInRect(
-          ctx,
-          images[i],
-          px,
-          py,
-          photoW,
-          photoH,
-          {
-            borderColor: theme.accentColor,
-            borderWidth: 3.5,
-            radius: 16
-          }
-        );
+        drawPhotoFittedInRect(ctx, images[i], px, py, photoW, photoH, {
+          borderColor: theme.accentColor,
+          borderWidth: 3.5,
+          radius: 16
+        });
         drawnPhotoRects.push({ x: px, y: py, w: photoW, h: photoH });
       }
 
@@ -2389,10 +2091,6 @@
       ctx.restore();
     }
 
-    /**
-     * Render 1200x1800 px (100mm x 148mm / Postcard 4x6 inch at 300 DPI) Canon SELPHY composition
-     * with built-in Borderless safe margins so top, bottom, and side edges never clip
-     */
     async function renderSelphyComposition() {
       const canvas = document.getElementById('selphyCanvas');
       if (!canvas) return;
@@ -2476,19 +2174,11 @@
             const row = Math.floor(i / cols);
             const x = sideMargin + col * (cellW + gapX);
             const y = headerHeight + row * (cellH + gapY);
-            drawPhotoFittedInRect(
-              ctx,
-              loadedImages[i],
-              x,
-              y,
-              cellW,
-              cellH,
-              {
-                borderColor: theme.accentColor,
-                borderWidth: 4.5,
-                radius: 22
-              }
-            );
+            drawPhotoFittedInRect(ctx, loadedImages[i], x, y, cellW, cellH, {
+              borderColor: theme.accentColor,
+              borderWidth: 4.5,
+              radius: 22
+            });
             drawnPhotoRects.push({ x, y, w: cellW, h: cellH });
           }
         } else {
@@ -2499,19 +2189,11 @@
 
           for (let i = 0; i < count; i++) {
             const y = headerHeight + i * (cellH + gap);
-            drawPhotoFittedInRect(
-              ctx,
-              loadedImages[i],
-              sideMargin,
-              y,
-              cellW,
-              cellH,
-              {
-                borderColor: theme.accentColor,
-                borderWidth: 4.5,
-                radius: 22
-              }
-            );
+            drawPhotoFittedInRect(ctx, loadedImages[i], sideMargin, y, cellW, cellH, {
+              borderColor: theme.accentColor,
+              borderWidth: 4.5,
+              radius: 22
+            });
             drawnPhotoRects.push({ x: sideMargin, y, w: cellW, h: cellH });
           }
         }
@@ -2539,9 +2221,6 @@
       return shotCount >= 4 ? 22 : 28;
     }
 
-    /**
-     * One-tap theme selection: rotates captions and layout/sticker variation on every press
-     */
     async function selectTheme(themeId) {
       if (!THEMES[themeId]) return;
       STATE.selectedTheme = themeId;
@@ -2561,9 +2240,6 @@
       }
     }
 
-    /**
-     * Print copies counter UI
-     */
     function updatePrintCopiesUI() {
       const copies = Math.max(1, Number(STATE.printCopies) || 1);
       const unitPrice = Number(STATE.pricePerCopy) || 5000;
@@ -2585,16 +2261,27 @@
       updatePrintCopiesUI();
     }
 
-    /**
-     * Direct print trigger calibrated for Canon SELPHY Postcard (4in x 6in / 100mm x 148mm)
-     */
+    async function downloadComposedImage() {
+      await renderSelphyComposition();
+      const canvas = document.getElementById('selphyCanvas');
+      if (!canvas) return;
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.98);
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `SELPHY_10x15_${STATE.printLayout}_${Date.now()}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      announceKioskStatus('تم حفظ الصورة بدقة 1200×1800 (10×15 سم)', true);
+    }
+
     async function triggerDirectPrint() {
       await renderSelphyComposition();
       setTimeout(() => {
         try {
           window.print();
         } catch (err) {}
-      }, 100);
+      }, 120);
     }
 
     function syncFullScreenPreviewMeta() {
@@ -2604,33 +2291,22 @@
       const layoutLabel = STATE.printLayout === 'postcard' ? 'بوست كارت' : 'شريطين';
       const copies = Math.max(1, Number(STATE.printCopies) || 1);
       const total = copies * (Number(STATE.pricePerCopy) || 5000);
-      if (metaEl) {
-        metaEl.textContent = `${STATE.shotCount} صور • ${layoutLabel} • ثيم ${themeObj.label} • ${copies} نسخة`;
-      }
-      if (fsPrintBtnLabel) {
-        fsPrintBtnLabel.textContent = `طباعة فورية (${copies}) — ${total.toLocaleString('en-US')} د.ع`;
-      }
+      if (metaEl) metaEl.textContent = `${STATE.shotCount} صور • ${layoutLabel} • ثيم ${themeObj.label} • ${copies} نسخة`;
+      if (fsPrintBtnLabel) fsPrintBtnLabel.textContent = `طباعة فورية (${copies}) — ${total.toLocaleString('en-US')} د.ع`;
     }
 
     async function openFullScreenPreview() {
       await renderSelphyComposition();
       syncFullScreenPreviewMeta();
       const modal = document.getElementById('fullScreenPreviewModal');
-      if (modal) {
-        modal.classList.remove('hidden');
-      }
+      if (modal) modal.classList.remove('hidden');
     }
 
     function closeFullScreenPreview() {
       const modal = document.getElementById('fullScreenPreviewModal');
-      if (modal) {
-        modal.classList.add('hidden');
-      }
+      if (modal) modal.classList.add('hidden');
     }
 
-    /**
-     * Return cleanly to Screen 1 (Start Kiosk)
-     */
     async function resetToStartScreen() {
       STATE.sessionId += 1;
       STATE.isCaptureRunning = false;
@@ -2640,18 +2316,13 @@
       updatePrintCopiesUI();
 
       const overlay = document.getElementById('countdownOverlay');
-      if (overlay) {
-        overlay.classList.add('hidden');
-      }
+      if (overlay) overlay.classList.add('hidden');
 
       setActiveScreen('start');
       syncHomeSelectionButtons();
       await ensureCameraReady(false);
     }
 
-    /**
-     * Initialize Kiosk on Load
-     */
     window.addEventListener('DOMContentLoaded', async () => {
       installViewportLocks();
       bindStartButtonEvents();
@@ -2662,9 +2333,7 @@
       await ensureCameraReady(false);
 
       document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) {
-          ensureCameraReady(!STATE.hasLiveVideoStream).catch(() => {});
-        }
+        if (!document.hidden) ensureCameraReady(!STATE.hasLiveVideoStream).catch(() => {});
       });
 
       const resumeVideoOnGesture = () => {
@@ -2678,9 +2347,7 @@
 
       document.addEventListener('pointerdown', resumeVideoOnGesture, { passive: true });
       document.addEventListener('click', resumeVideoOnGesture, { passive: true });
-      window.addEventListener('resize', () => {
-        syncCameraVisualTargets();
-      });
+      window.addEventListener('resize', () => syncCameraVisualTargets());
     });
   </script>
 </body>
