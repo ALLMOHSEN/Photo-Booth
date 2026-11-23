@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>فوتو بوث الذكريات | طباعة كاملة بدون قص</title>
+  <title>فوتو بوث الذكريات | طباعة حسب قياس الطابعة بدون قص</title>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -102,23 +102,6 @@
       transform: scaleX(-1);
     }
 
-    #framingGuideBadge {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      padding: 4px 12px;
-      border-radius: 9999px;
-      background: rgba(15, 23, 42, 0.78);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.24);
-      color: #f8fafc;
-      font-size: 12px;
-      font-weight: 800;
-      white-space: nowrap;
-      box-shadow: 0 6px 18px rgba(2, 6, 23, 0.4);
-    }
-
     @keyframes capturePulse {
       0%, 100% {
         box-shadow: 0 0 36px rgba(99, 102, 241, 0.55), 0 0 72px rgba(236, 72, 153, 0.28);
@@ -166,7 +149,7 @@
       display: none;
     }
 
-    /* Universal No-Crop Fit Print Rules across all printers and paper sizes */
+    /* Printer-driven full fit rules: scales cleanly to the selected printer paper with zero cropping */
     @media print {
       @page {
         size: auto;
@@ -199,10 +182,9 @@
         align-items: center !important;
         justify-content: center !important;
         position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100vw !important;
-        height: 100vh !important;
+        inset: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
         overflow: hidden !important;
@@ -217,8 +199,8 @@
         display: block !important;
         width: 100% !important;
         height: 100% !important;
-        max-width: 100vw !important;
-        max-height: 100vh !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
         object-fit: contain !important;
         object-position: center center !important;
         margin: 0 auto !important;
@@ -230,9 +212,9 @@
   </style>
 </head>
 <body>
-  <!-- Full-fit print container (object-fit: contain guarantees zero cropping on any printer) -->
+  <!-- Printer-sized full output container (zero cropping on any printer paper size) -->
   <div id="printOnlyContainer" aria-hidden="true">
-    <img id="printOnlyImg" alt="Full Uncropped Print Output" />
+    <img id="printOnlyImg" alt="Full Uncropped Printer Output" />
   </div>
 
   <div id="app" class="relative w-full h-full overflow-hidden">
@@ -397,7 +379,6 @@
         <div id="framingGuideClearWindow">
           <video id="framingGuideClearVideo" autoplay playsinline webkit-playsinline="true" muted class="hidden"></video>
           <canvas id="framingGuideClearCanvas" width="1280" height="720" class="hidden"></canvas>
-          <div id="framingGuideBadge">100×148 مم (4×6)</div>
         </div>
       </div>
 
@@ -415,7 +396,7 @@
     </section>
 
     <!-- ===================================================================== -->
-    <!-- SCREEN 3: PAPER SIZE + THEMES + NO-CROP UNIVERSAL PRINT             -->
+    <!-- SCREEN 3: THEMES + PRINTER-MATCHED NO-CROP PRINT                      -->
     <!-- ===================================================================== -->
     <section id="editorScreen" class="hidden relative w-full h-full p-3 sm:p-5 lg:p-6 flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch justify-center overflow-hidden">
       <!-- Left / Top Preview Column -->
@@ -423,8 +404,7 @@
         <img
           id="composedPreviewImg"
           alt="معاينة الطباعة الكاملة بدون قص"
-          style="aspect-ratio: 100 / 148;"
-          class="max-h-full w-auto rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.85)] border-2 border-white/20 object-contain"
+          class="max-w-full max-h-full w-auto h-auto rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.85)] border-2 border-white/20 object-contain"
         />
       </div>
 
@@ -432,38 +412,10 @@
       <div class="lg:w-1/2 h-[58%] lg:h-full glass-panel rounded-3xl p-3.5 sm:p-5 lg:p-6 flex flex-col justify-between gap-2.5 overflow-hidden">
         <div class="flex flex-col gap-2.5 overflow-y-auto pr-0.5">
           <div class="flex items-center justify-between gap-2">
-            <h2 class="text-base sm:text-xl font-black text-white">نسبة اللوحة والثيم</h2>
+            <h2 class="text-base sm:text-xl font-black text-white">اختر الثيم</h2>
             <span id="editorModeBadge" class="px-3 py-1 rounded-xl bg-slate-900/90 border border-white/15 text-xs sm:text-sm font-black text-amber-300">
-              3 صور • 100×148 مم
+              3 صور • حسب الطابعة
             </span>
-          </div>
-
-          <!-- Aspect / Paper Size Selector (Postcard / A4 / Card Size) -->
-          <div class="grid grid-cols-3 gap-2" role="group" aria-label="قياس اللوحة">
-            <button
-              type="button"
-              data-action="select-paper"
-              data-paper="postcard"
-              class="paper-size-btn py-2 px-2.5 rounded-2xl border-2 text-center transition font-black text-xs sm:text-sm bg-emerald-600/35 border-emerald-300 text-white shadow"
-            >
-              100×148 مم (4×6)
-            </button>
-            <button
-              type="button"
-              data-action="select-paper"
-              data-paper="a4"
-              class="paper-size-btn py-2 px-2.5 rounded-2xl border-2 text-center transition font-black text-xs sm:text-sm bg-slate-900/75 border-white/15 hover:border-emerald-300/60 text-slate-200"
-            >
-              ورقة A4 (210×297)
-            </button>
-            <button
-              type="button"
-              data-action="select-paper"
-              data-paper="card"
-              class="paper-size-btn py-2 px-2.5 rounded-2xl border-2 text-center transition font-black text-xs sm:text-sm bg-slate-900/75 border-white/15 hover:border-emerald-300/60 text-slate-200"
-            >
-              بطاقة 54×86 مم
-            </button>
           </div>
 
           <!-- Simple One-Tap Themes Grid -->
@@ -534,7 +486,7 @@
         <div class="flex flex-col gap-2 pt-2 border-t border-white/10 shrink-0">
           <div class="w-full flex items-center justify-between gap-3 bg-slate-900/85 border border-white/15 rounded-2xl px-3.5 py-2">
             <div class="flex flex-col text-right">
-              <span id="paperSpecsSubLabel" class="text-xs font-bold text-slate-300">5,000 د.ع للطبعة • بدون قص • متوافق مع أي طابعة</span>
+              <span class="text-xs font-bold text-slate-300">5,000 د.ع للطبعة • قياس الطابعة بدون قص</span>
               <span id="printTotalPriceLabel" class="text-sm sm:text-base font-black text-amber-300">المجموع: 5,000 د.ع</span>
             </div>
 
@@ -579,7 +531,7 @@
               data-action="download-image"
               class="py-2.5 px-3 rounded-2xl bg-sky-600/85 hover:bg-sky-500 active:scale-[0.98] border border-sky-300/40 text-white font-black text-xs sm:text-sm shadow-lg transition flex items-center justify-center gap-1.5"
             >
-              <span id="btnDownloadImageLabel">حفظ الصورة (100×148 مم)</span>
+              <span>حفظ الصورة</span>
             </button>
           </div>
 
@@ -589,7 +541,7 @@
             data-action="direct-print"
             class="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 active:scale-[0.98] text-white font-black text-base sm:text-lg shadow-xl transition flex items-center justify-center gap-2"
           >
-            <span id="btnDirectPrintLabel">طباعة فورية بدون قص — 5,000 د.ع</span>
+            <span id="btnDirectPrintLabel">طباعة فورية حسب الطابعة — 5,000 د.ع</span>
           </button>
 
           <button
@@ -615,8 +567,8 @@
     <div id="fullScreenPreviewModal" class="hidden fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-xl flex flex-col items-center justify-between p-3 sm:p-5 select-none">
       <div class="w-full max-w-5xl flex items-center justify-between gap-3 shrink-0">
         <div class="flex items-center gap-2.5">
-          <span id="fullScreenPaperBadge" class="px-3.5 py-1.5 rounded-2xl bg-indigo-600/35 border border-amber-300/60 text-amber-200 text-xs sm:text-sm font-black">
-            معاينة كاملة بدون قص • 100×148 مم
+          <span class="px-3.5 py-1.5 rounded-2xl bg-indigo-600/35 border border-amber-300/60 text-amber-200 text-xs sm:text-sm font-black">
+            معاينة كاملة بدون قص • حسب الطابعة
           </span>
           <span id="fullScreenPreviewMeta" class="text-xs sm:text-sm font-bold text-slate-300"></span>
         </div>
@@ -645,54 +597,20 @@
         <img
           id="fullScreenComposedImg"
           alt="معاينة كاملة بدون قص قبل الطباعة"
-          style="aspect-ratio: 100 / 148;"
           class="max-w-full max-h-full w-auto h-auto rounded-3xl shadow-[0_24px_70px_rgba(0,0,0,0.9)] border-2 border-white/25 object-contain"
         />
       </div>
 
-      <div id="fullScreenPaperHint" class="text-xs font-bold text-slate-400 shrink-0 text-center">
-        تطابق الطباعة تلقائياً مع ورق الطابعة بدون قص أي جزء من الصورة
+      <div class="text-xs font-bold text-slate-400 shrink-0 text-center">
+        يتم ضبط الحجم تلقائياً حسب ورق الطابعة المختار دون قص أي جزء من الصورة
       </div>
     </div>
 
-    <!-- Dynamic Printer-Matched Canvas -->
+    <!-- Printer-Matched Composition Canvas -->
     <canvas id="selphyCanvas" width="1200" height="1800" class="hidden"></canvas>
   </div>
 
   <script>
-    const PAPER_PRESETS = {
-      postcard: {
-        id: 'postcard',
-        label: '100×148 مم',
-        shortLabel: '100×148 مم',
-        pageCssSize: 'auto',
-        widthMm: 100,
-        heightMm: 148,
-        canvasW: 1200,
-        canvasH: 1800
-      },
-      a4: {
-        id: 'a4',
-        label: 'A4 (210×297 مم)',
-        shortLabel: 'A4',
-        pageCssSize: 'auto',
-        widthMm: 210,
-        heightMm: 297,
-        canvasW: 1488,
-        canvasH: 2105
-      },
-      card: {
-        id: 'card',
-        label: '54×86 مم',
-        shortLabel: '54×86 مم',
-        pageCssSize: 'auto',
-        widthMm: 54,
-        heightMm: 86,
-        canvasW: 944,
-        canvasH: 1504
-      }
-    };
-
     const STATE = {
       screen: 'start',
       shotCount: 3,
@@ -700,7 +618,6 @@
       betweenShotsSec: 3,
       selectedTheme: 'kids',
       printLayout: 'postcard',
-      paperSize: 'postcard',
       printCopies: 1,
       pricePerCopy: 5000,
       facingMode: 'user',
@@ -884,66 +801,17 @@
       }
     };
 
-    function getActivePaperPreset() {
-      return PAPER_PRESETS[STATE.paperSize] || PAPER_PRESETS.postcard;
-    }
-
-    function applyPaperSizeToDomAndStyle() {
-      const preset = getActivePaperPreset();
+    function applyPrinterPageRule() {
       const dynStyle = document.getElementById('dynamicPageStyle');
       if (dynStyle) {
-        dynStyle.textContent = `@page { size: ${preset.pageCssSize}; margin: 0mm; }`;
+        dynStyle.textContent = `@page { size: auto; margin: 0mm; }`;
       }
-
-      document.querySelectorAll('.paper-size-btn').forEach((btn) => {
-        const isActive = btn.getAttribute('data-paper') === preset.id;
-        btn.className = isActive
-          ? 'paper-size-btn py-2 px-2.5 rounded-2xl border-2 text-center transition font-black text-xs sm:text-sm bg-emerald-600/35 border-emerald-300 text-white shadow'
-          : 'paper-size-btn py-2 px-2.5 rounded-2xl border-2 text-center transition font-black text-xs sm:text-sm bg-slate-900/75 border-white/15 hover:border-emerald-300/60 text-slate-200';
-      });
-
-      const aspectVal = `${preset.widthMm} / ${preset.heightMm}`;
-      const previewImg = document.getElementById('composedPreviewImg');
-      const fullScreenImg = document.getElementById('fullScreenComposedImg');
-      if (previewImg) previewImg.style.aspectRatio = aspectVal;
-      if (fullScreenImg) fullScreenImg.style.aspectRatio = aspectVal;
-
-      const subLabel = document.getElementById('paperSpecsSubLabel');
-      if (subLabel) {
-        subLabel.textContent = `5,000 د.ع للطبعة • بدون قص • ${preset.label}`;
-      }
-
-      const dlLabel = document.getElementById('btnDownloadImageLabel');
-      if (dlLabel) {
-        dlLabel.textContent = `حفظ الصورة (${preset.shortLabel})`;
-      }
-
-      const fsBadge = document.getElementById('fullScreenPaperBadge');
-      if (fsBadge) {
-        fsBadge.textContent = `معاينة كاملة بدون قص • ${preset.label}`;
-      }
-
       const badge = document.getElementById('editorModeBadge');
       if (badge) {
         const countText = STATE.shotCount === 4 ? '4 صور' : '3 صور';
-        badge.textContent = `${countText} • ${preset.label}`;
+        badge.textContent = `${countText} • حسب الطابعة`;
       }
-
-      const guideBadge = document.getElementById('framingGuideBadge');
-      if (guideBadge) {
-        guideBadge.textContent = preset.label;
-      }
-
       syncCameraVisualTargets();
-    }
-
-    async function selectPaperSize(paperId) {
-      if (!PAPER_PRESETS[paperId]) return;
-      STATE.paperSize = paperId;
-      applyPaperSizeToDomAndStyle();
-      if (STATE.screen === 'print') {
-        await renderSelphyComposition();
-      }
     }
 
     function getThemeCaptions(theme, variantSeed = 0) {
@@ -987,7 +855,7 @@
           : 'home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35';
       });
 
-      applyPaperSizeToDomAndStyle();
+      applyPrinterPageRule();
     }
 
     function selectShotCount(count) {
@@ -1173,10 +1041,9 @@
     }
 
     function getActiveSlotAspectRatio() {
-      const preset = getActivePaperPreset();
       const count = STATE.shotCount === 4 ? 4 : 3;
-      const W = preset.canvasW;
-      const H = preset.canvasH;
+      const W = 1200;
+      const H = 1800;
       const headerHeight = Math.round(H * 0.11);
       const footerHeight = Math.round(H * 0.14);
       const sideMargin = Math.round(W * 0.085);
@@ -1207,14 +1074,12 @@
     }
 
     function computeCoverGuideRect(containerW, containerH, targetAspect) {
-      const preset = getActivePaperPreset();
       const safeW = Math.max(1, containerW);
       const safeH = Math.max(1, containerH);
       const maxW = safeW * 0.72;
       const maxH = safeH * 0.68;
-      const paperAspect = preset.widthMm / preset.heightMm;
-      const effectiveAspect = STATE.printLayout === 'postcard' ? paperAspect : (targetAspect || paperAspect);
-      const safeAspect = Math.max(0.25, Math.min(4.0, effectiveAspect));
+      const defaultAspect = STATE.printLayout === 'postcard' ? (2 / 3) : (targetAspect || (2 / 3));
+      const safeAspect = Math.max(0.25, Math.min(4.0, defaultAspect));
 
       let w = maxW;
       let h = w / safeAspect;
@@ -1234,7 +1099,6 @@
       const clearWin = document.getElementById('framingGuideClearWindow');
       const clearVid = document.getElementById('framingGuideClearVideo');
       const clearCan = document.getElementById('framingGuideClearCanvas');
-      const badge = document.getElementById('framingGuideBadge');
       const captureEl = document.getElementById('captureScreen');
 
       if (!overlay || !backdrop || !clearWin) return;
@@ -1257,10 +1121,6 @@
       clearWin.style.width = `${Number(box.w.toFixed(2))}px`;
       clearWin.style.height = `${Number(box.h.toFixed(2))}px`;
       clearWin.style.borderRadius = '28px';
-
-      if (badge) {
-        badge.textContent = getActivePaperPreset().label;
-      }
 
       if (clearVid) {
         clearVid.autoplay = true;
@@ -1847,15 +1707,6 @@
         return;
       }
 
-      if (explicitAction === 'select-paper' || buttonEl.classList.contains('paper-size-btn')) {
-        const paperId = buttonEl.getAttribute('data-paper');
-        if (paperId && PAPER_PRESETS[paperId]) {
-          selectPaperSize(paperId);
-          announceKioskStatus(`تم ضبط القياس على ${PAPER_PRESETS[paperId].label}`, true);
-        }
-        return;
-      }
-
       if (explicitAction === 'start-capture' || btnId === 'startCaptureBtn') {
         handleStartBoothClick(event);
         return;
@@ -1895,7 +1746,7 @@
       }
 
       if (explicitAction === 'direct-print' || btnId === 'btnDirectPrint') {
-        announceKioskStatus('جاري تجهيز الطباعة الكاملة بدون قص', true);
+        announceKioskStatus('جاري الطباعة حسب قياس الطابعة بدون قص', true);
         triggerDirectPrint();
         return;
       }
@@ -2257,11 +2108,10 @@
     }
 
     async function renderSelphyComposition() {
-      const preset = getActivePaperPreset();
       const canvas = document.getElementById('selphyCanvas');
       if (!canvas) return;
-      canvas.width = preset.canvasW;
-      canvas.height = preset.canvasH;
+      canvas.width = 1200;
+      canvas.height = 1800;
 
       const ctx = canvas.getContext('2d');
       const theme = THEMES[STATE.selectedTheme] || THEMES.kids;
@@ -2282,11 +2132,11 @@
 
       if (loadedImages.length === 0) {
         const fallbackCanvas = document.createElement('canvas');
-        fallbackCanvas.width = preset.canvasW;
-        fallbackCanvas.height = preset.canvasH;
+        fallbackCanvas.width = 1200;
+        fallbackCanvas.height = 1800;
         const fctx = fallbackCanvas.getContext('2d');
         fctx.fillStyle = '#1e293b';
-        fctx.fillRect(0, 0, preset.canvasW, preset.canvasH);
+        fctx.fillRect(0, 0, 1200, 1800);
         const fallbackImg = await loadImageElement(fallbackCanvas.toDataURL('image/jpeg'));
         loadedImages.push(fallbackImg);
       }
@@ -2422,7 +2272,7 @@
 
       if (countEl) countEl.textContent = String(copies);
       if (totalEl) totalEl.textContent = `المجموع: ${formattedTotal}`;
-      if (printBtnLabel) printBtnLabel.textContent = `طباعة فورية بدون قص (${copies}) — ${formattedTotal}`;
+      if (printBtnLabel) printBtnLabel.textContent = `طباعة فورية حسب الطابعة (${copies}) — ${formattedTotal}`;
     }
 
     function changePrintCopies(delta) {
@@ -2433,21 +2283,20 @@
 
     async function downloadComposedImage() {
       await renderSelphyComposition();
-      const preset = getActivePaperPreset();
       const canvas = document.getElementById('selphyCanvas');
       if (!canvas) return;
       const dataUrl = canvas.toDataURL('image/jpeg', 0.98);
       const link = document.createElement('a');
       link.href = dataUrl;
-      link.download = `NO_CROP_${preset.id.toUpperCase()}_${preset.widthMm}x${preset.heightMm}mm_${Date.now()}.jpg`;
+      link.download = `PRINTER_FIT_NO_CROP_${Date.now()}.jpg`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      announceKioskStatus(`تم حفظ الصورة الكاملة (${preset.label}) بدون قص`, true);
+      announceKioskStatus('تم حفظ الصورة الكاملة بدون قص', true);
     }
 
     async function triggerDirectPrint() {
-      applyPaperSizeToDomAndStyle();
+      applyPrinterPageRule();
       await renderSelphyComposition();
       setTimeout(() => {
         try {
@@ -2457,19 +2306,18 @@
     }
 
     function syncFullScreenPreviewMeta() {
-      const preset = getActivePaperPreset();
       const metaEl = document.getElementById('fullScreenPreviewMeta');
       const fsPrintBtnLabel = document.getElementById('btnFullScreenPrintLabel');
       const themeObj = THEMES[STATE.selectedTheme] || THEMES.kids;
       const layoutLabel = STATE.printLayout === 'postcard' ? 'بوست كارت' : 'شريطين';
       const copies = Math.max(1, Number(STATE.printCopies) || 1);
       const total = copies * (Number(STATE.pricePerCopy) || 5000);
-      if (metaEl) metaEl.textContent = `${preset.label} • ${STATE.shotCount} صور • ${layoutLabel} • ثيم ${themeObj.label} • ${copies} نسخة`;
+      if (metaEl) metaEl.textContent = `${STATE.shotCount} صور • ${layoutLabel} • ثيم ${themeObj.label} • ${copies} نسخة`;
       if (fsPrintBtnLabel) fsPrintBtnLabel.textContent = `طباعة فورية (${copies}) — ${total.toLocaleString('en-US')} د.ع`;
     }
 
     async function openFullScreenPreview() {
-      applyPaperSizeToDomAndStyle();
+      applyPrinterPageRule();
       await renderSelphyComposition();
       syncFullScreenPreviewMeta();
       const modal = document.getElementById('fullScreenPreviewModal');
