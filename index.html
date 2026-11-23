@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>فوتو بوث CP1500 - عملي وسريع</title>
-    <!-- خط القاهرة العربي الواضح للمس والشاشات -->
+    <title>كشك الفوتو بوث الذاتي | Canon CP1500</title>
+    <!-- خطوط عربية أنيقة وواضحة للتابلت والطباعة -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Cairo:wght@500;600;700;800;900&display=swap" rel="stylesheet">
@@ -29,9 +29,9 @@
             color: #fafafa;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
 
-        /* تأثير فلاش التصوير */
         @keyframes cameraFlash {
             0% { opacity: 1; }
             100% { opacity: 0; }
@@ -40,20 +40,26 @@
             animation: cameraFlash 0.55s ease-out forwards;
         }
 
-        /* حركة العد التنازلي */
         @keyframes pulseScale {
             0% { transform: scale(0.5); opacity: 0; }
-            60% { transform: scale(1.1); opacity: 1; }
+            60% { transform: scale(1.12); opacity: 1; }
             100% { transform: scale(1); opacity: 1; }
         }
         .count-pop {
             animation: pulseScale 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
 
-        /* شريط تمرير مدمج */
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: #18181b; }
-        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 999px; }
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-float {
+            animation: floatSlow 3.5s ease-in-out infinite;
+        }
+
+        /* إخفاء شريط التمرير مع إبقاء التمرير سلساً */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         /* =========================================================
            تنسيق الطباعة الصارم لطابعة Canon SELPHY CP1500 (4x6 in)
@@ -108,34 +114,47 @@
 </head>
 <body class="h-screen w-screen overflow-hidden flex flex-col bg-zinc-950 text-zinc-100">
 
-    <!-- طبقة الفلاش -->
+    <!-- طبقة الفلاش الأبيض -->
     <div id="flash-overlay" class="fixed inset-0 bg-white pointer-events-none opacity-0 z-50"></div>
 
-    <!-- إشعارات سريعة -->
-    <div id="toast-container" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 w-11/12 max-w-sm pointer-events-none"></div>
+    <!-- إشعارات عائمة -->
+    <div id="toast-container" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 w-11/12 max-w-md pointer-events-none"></div>
 
     <!-- =========================================================
-         الشريط العلوي المدمج (أدوات سريعة + قفل الضيوف)
+         الشريط العلوي للكشك (يحتوي على زر المشرف السري بالضغط المطول 3 ثوانٍ)
          ========================================================= -->
-    <header class="h-14 shrink-0 bg-zinc-900/90 border-b border-zinc-800 px-3 sm:px-5 flex items-center justify-between z-30">
-        <!-- الشعار والحالة -->
-        <div class="flex items-center gap-2.5">
-            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-fuchsia-600 to-amber-500 flex items-center justify-center shadow">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <header class="h-14 sm:h-16 shrink-0 bg-zinc-900/90 backdrop-blur-md border-b border-zinc-800/80 px-4 sm:px-6 flex items-center justify-between z-30">
+        <!-- الشعار: الضغط المطول 3 ثوانٍ يفتح لوحة المشرف -->
+        <div id="secret-admin-trigger" class="flex items-center gap-3 cursor-pointer relative group" title="اضغط مطولاً 3 ثوانٍ لإدارة الكشك">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-fuchsia-600 via-purple-600 to-amber-500 flex items-center justify-center shadow-lg shadow-fuchsia-600/20 relative overflow-hidden">
+                <svg class="w-5 h-5 text-white relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
                     <circle cx="12" cy="13" r="3" stroke-width="2.2"></circle>
                 </svg>
+                <!-- شريط تقدم الضغط المطول -->
+                <div id="admin-hold-bar" class="absolute bottom-0 left-0 right-0 h-0 bg-white/40 transition-all duration-75"></div>
             </div>
             <div>
-                <h1 class="font-extrabold text-sm sm:text-base leading-tight text-white">فوتو بوث CP1500</h1>
-                <p id="header-status-badge" class="text-[11px] text-emerald-400 font-semibold">جاهز • شريط مزدوج (4×6)</p>
+                <h1 id="header-kiosk-name" class="font-black text-base sm:text-lg leading-tight text-white">استوديو الذكريات الفوري</h1>
+                <p class="text-[11px] text-zinc-400 font-semibold">طباعة فورية عالية الدقة • Canon CP1500</p>
             </div>
         </div>
 
-        <!-- أزرار التحكم السريعة -->
-        <div class="flex items-center gap-2">
-            <!-- زر كتم/تفعيل الصوت -->
-            <button onclick="toggleMute()" id="btn-mute" class="w-10 h-10 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 flex items-center justify-center text-zinc-200 transition active:scale-95" title="الصوت">
+        <!-- شريط مؤشر الخطوات للزبون + حالة الورق -->
+        <div class="flex items-center gap-3">
+            <!-- مؤشر الخطوات -->
+            <div id="kiosk-stepper" class="hidden md:flex items-center gap-2 bg-zinc-950/90 px-4 py-1.5 rounded-2xl border border-zinc-800 text-xs font-bold">
+                <span id="step-badge-1" class="text-fuchsia-400">1. التصميم</span>
+                <span class="text-zinc-600">←</span>
+                <span id="step-badge-2" class="text-zinc-500">2. الدفع (<span class="price-display">5,000</span> د.ع)</span>
+                <span class="text-zinc-600">←</span>
+                <span id="step-badge-3" class="text-zinc-500">3. التصوير</span>
+                <span class="text-zinc-600">←</span>
+                <span id="step-badge-4" class="text-zinc-500">4. الطباعة</span>
+            </div>
+
+            <!-- زر الصوت -->
+            <button onclick="toggleMute()" class="w-10 h-10 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 flex items-center justify-center text-zinc-200 transition active:scale-95">
                 <svg id="icon-sound-on" class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>
                 </svg>
@@ -144,277 +163,450 @@
                 </svg>
             </button>
 
-            <!-- دليل ضبط الطابعة (يختفي في وضع الضيوف) -->
-            <button onclick="togglePrinterGuide(true)" id="btn-printer-guide" class="h-10 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-xs sm:text-sm font-bold text-amber-300 flex items-center gap-1.5 transition active:scale-95">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
-                </svg>
-                <span class="hidden sm:inline">ضبط الطابعة</span>
-            </button>
-
-            <!-- زر فتح/إغلاق درج الإعدادات (يختفي في وضع الضيوف) -->
-            <button onclick="toggleSettingsDrawer()" id="btn-toggle-settings" class="h-10 px-3.5 rounded-xl bg-fuchsia-600/20 hover:bg-fuchsia-600/30 border border-fuchsia-500/50 text-xs sm:text-sm font-bold text-fuchsia-300 flex items-center gap-1.5 transition active:scale-95">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
-                </svg>
-                <span>القالب والثيم</span>
-            </button>
-
-            <!-- زر وضع الضيوف (Kiosk Lock) -->
-            <button onclick="toggleKioskLock()" id="btn-kiosk-lock" class="h-10 px-3.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-xs sm:text-sm font-bold text-zinc-200 flex items-center gap-1.5 transition active:scale-95" title="قفل الإعدادات للضيوف">
-                <svg id="icon-unlocked" class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path>
-                </svg>
-                <svg id="icon-locked" class="w-4 h-4 text-amber-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                </svg>
-                <span id="kiosk-lock-text" class="hidden md:inline">وضع الضيوف</span>
+            <!-- زر العودة للبداية (يظهر في شاشات الاختيار والدفع) -->
+            <button id="btn-home-reset" onclick="resetToWelcome()" class="hidden h-10 px-3.5 rounded-xl bg-zinc-800 hover:bg-rose-600/20 hover:text-rose-300 border border-zinc-700 text-xs font-bold text-zinc-300 transition active:scale-95">
+                إلغاء ✕
             </button>
         </div>
     </header>
 
     <!-- =========================================================
-         المنطقة الرئيسية (Single-Screen Workspace)
+         المحتوى الرئيسي للكشك (5 شاشات متسلسلة للخدمة الذاتية)
          ========================================================= -->
-    <main class="flex-1 relative flex overflow-hidden">
+    <main class="flex-1 relative overflow-hidden">
 
-        <!-- 1. لوحة الإعدادات السريعة القابلة للطي (Drawer) -->
-        <aside id="settings-drawer" class="w-full sm:w-96 bg-zinc-900 border-l border-zinc-800 h-full overflow-y-auto p-4 flex flex-col gap-5 z-20 transition-all duration-300 shrink-0">
-            <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
-                <h2 class="font-extrabold text-base text-white">إعداد القالب والثيم</h2>
-                <button onclick="toggleSettingsDrawer(false)" class="px-3 py-1 rounded-lg bg-zinc-800 text-xs font-bold text-zinc-300 hover:text-white">إخفاء ✕</button>
-            </div>
-
-            <!-- الخطوة 1: اختيار التخطيط العملي -->
-            <div>
-                <label class="block text-xs font-bold text-zinc-400 mb-2">1. شكل الورقة (مقاس CP1500 4×6):</label>
-                <div class="grid grid-cols-3 gap-2" id="layout-selector">
-                    <button type="button" onclick="setLayout('strip3')" data-layout="strip3" class="layout-btn p-2.5 rounded-2xl border-2 border-fuchsia-500 bg-fuchsia-500/15 flex flex-col items-center text-center transition active:scale-95">
-                        <span class="text-lg mb-1">🎞️</span>
-                        <span class="text-xs font-extrabold text-white">شريط مزدوج</span>
-                        <span class="text-[10px] text-zinc-400">3 صور (2×6 ×2)</span>
-                    </button>
-
-                    <button type="button" onclick="setLayout('grid4')" data-layout="grid4" class="layout-btn p-2.5 rounded-2xl border-2 border-zinc-800 bg-zinc-950 hover:border-zinc-700 flex flex-col items-center text-center transition active:scale-95">
-                        <span class="text-lg mb-1">🪟</span>
-                        <span class="text-xs font-extrabold text-white">بطاقة رباعية</span>
-                        <span class="text-[10px] text-zinc-400">4 صور (4×6)</span>
-                    </button>
-
-                    <button type="button" onclick="setLayout('single')" data-layout="single" class="layout-btn p-2.5 rounded-2xl border-2 border-zinc-800 bg-zinc-950 hover:border-zinc-700 flex flex-col items-center text-center transition active:scale-95">
-                        <span class="text-lg mb-1">🖼️</span>
-                        <span class="text-xs font-extrabold text-white">صورة كبيرة</span>
-                        <span class="text-[10px] text-zinc-400">1 صورة (6×4)</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- الخطوة 2: اختيار الثيم (5 ثيمات عملية) -->
-            <div>
-                <label class="block text-xs font-bold text-zinc-400 mb-2">2. ثيم الإطار:</label>
-                <div class="grid grid-cols-2 gap-2" id="theme-selector">
-                    <button type="button" onclick="setTheme('white')" data-theme="white" class="theme-btn p-2.5 rounded-xl border-2 border-fuchsia-500 bg-fuchsia-500/10 flex items-center gap-2.5 text-right transition active:scale-95">
-                        <span class="w-6 h-6 rounded-lg bg-white border border-zinc-300 shrink-0"></span>
-                        <div>
-                            <div class="text-xs font-extrabold text-white">أبيض كلاسيكي</div>
-                            <div class="text-[10px] text-zinc-400">بسيط وسريع الطباعة</div>
-                        </div>
-                    </button>
-
-                    <button type="button" onclick="setTheme('wedding')" data-theme="wedding" class="theme-btn p-2.5 rounded-xl border-2 border-zinc-800 bg-zinc-950 hover:border-zinc-700 flex items-center gap-2.5 text-right transition active:scale-95">
-                        <span class="w-6 h-6 rounded-lg bg-[#fdf8ee] border-2 border-amber-500 shrink-0"></span>
-                        <div>
-                            <div class="text-xs font-extrabold text-white">زفاف ذهبي</div>
-                            <div class="text-[10px] text-zinc-400">عاجي مع إطار ذهبي</div>
-                        </div>
-                    </button>
-
-                    <button type="button" onclick="setTheme('birthday')" data-theme="birthday" class="theme-btn p-2.5 rounded-xl border-2 border-zinc-800 bg-zinc-950 hover:border-zinc-700 flex items-center gap-2.5 text-right transition active:scale-95">
-                        <span class="w-6 h-6 rounded-lg bg-gradient-to-tr from-pink-500 to-amber-400 shrink-0"></span>
-                        <div>
-                            <div class="text-xs font-extrabold text-white">عيد ميلاد</div>
-                            <div class="text-[10px] text-zinc-400">ألوان احتفالية مبهجة</div>
-                        </div>
-                    </button>
-
-                    <button type="button" onclick="setTheme('luxury')" data-theme="luxury" class="theme-btn p-2.5 rounded-xl border-2 border-zinc-800 bg-zinc-950 hover:border-zinc-700 flex items-center gap-2.5 text-right transition active:scale-95">
-                        <span class="w-6 h-6 rounded-lg bg-zinc-900 border border-amber-400/60 shrink-0"></span>
-                        <div>
-                            <div class="text-xs font-extrabold text-white">أسود فاخر</div>
-                            <div class="text-[10px] text-zinc-400">داكن بلمسة ذهبية</div>
-                        </div>
-                    </button>
-
-                    <button type="button" onclick="setTheme('polaroid')" data-theme="polaroid" class="theme-btn col-span-2 p-2.5 rounded-xl border-2 border-zinc-800 bg-zinc-950 hover:border-zinc-700 flex items-center gap-2.5 text-right transition active:scale-95">
-                        <span class="w-6 h-6 rounded-lg bg-[#f4f1ea] border border-stone-400 shrink-0"></span>
-                        <div>
-                            <div class="text-xs font-extrabold text-white">إطار فوري (Polaroid Retro)</div>
-                            <div class="text-[10px] text-zinc-400">ملمس ورقي كلاسيكي بمساحة كتابة واسعة</div>
-                        </div>
-                    </button>
-                </div>
-            </div>
-
-            <!-- الخطوة 3: نص المناسبة والتاريخ + معاينة مصغرة -->
-            <div class="space-y-2.5">
-                <label class="block text-xs font-bold text-zinc-400">3. النص المطبوع أسفل البطاقة:</label>
-                <input type="text" id="input-event-title" value="ذكرى جميلة ✨" maxlength="30" oninput="updateLiveMiniPreview()" placeholder="عنوان المناسبة (مثال: زفاف أحمد وسارة)" class="w-full bg-zinc-950 border border-zinc-700 focus:border-fuchsia-500 rounded-xl px-3.5 py-2.5 text-sm text-white outline-none">
-                <input type="text" id="input-event-date" value="23 / 11 / 2026" maxlength="25" oninput="updateLiveMiniPreview()" placeholder="التاريخ أو عبارة قصيرة" class="w-full bg-zinc-950 border border-zinc-700 focus:border-fuchsia-500 rounded-xl px-3.5 py-2.5 text-sm text-white outline-none">
-            </div>
-
-            <!-- خيارات التشغيل السريع -->
-            <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-3 space-y-3">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-zinc-300">مؤقت العد التنازلي:</span>
-                    <select id="select-countdown" class="bg-zinc-900 border border-zinc-700 rounded-lg px-2.5 py-1 text-xs font-bold text-white outline-none">
-                        <option value="3" selected>3 ثوانٍ</option>
-                        <option value="5">5 ثوانٍ</option>
-                    </select>
-                </div>
-
-                <label class="flex items-center justify-between cursor-pointer pt-2 border-t border-zinc-800/80">
-                    <div>
-                        <span class="text-xs font-bold text-emerald-400 block">طباعة تلقائية بعد التصوير</span>
-                        <span class="text-[10px] text-zinc-500">يفتح أمر الطباعة فور انتهاء اللقطات</span>
-                    </div>
-                    <input type="checkbox" id="check-auto-print" class="w-5 h-5 accent-emerald-500 rounded cursor-pointer">
-                </label>
-            </div>
-
-            <!-- معاينة مصغرة حية للبطاقة -->
-            <div class="flex flex-col items-center bg-zinc-950 rounded-2xl p-3 border border-zinc-800">
-                <span class="text-[10px] text-zinc-400 mb-2">معاينة حية للتصميم (300 DPI)</span>
-                <canvas id="mini-preview-canvas" class="max-h-44 rounded shadow-lg"></canvas>
-            </div>
-
-            <button onclick="toggleSettingsDrawer(false)" class="w-full py-3 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-extrabold text-sm shadow-lg transition active:scale-95">
-                حفظ والعودة للكاميرا ✓
-            </button>
-        </aside>
-
-        <!-- 2. شاشة الكاميرا الرئيسية (تأخذ 70%+ من الشاشة) -->
-        <section id="camera-workspace" class="flex-1 h-full flex flex-col p-3 sm:p-4 gap-3 relative overflow-hidden">
+        <!-- *********************************************************
+             الشاشة 1: شاشة الترحيب والبداية (Welcome Screen)
+             ********************************************************* -->
+        <section id="screen-welcome" class="h-full w-full flex flex-col items-center justify-between p-5 sm:p-8 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-fuchsia-950/40 via-zinc-950 to-zinc-950 overflow-y-auto">
             
-            <!-- شريط أدوات الكاميرا العلوي -->
-            <div class="flex flex-wrap items-center justify-between gap-2 shrink-0">
-                <div class="flex items-center gap-2">
-                    <!-- اختيار الكاميرا -->
-                    <select id="camera-select" onchange="switchCamera(this.value)" class="h-10 bg-zinc-900 border border-zinc-700 rounded-xl px-3 text-xs sm:text-sm font-semibold text-zinc-200 max-w-[170px] sm:max-w-[230px] outline-none">
-                        <option value="">جاري تشغيل الكاميرا...</option>
-                    </select>
+            <!-- تنبيه في حال نفاد الورق من الطابعة -->
+            <div id="out-of-paper-banner" class="hidden w-full max-w-2xl bg-rose-600/20 border-2 border-rose-500 rounded-2xl p-3 text-center">
+                <p class="text-rose-300 font-black text-sm sm:text-base">⚠️ عذراً، ورق الطباعة على وشك النفاد أو نفد بالكامل. يرجى إبلاغ المشرف.</p>
+            </div>
 
-                    <!-- زر قلب المرآة -->
-                    <button onclick="toggleMirror()" id="btn-mirror" class="h-10 px-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-xs sm:text-sm font-bold text-zinc-200 flex items-center gap-1.5 transition active:scale-95">
-                        <svg class="w-4 h-4 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
-                        </svg>
-                        <span class="hidden sm:inline">عكس المرآة</span>
+            <div class="my-auto flex flex-col items-center text-center max-w-3xl space-y-6">
+                <!-- شارة السعر البارزة -->
+                <div class="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-amber-500/15 border border-amber-400/40 text-amber-300 font-black text-sm sm:text-base shadow-lg">
+                    <span>✨ التقط صورك واطبعها فوراً بـ</span>
+                    <span class="bg-amber-400 text-zinc-950 px-3 py-0.5 rounded-full text-base sm:text-lg"><span class="price-display">5,000</span> د.ع</span>
+                </div>
+
+                <!-- العنوان الرئيسي -->
+                <h2 class="text-4xl sm:text-6xl font-black text-white leading-tight tracking-tight">
+                    اصنع ذكرياتك <br>
+                    <span class="bg-gradient-to-l from-fuchsia-400 via-pink-400 to-amber-300 bg-clip-text text-transparent">واطبعها بلمسة واحدة!</span>
+                </h2>
+
+                <p class="text-zinc-300 text-base sm:text-xl max-w-xl font-medium">
+                    كشك تصوير ذاتي بالكامل • اختر تصميمك المفضل، ادفع بكل سهولة، واستلم صورتك المطبوعة خلال ثوانٍ.
+                </p>
+
+                <!-- الخطوات الثلاث البصرية -->
+                <div class="grid grid-cols-3 gap-3 sm:gap-5 w-full max-w-2xl pt-2">
+                    <div class="bg-zinc-900/80 border border-zinc-800 rounded-3xl p-4 flex flex-col items-center text-center">
+                        <div class="w-12 h-12 rounded-2xl bg-fuchsia-500/20 text-fuchsia-400 flex items-center justify-center text-2xl font-black mb-2">🎨</div>
+                        <span class="text-xs sm:text-sm font-extrabold text-white">1. اختر الثيم</span>
+                        <span class="text-[11px] text-zinc-400 mt-0.5">قوالب وتصاميم متنوعة</span>
+                    </div>
+
+                    <div class="bg-zinc-900/80 border border-zinc-800 rounded-3xl p-4 flex flex-col items-center text-center">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl font-black mb-2">💳</div>
+                        <span class="text-xs sm:text-sm font-extrabold text-white">2. ادفع <span class="price-display">5,000</span> د.ع</span>
+                        <span class="text-[11px] text-zinc-400 mt-0.5">زين كاش / بطاقة / نقداً</span>
+                    </div>
+
+                    <div class="bg-zinc-900/80 border border-zinc-800 rounded-3xl p-4 flex flex-col items-center text-center">
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl font-black mb-2">📸</div>
+                        <span class="text-xs sm:text-sm font-extrabold text-white">3. صوّر واطبع</span>
+                        <span class="text-[11px] text-zinc-400 mt-0.5">طباعة فورية عالية الدقة</span>
+                    </div>
+                </div>
+
+                <!-- زر البداية العملاق -->
+                <div class="pt-4 w-full sm:w-auto">
+                    <button onclick="goToStep('customize')" class="animate-float w-full sm:w-auto min-w-[320px] h-20 px-12 rounded-3xl bg-gradient-to-l from-fuchsia-600 via-pink-600 to-amber-500 hover:brightness-110 text-white font-black text-2xl sm:text-3xl shadow-[0_15px_45px_rgba(217,70,239,0.45)] flex items-center justify-center gap-4 transition-transform active:scale-95">
+                        <span>المس هنا للبدء</span>
+                        <span class="text-3xl">👈</span>
                     </button>
                 </div>
-
-                <!-- مؤشر التقدم -->
-                <div id="progress-pills" class="flex items-center gap-1.5 bg-zinc-900 px-3.5 py-2 rounded-xl border border-zinc-800">
-                    <!-- يولد ديناميكياً -->
-                </div>
             </div>
 
-            <!-- إطار الكاميرا + مصغرات اللقطات -->
-            <div class="flex-1 flex flex-col lg:flex-row gap-3 min-h-0">
+            <!-- تذييل بسيط -->
+            <div class="text-xs text-zinc-500 font-semibold pt-4">
+                مقاس الطباعة: 10×15 سم (4×6 بوصة) • ورق فوتوغرافي مقاوم للماء والبصمات
+            </div>
+        </section>
+
+        <!-- *********************************************************
+             الشاشة 2: اختيار القالب والثيم والنص (Theme & Layout Picker)
+             ********************************************************* -->
+        <section id="screen-customize" class="hidden h-full w-full flex-col lg:flex-row p-4 sm:p-6 gap-5 overflow-y-auto lg:overflow-hidden">
+            
+            <!-- العمود الأيمن: خيارات الزبون -->
+            <div class="flex-1 flex flex-col gap-5 overflow-y-auto no-scrollbar pb-4">
                 
-                <!-- شاشة العرض المباشر (Viewfinder) -->
-                <div class="flex-1 relative bg-black rounded-3xl overflow-hidden border-2 border-zinc-800 shadow-2xl flex items-center justify-center min-h-[260px]">
-                    <video id="webcam-video" autoplay playsinline muted class="w-full h-full object-cover transform -scale-x-100"></video>
+                <!-- 1. اختيار شكل البطاقة -->
+                <div class="bg-zinc-900/90 border border-zinc-800 rounded-3xl p-4 sm:p-5">
+                    <h3 class="text-base sm:text-lg font-black text-white mb-3 flex items-center gap-2">
+                        <span class="w-7 h-7 rounded-full bg-fuchsia-600 text-white text-sm flex items-center justify-center">1</span>
+                        <span>اختر شكل الورقة المطبوعة:</span>
+                    </h3>
+                    <div class="grid grid-cols-3 gap-3" id="customer-layout-grid">
+                        <button type="button" onclick="selectCustomerLayout('strip3')" data-layout="strip3" class="c-layout-btn p-3.5 rounded-2xl border-2 border-fuchsia-500 bg-fuchsia-500/15 flex flex-col items-center text-center transition active:scale-95">
+                            <span class="text-2xl sm:text-3xl mb-1.5">🎞️</span>
+                            <span class="text-xs sm:text-sm font-black text-white">شريط مزدوج (2×6)</span>
+                            <span class="text-[11px] text-zinc-300 mt-0.5">3 لقطات • نسختان للقص</span>
+                        </button>
 
-                    <!-- العد التنازلي العملاق -->
-                    <div id="countdown-overlay" class="hidden absolute inset-0 bg-black/45 backdrop-blur-[2px] flex flex-col items-center justify-center z-20">
-                        <div id="countdown-number" class="text-8xl sm:text-9xl font-black text-white drop-shadow-[0_0_30px_rgba(217,70,239,0.95)]">3</div>
-                        <div id="countdown-subtext" class="mt-3 px-5 py-1.5 rounded-full bg-black/70 text-fuchsia-200 font-bold text-base sm:text-lg">ابتسم للكاميرا! 📸</div>
-                    </div>
+                        <button type="button" onclick="selectCustomerLayout('grid4')" data-layout="grid4" class="c-layout-btn p-3.5 rounded-2xl border-2 border-zinc-800 bg-zinc-950 hover:border-zinc-700 flex flex-col items-center text-center transition active:scale-95">
+                            <span class="text-2xl sm:text-3xl mb-1.5">🪟</span>
+                            <span class="text-xs sm:text-sm font-black text-white">بطاقة شبكية (2×2)</span>
+                            <span class="text-[11px] text-zinc-400 mt-0.5">4 لقطات في بطاقة كبيرة</span>
+                        </button>
 
-                    <!-- رسالة في حال تعذر الوصول للكاميرا -->
-                    <div id="camera-fallback-box" class="hidden absolute inset-0 bg-zinc-950/95 p-6 flex flex-col items-center justify-center text-center z-30">
-                        <p class="text-lg font-extrabold text-white mb-2">الكاميرا غير متاحة حالياً</p>
-                        <p class="text-xs sm:text-sm text-zinc-400 max-w-md mb-4">تأكد من السماح للمتصفح باستخدام الكاميرا، أو اختر صوراً من جهازك للتجربة والطباعة فوراً.</p>
-                        <div class="flex gap-3">
-                            <button onclick="initCamera()" class="px-5 py-2.5 rounded-xl bg-fuchsia-600 text-white font-bold text-sm">إعادة المحاولة</button>
-                            <label class="px-5 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-sm cursor-pointer">
-                                <span>اختيار صور من الجهاز</span>
-                                <input type="file" accept="image/*" multiple onchange="handleManualUpload(event)" class="hidden">
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- فلاتر سريعة أسفل شاشة الكاميرا -->
-                    <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 bg-black/75 backdrop-blur-md p-1.5 rounded-2xl border border-white/10">
-                        <button onclick="setFilter('none')" data-filter="none" class="filter-chip px-3 py-1 rounded-xl text-xs font-extrabold bg-white text-black transition">طبيعي</button>
-                        <button onclick="setFilter('bw')" data-filter="bw" class="filter-chip px-3 py-1 rounded-xl text-xs font-bold text-zinc-300 hover:text-white transition">أبيض وأسود</button>
-                        <button onclick="setFilter('warm')" data-filter="warm" class="filter-chip px-3 py-1 rounded-xl text-xs font-bold text-zinc-300 hover:text-white transition">دافئ</button>
+                        <button type="button" onclick="selectCustomerLayout('single')" data-layout="single" class="c-layout-btn p-3.5 rounded-2xl border-2 border-zinc-800 bg-zinc-950 hover:border-zinc-700 flex flex-col items-center text-center transition active:scale-95">
+                            <span class="text-2xl sm:text-3xl mb-1.5">🖼️</span>
+                            <span class="text-xs sm:text-sm font-black text-white">صورة كاملة (6×4)</span>
+                            <span class="text-[11px] text-zinc-400 mt-0.5">لقطة واحدة بحجم كبير</span>
+                        </button>
                     </div>
                 </div>
 
-                <!-- شريط مصغرات اللقطات الملتقطة (جانبي في الشاشات الكبيرة وسفلي في الموبايل) -->
-                <div id="live-thumbs-bar" class="lg:w-36 shrink-0 flex lg:flex-col gap-2 overflow-x-auto lg:overflow-y-auto justify-center">
-                    <!-- يولد ديناميكياً -->
+                <!-- 2. اختيار الثيم اللوني والتصميم (6 ثيمات متنوعة) -->
+                <div class="bg-zinc-900/90 border border-zinc-800 rounded-3xl p-4 sm:p-5">
+                    <h3 class="text-base sm:text-lg font-black text-white mb-3 flex items-center gap-2">
+                        <span class="w-7 h-7 rounded-full bg-fuchsia-600 text-white text-sm flex items-center justify-center">2</span>
+                        <span>اختر ثيم التصميم المفضل لديك:</span>
+                    </h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="customer-theme-grid">
+                        <!-- ملكي ذهبي -->
+                        <button type="button" onclick="selectCustomerTheme('royal')" data-theme="royal" class="c-theme-btn p-3 rounded-2xl border-2 border-fuchsia-500 bg-fuchsia-500/15 flex items-center gap-3 text-right transition active:scale-95">
+                            <span class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#fffdf7] to-[#f3e3b8] border-2 border-amber-500 shrink-0 flex items-center justify-center text-amber-700 font-bold">👑</span>
+                            <div>
+                                <div class="text-xs sm:text-sm font-black text-white">ملكي ذهبي</div>
+                                <div class="text-[10px] text-zinc-400">عاجي فاخر بإطار ذهبي</div>
+                            </div>
+                        </button>
+
+                        <!-- تراثي بغدادي دافئ -->
+                        <button type="button" onclick="selectCustomerTheme('baghdadi')" data-theme="baghdadi" class="c-theme-btn p-3 rounded-2xl border-2 border-zinc-800 bg-zinc-950 hover:border-zinc-700 flex items-center gap-3 text-right transition active:scale-95">
+                            <span class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2b1810] to-[#5c3317] border-2 border-amber-400 shrink-0 flex items-center justify-center text-amber-300 font-bold">🕌</span>
+                            <div>
+                                <div class="text-xs sm:text-sm font-black text-white">تراثي بغدادي</div>
+                                <div class="text-[10px] text-zinc-400">زخرفة شناشيل ونحاس دافئ</div>
+                            </div>
+                        </button>
+
+                        <!-- كلاسيكي أنيق -->
+                        <button type="button" onclick="selectCustomerTheme('classic')" data-theme="classic" class="c-theme-btn p-3 rounded-2xl border-2 border-zinc-800 bg-zinc-950 hover:border-zinc-700 flex items-center gap-3 text-right transition active:scale-95">
+                            <span class="w-10 h-10 rounded-xl bg-zinc-900 border-2 border-zinc-400 shrink-0 flex items-center justify-center text-white font-bold">🎩</span>
+                            <div>
+                                <div class="text-xs sm:text-sm font-black text-white">كلاسيكي أنيق</div>
+                                <div class="text-[10px] text-zinc-400">أسود داكن بلمسة فضية</div>
+                            </div>
+                        </button>
+
+                        <!-- احتفال وألوان -->
+                        <button type="button" onclick="selectCustomerTheme('party')" data-theme="party" class="c-theme-btn p-3 rounded-2xl border-2 border-zinc-800 bg-zinc-950 hover:border-zinc-700 flex items-center gap-3 text-right transition active:scale-95">
+                            <span class="w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-500 via-amber-400 to-cyan-400 shrink-0 flex items-center justify-center text-white font-bold">🎉</span>
+                            <div>
+                                <div class="text-xs sm:text-sm font-black text-white">احتفال وألوان</div>
+                                <div class="text-[10px] text-zinc-400">بهجة ونجوم ملونة</div>
+                            </div>
+                        </button>
+
+                        <!-- نيون عصري -->
+                        <button type="button" onclick="selectCustomerTheme('neon')" data-theme="neon" class="c-theme-btn p-3 rounded-2xl border-2 border-zinc-800 bg-zinc-950 hover:border-zinc-700 flex items-center gap-3 text-right transition active:scale-95">
+                            <span class="w-10 h-10 rounded-xl bg-[#090418] border-2 border-fuchsia-500 shrink-0 flex items-center justify-center text-cyan-400 font-bold">⚡</span>
+                            <div>
+                                <div class="text-xs sm:text-sm font-black text-white">نيون عصري</div>
+                                <div class="text-[10px] text-zinc-400">أضواء ليلية بنفسجية</div>
+                            </div>
+                        </button>
+
+                        <!-- بسيط ناعم -->
+                        <button type="button" onclick="selectCustomerTheme('soft')" data-theme="soft" class="c-theme-btn p-3 rounded-2xl border-2 border-zinc-800 bg-zinc-950 hover:border-zinc-700 flex items-center gap-3 text-right transition active:scale-95">
+                            <span class="w-10 h-10 rounded-xl bg-[#fdf2f4] border-2 border-rose-300 shrink-0 flex items-center justify-center text-rose-500 font-bold">🌸</span>
+                            <div>
+                                <div class="text-xs sm:text-sm font-black text-white">بسيط ناعم</div>
+                                <div class="text-[10px] text-zinc-400">باستيل هادئ ولطيف</div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3. نص اختياري للذكرى -->
+                <div class="bg-zinc-900/90 border border-zinc-800 rounded-3xl p-4 sm:p-5">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-full bg-fuchsia-600 text-white text-sm flex items-center justify-center">3</span>
+                            <span>اكتب اسمك أو عبارة للذكرى (اختياري):</span>
+                        </h3>
+                        <button type="button" onclick="clearCustomerNote()" class="text-xs text-zinc-400 hover:text-white underline">مسح النص</button>
+                    </div>
+                    <input type="text" id="customer-note-input" maxlength="28" oninput="updateLiveKioskPreview()" placeholder="مثال: ذكرى بغداد الجميلة ❤️ (أو اتركه فارغاً)" class="w-full h-12 bg-zinc-950 border-2 border-zinc-700 focus:border-fuchsia-500 rounded-2xl px-4 text-base text-white outline-none">
+                    
+                    <!-- عبارات سريعة بلمسة واحدة للتابلت -->
+                    <div class="flex flex-wrap gap-2 mt-2.5">
+                        <button type="button" onclick="setQuickPhrase('ذكرى لا تُنسى ✨')" class="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-zinc-200">ذكرى لا تُنسى ✨</button>
+                        <button type="button" onclick="setQuickPhrase('أحلى لمة ❤️')" class="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-zinc-200">أحلى لمة ❤️</button>
+                        <button type="button" onclick="setQuickPhrase('بغداد الحبيبة 🇮🇶')" class="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-zinc-200">بغداد الحبيبة 🇮🇶</button>
+                        <button type="button" onclick="setQuickPhrase('يوم مميز 🎉')" class="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-zinc-200">يوم مميز 🎉</button>
+                    </div>
                 </div>
             </div>
 
-            <!-- زر البدء العملاق أسفل الكاميرا -->
-            <div class="shrink-0 flex items-center justify-center gap-3 pt-1">
-                <button id="btn-start-shoot" onclick="startCaptureSequence()" class="w-full sm:w-auto min-w-[280px] h-16 px-10 rounded-2xl bg-gradient-to-l from-rose-600 via-fuchsia-600 to-indigo-600 hover:from-rose-500 hover:to-indigo-500 text-white font-black text-xl sm:text-2xl shadow-xl shadow-fuchsia-600/30 flex items-center justify-center gap-3 transition-transform active:scale-95">
-                    <span class="w-4 h-4 rounded-full bg-white animate-ping"></span>
-                    <span id="btn-start-label">ابدأ التصوير</span>
+            <!-- العمود الأيسر: المعاينة الحية وزر المتابعة للدفع -->
+            <div class="lg:w-96 shrink-0 bg-zinc-900 border border-zinc-800 rounded-3xl p-4 sm:p-5 flex flex-col items-center justify-between gap-4">
+                <div class="text-center">
+                    <span class="text-xs font-bold text-fuchsia-400 uppercase tracking-wider">معاينة حية لشكل البطاقة</span>
+                    <p class="text-[11px] text-zinc-400">ستخرج الصورة من الطابعة بهذا التصميم تماماً</p>
+                </div>
+
+                <div class="flex-1 flex items-center justify-center w-full bg-zinc-950/80 rounded-2xl p-3 border border-zinc-800/80 min-h-[220px]">
+                    <canvas id="kiosk-live-preview" class="max-h-[42vh] w-auto rounded shadow-2xl"></canvas>
+                </div>
+
+                <button onclick="goToStep('payment')" class="w-full h-16 px-6 rounded-2xl bg-gradient-to-l from-emerald-600 to-teal-500 hover:brightness-110 text-white font-black text-lg sm:text-xl shadow-xl shadow-emerald-600/25 flex items-center justify-between transition-transform active:scale-95">
+                    <span>المتابعة للدفع</span>
+                    <span class="bg-black/25 px-3 py-1 rounded-xl text-base"><span class="price-display">5,000</span> د.ع ←</span>
                 </button>
             </div>
         </section>
 
-        <!-- 3. شاشة النتيجة الفورية والطباعة (Result & Print Screen) -->
-        <section id="result-screen" class="hidden absolute inset-0 bg-zinc-950 z-20 flex-col lg:flex-row p-4 sm:p-6 gap-6 overflow-y-auto">
-            
-            <!-- عرض البطاقة النهائية عالية الدقة -->
-            <div class="flex-1 bg-zinc-900/80 border border-zinc-800 rounded-3xl p-4 flex flex-col items-center justify-center min-h-[320px]">
-                <div class="flex items-center gap-2 mb-3">
-                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                    <span class="text-xs sm:text-sm font-bold text-emerald-400">جاهزة للطباعة بدقة 300 DPI (مقاس 4×6 بوصة)</span>
-                </div>
-                <img id="final-result-image" alt="النتيجة النهائية" class="max-h-[62vh] w-auto object-contain rounded-lg shadow-[0_15px_50px_rgba(0,0,0,0.85)] border border-white/10">
-            </div>
+        <!-- *********************************************************
+             الشاشة 3: بوابة الدفع الذاتي (5,000 د.ع)
+             ********************************************************* -->
+        <section id="screen-payment" class="hidden h-full w-full flex-col items-center justify-center p-4 sm:p-6 overflow-y-auto">
+            <div class="w-full max-w-4xl bg-zinc-900 border border-zinc-800 rounded-3xl p-5 sm:p-8 shadow-2xl grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                
+                <!-- ملخص الطلب -->
+                <div class="lg:col-span-5 bg-zinc-950 border border-zinc-800 rounded-2xl p-5 space-y-4">
+                    <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+                        <span class="text-sm font-bold text-zinc-400">ملخص طلبك</span>
+                        <button onclick="goToStep('customize')" class="text-xs font-bold text-fuchsia-400 hover:underline">تعديل التصميم ✎</button>
+                    </div>
 
-            <!-- لوحة أزرار الطباعة وإعادة اللقطة -->
-            <div class="lg:w-96 shrink-0 flex flex-col justify-center gap-4">
-                <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 space-y-4">
-                    <h2 class="text-2xl font-black text-white text-center">تم التقاط الصور! 🎉</h2>
+                    <div class="space-y-2.5 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-zinc-400">القالب المختار:</span>
+                            <span id="pay-summary-layout" class="font-extrabold text-white">شريط مزدوج (2×6)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-zinc-400">الثيم اللوني:</span>
+                            <span id="pay-summary-theme" class="font-extrabold text-white">ملكي ذهبي</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-zinc-400">عدد النسخ:</span>
+                            <span class="font-extrabold text-emerald-400">طباعة فورية 4×6</span>
+                        </div>
+                    </div>
 
-                    <!-- زر الطباعة الفورية العملاق -->
-                    <button onclick="triggerPrintCP1500()" class="w-full h-16 px-6 rounded-2xl bg-gradient-to-l from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-black text-xl shadow-xl shadow-emerald-600/30 flex items-center justify-center gap-3 transition-transform active:scale-95">
-                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
-                        </svg>
-                        <span>طباعة فورية</span>
-                    </button>
+                    <div class="pt-3 border-t border-zinc-800 flex items-center justify-between">
+                        <span class="text-base font-bold text-zinc-300">المبلغ المطلوب:</span>
+                        <span class="text-2xl sm:text-3xl font-black text-amber-400"><span class="price-display">5,000</span> د.ع</span>
+                    </div>
 
-                    <!-- زر التحميل وزر التصوير الجديد -->
-                    <div class="grid grid-cols-2 gap-3">
-                        <button onclick="downloadImage()" class="h-14 px-4 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-base flex items-center justify-center gap-2 transition active:scale-95">
-                            <svg class="w-5 h-5 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                            </svg>
-                            <span>تحميل</span>
-                        </button>
-
-                        <button onclick="startNewSession()" class="h-14 px-4 rounded-2xl bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-extrabold text-base flex items-center justify-center gap-2 transition active:scale-95">
-                            <span>تصوير جديد</span>
-                            <span>↻</span>
-                        </button>
+                    <!-- مؤقت انتظار الدفع -->
+                    <div class="bg-zinc-900 rounded-xl p-2.5 text-center border border-zinc-800">
+                        <span class="text-xs text-zinc-400">الوقت المتبقي لإتمام الدفع: </span>
+                        <span id="payment-timer-text" class="font-mono font-black text-amber-400 text-sm">02:00</span>
                     </div>
                 </div>
 
-                <!-- إعادة التقاط صورة واحدة فقط (في حال أغمض أحد عينيه) -->
+                <!-- خيارات الدفع (QR الإلكتروني / الدفع النقدي) -->
+                <div class="lg:col-span-7 flex flex-col gap-4">
+                    
+                    <!-- أزرار التبديل بين طرق الدفع المفعلة -->
+                    <div id="payment-method-tabs" class="grid grid-cols-2 gap-2.5 bg-zinc-950 p-1.5 rounded-2xl border border-zinc-800">
+                        <button type="button" id="tab-pay-qr" onclick="switchPaymentTab('qr')" class="py-3 px-4 rounded-xl font-black text-sm bg-fuchsia-600 text-white transition">
+                            📱 دفع إلكتروني / QR
+                        </button>
+                        <button type="button" id="tab-pay-cash" onclick="switchPaymentTab('cash')" class="py-3 px-4 rounded-xl font-black text-sm text-zinc-400 hover:text-white transition">
+                            💵 دفع نقدي (كاش)
+                        </button>
+                    </div>
+
+                    <!-- لوحة الدفع الإلكتروني (زين كاش / ماستر الرافدين / كي كارد) -->
+                    <div id="panel-pay-qr" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-5 flex flex-col sm:flex-row items-center gap-5">
+                        <!-- رمز QR مولّد ديناميكياً -->
+                        <div class="bg-white p-3 rounded-2xl shrink-0 shadow-lg flex flex-col items-center">
+                            <canvas id="payment-qr-canvas" width="150" height="150" class="w-36 h-36"></canvas>
+                            <span class="text-[10px] font-black text-zinc-900 mt-1">امسح الرمز للدفع</span>
+                        </div>
+
+                        <div class="flex-1 text-center sm:text-right space-y-2.5">
+                            <div class="flex flex-wrap justify-center sm:justify-start gap-1.5">
+                                <span class="px-2.5 py-0.5 rounded-md bg-pink-600/20 border border-pink-500/40 text-pink-300 text-[11px] font-extrabold">ZainCash زين كاش</span>
+                                <span class="px-2.5 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[11px] font-extrabold">ماستر الرافدين</span>
+                                <span class="px-2.5 py-0.5 rounded-md bg-sky-500/20 border border-sky-500/40 text-sky-300 text-[11px] font-extrabold">QiCard كي كارد</span>
+                            </div>
+                            <p class="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+                                افتح تطبيق المحفظة أو المصرف وامسح رمز QR أعلاه لتحويل مبلغ <strong class="text-amber-400"><span class="price-display">5,000</span> د.ع</strong> إلى الرقم:
+                            </p>
+                            <div class="bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 font-mono text-base font-black text-emerald-400 tracking-wider text-center" dir="ltr" id="display-wallet-number">
+                                0780 000 5000
+                            </div>
+                            <button onclick="confirmPaymentSuccess('QR / محفظة إلكترونية')" class="w-full h-13 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-base shadow-lg transition active:scale-95">
+                                ✓ تم التحويل — ابدأ التصوير الآن
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- لوحة الدفع النقدي (كاش / جهاز العملات / كود الكاشير) -->
+                    <div id="panel-pay-cash" class="hidden bg-zinc-950 border border-zinc-800 rounded-2xl p-5 space-y-4">
+                        <div class="flex items-start gap-3.5">
+                            <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl shrink-0">💵</div>
+                            <div>
+                                <h4 class="font-black text-base text-white">إيداع نقدي بقيمة <span class="price-display">5,000</span> دينار عراقي</h4>
+                                <p class="text-xs text-zinc-400 mt-1 leading-relaxed">
+                                    أدخل ورقة <strong class="text-white">5,000 د.ع</strong> في فتحة استقبال النقود أسفل الجهاز، أو سلّم المبلغ للكاشير للحصول على رمز التفعيل الفوري.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- محاكاة جهاز قبول العملات أو إدخال كود الكاشير -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                            <button onclick="confirmPaymentSuccess('نقدي - جهاز العملات')" class="h-14 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm flex items-center justify-center gap-2 shadow-lg transition active:scale-95">
+                                <span>📥 تم إدخال 5,000 د.ع</span>
+                            </button>
+
+                            <div class="flex gap-1.5">
+                                <input type="password" id="cashier-quick-pin" maxlength="6" placeholder="رمز الكاشير" class="w-full h-14 bg-zinc-900 border border-zinc-700 rounded-xl px-3 text-center font-mono text-base text-white outline-none">
+                                <button onclick="verifyCashierPin()" class="h-14 px-4 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-amber-400 font-black text-sm shrink-0">تفعيل</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- زر محاكاة تجريبي مدمج بلطف للمشرف أثناء الاختبار -->
+                    <div class="flex items-center justify-between px-1">
+                        <span class="text-[11px] text-zinc-500">محمي بتشفير الجلسة الفورية</span>
+                        <button onclick="confirmPaymentSuccess('تجريبي / اختبار')" class="text-[11px] text-zinc-500 hover:text-amber-400 transition underline">
+                            [تأكيد استلام 5,000 د.ع - وضع التجربة]
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- *********************************************************
+             الشاشة 4: التصوير الذاتي بملء الشاشة (Self-Service Camera)
+             ********************************************************* -->
+        <section id="screen-camera" class="hidden h-full w-full flex-col p-3 sm:p-5 gap-3">
+            
+            <!-- شريط علوي للفلاتر وحالة اللقطات -->
+            <div class="flex flex-wrap items-center justify-between gap-2 shrink-0">
+                <!-- اختيار الفلتر بلمسة واحدة -->
+                <div class="flex items-center gap-1.5 bg-zinc-900 p-1.5 rounded-2xl border border-zinc-800 overflow-x-auto no-scrollbar">
+                    <button onclick="setCameraFilter('none')" data-filter="none" class="cam-filter-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-black bg-fuchsia-600 text-white transition">✨ طبيعي</button>
+                    <button onclick="setCameraFilter('beauty')" data-filter="beauty" class="cam-filter-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold text-zinc-300 hover:text-white transition">🌟 إشراقة ناعمة</button>
+                    <button onclick="setCameraFilter('bw')" data-filter="bw" class="cam-filter-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold text-zinc-300 hover:text-white transition">🎬 أبيض وأسود</button>
+                    <button onclick="setCameraFilter('warm')" data-filter="warm" class="cam-filter-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold text-zinc-300 hover:text-white transition">☀️ دافئ</button>
+                </div>
+
+                <!-- مؤشر اللقطات -->
+                <div id="camera-shots-indicator" class="flex items-center gap-2 bg-zinc-900 px-4 py-2 rounded-2xl border border-zinc-800">
+                    <!-- يولد ديناميكياً -->
+                </div>
+            </div>
+
+            <!-- شاشة العرض المباشر + مصغرات اللقطات -->
+            <div class="flex-1 flex flex-col lg:flex-row gap-3 min-h-0">
+                <div class="flex-1 relative bg-black rounded-3xl overflow-hidden border-2 border-zinc-800 shadow-2xl flex items-center justify-center">
+                    <video id="webcam-video" autoplay playsinline muted class="w-full h-full object-cover transform -scale-x-100"></video>
+
+                    <!-- العد التنازلي العملاق -->
+                    <div id="countdown-overlay" class="hidden absolute inset-0 bg-black/45 backdrop-blur-[2px] flex flex-col items-center justify-center z-20">
+                        <div id="countdown-number" class="text-8xl sm:text-9xl font-black text-white drop-shadow-[0_0_35px_rgba(217,70,239,0.95)]">3</div>
+                        <div id="countdown-subtext" class="mt-3 px-6 py-2 rounded-full bg-black/75 text-amber-300 font-black text-lg sm:text-xl">انظر إلى العدسة وابتسم! 📸</div>
+                    </div>
+
+                    <!-- رسالة احتياطية في حال عدم وجود كاميرا متصلة -->
+                    <div id="camera-fallback-box" class="hidden absolute inset-0 bg-zinc-950/95 p-6 flex flex-col items-center justify-center text-center z-30">
+                        <p class="text-xl font-black text-white mb-2">الكاميرا غير متصلة بالمتصفح</p>
+                        <p class="text-sm text-zinc-400 max-w-md mb-5">يرجى السماح بالوصول للكاميرا، أو يمكنك رفع صور من الجهاز لاختبار دورة الطباعة.</p>
+                        <div class="flex gap-3">
+                            <button onclick="initCamera()" class="px-6 py-3 rounded-2xl bg-fuchsia-600 text-white font-black text-sm">إعادة تشغيل الكاميرا</button>
+                            <label class="px-6 py-3 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-white font-black text-sm cursor-pointer">
+                                <span>رفع صور للاختبار</span>
+                                <input type="file" accept="image/*" multiple onchange="handleManualUpload(event)" class="hidden">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- مصغرات اللقطات -->
+                <div id="camera-thumbs-strip" class="lg:w-36 shrink-0 flex lg:flex-col gap-2.5 justify-center overflow-x-auto">
+                    <!-- يولد ديناميكياً -->
+                </div>
+            </div>
+
+            <!-- زر بدء الالتقاط العملاق -->
+            <div class="shrink-0 flex justify-center pt-1">
+                <button id="btn-start-capture" onclick="runCaptureSession()" class="w-full sm:w-auto min-w-[320px] h-16 sm:h-18 px-10 rounded-2xl bg-gradient-to-l from-rose-600 via-fuchsia-600 to-indigo-600 hover:brightness-110 text-white font-black text-xl sm:text-2xl shadow-xl shadow-fuchsia-600/30 flex items-center justify-center gap-3 transition-transform active:scale-95">
+                    <span class="w-4 h-4 rounded-full bg-white animate-ping"></span>
+                    <span>ابدأ التصوير الآن</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- *********************************************************
+             الشاشة 5: مراجعة النتيجة النهائية والطباعة (Review & Print)
+             ********************************************************* -->
+        <section id="screen-result" class="hidden h-full w-full flex-col lg:flex-row p-4 sm:p-6 gap-6 overflow-y-auto">
+            
+            <!-- عرض البطاقة المجمعة بدقة 300 DPI -->
+            <div class="flex-1 bg-zinc-900/80 border border-zinc-800 rounded-3xl p-4 flex flex-col items-center justify-center min-h-[300px]">
+                <span class="text-xs sm:text-sm font-extrabold text-emerald-400 mb-3">✨ بطاقتك جاهزة للطباعة بدقة 300 DPI</span>
+                <img id="final-result-image" alt="بطاقتك الجاهزة" class="max-h-[60vh] w-auto object-contain rounded-lg shadow-[0_15px_50px_rgba(0,0,0,0.9)] border border-white/15">
+            </div>
+
+            <!-- لوحة الطباعة وإعادة لقطة واحدة -->
+            <div class="lg:w-96 shrink-0 flex flex-col justify-center gap-4">
+                <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 space-y-4">
+                    <h3 class="text-2xl font-black text-white text-center">صورتك جاهزة! 🎉</h3>
+                    <p class="text-xs sm:text-sm text-zinc-400 text-center">راجع صورك، وإذا أردت إعادة لقطة معينة اضغط عليها بالأسفل قبل الطباعة.</p>
+
+                    <!-- زر الطباعة الفورية الضخم -->
+                    <button onclick="executePrintAndFinish()" class="w-full h-20 px-6 rounded-2xl bg-gradient-to-l from-emerald-600 to-teal-500 hover:brightness-110 text-white font-black text-2xl shadow-xl shadow-emerald-600/35 flex items-center justify-center gap-3 transition-transform active:scale-95">
+                        <span>اطبع صورتي الآن</span>
+                        <span class="text-3xl">🖨️</span>
+                    </button>
+                </div>
+
+                <!-- إعادة التقاط لقطة واحدة فقط -->
                 <div class="bg-zinc-900/80 border border-zinc-800 rounded-3xl p-4">
-                    <p class="text-xs font-bold text-zinc-400 mb-2.5 text-center">هل أغمض أحدهم عينيه؟ اضغط لإعادة لقطة واحدة فقط:</p>
-                    <div id="retake-single-grid" class="grid grid-cols-4 gap-2">
+                    <p class="text-xs font-bold text-zinc-400 mb-3 text-center">اضغط على أي صورة لإعادة التقاطها مرة واحدة:</p>
+                    <div id="single-retake-grid" class="grid grid-cols-4 gap-2.5">
                         <!-- يولد ديناميكياً -->
                     </div>
                 </div>
+            </div>
+        </section>
+
+        <!-- *********************************************************
+             الشاشة 6: شاشة الشكر واستلام الصورة (Thank You & Auto-Reset)
+             ********************************************************* -->
+        <section id="screen-thankyou" class="hidden h-full w-full flex-col items-center justify-center p-6 text-center bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-emerald-950/40 via-zinc-950 to-zinc-950">
+            <div class="max-w-lg bg-zinc-900/90 border border-zinc-800 rounded-3xl p-8 shadow-2xl space-y-5">
+                <div class="w-20 h-20 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-5xl mx-auto animate-bounce">
+                    🖨️
+                </div>
+                <h2 class="text-3xl sm:text-4xl font-black text-white">جاري الطباعة...</h2>
+                <p class="text-base sm:text-lg text-zinc-300 leading-relaxed">
+                    شكراً لاستخدامك كشك الفوتو بوث! <br>
+                    يرجى استلام صورتك من درج الطابعة أسفل الجهاز خلال ثوانٍ.
+                </p>
+
+                <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4">
+                    <p class="text-xs text-zinc-400 mb-1">لحماية خصوصيتك، سيتم مسح الصور والعودة للرئيسية خلال:</p>
+                    <div class="text-3xl font-black text-amber-400 font-mono"><span id="thankyou-countdown">15</span> ثانية</div>
+                </div>
+
+                <button onclick="resetToWelcome()" class="w-full h-14 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-white font-black text-base transition active:scale-95">
+                    إنهاء والعودة للرئيسية الآن ✓
+                </button>
             </div>
         </section>
 
@@ -429,115 +621,240 @@
     <canvas id="hd-canvas" class="hidden"></canvas>
 
     <!-- =========================================================
-         نافذة دليل ضبط طابعة Canon SELPHY CP1500
+         نافذة إدخال رمز PIN للمشرف (Admin PIN Modal)
          ========================================================= -->
-    <div id="printer-guide-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-zinc-900 border border-zinc-700 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
-                <h3 class="text-lg font-black text-white flex items-center gap-2">
-                    <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
-                    ضبط المتصفح لطابعة CP1500
-                </h3>
-                <button onclick="togglePrinterGuide(false)" class="w-8 h-8 rounded-full bg-zinc-800 text-zinc-400 hover:text-white">✕</button>
+    <div id="admin-pin-modal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-700 rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4 text-center">
+            <h3 class="text-xl font-black text-white">🔐 دخول المشرف</h3>
+            <p class="text-xs text-zinc-400">أدخل رمز PIN الخاص بإدارة الكشك (الافتراضي: 1234)</p>
+            <input type="password" id="admin-pin-input" maxlength="8" inputmode="numeric" placeholder="••••" class="w-full h-14 bg-zinc-950 border-2 border-zinc-700 focus:border-fuchsia-500 rounded-2xl text-center text-2xl font-mono tracking-widest text-white outline-none">
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <button onclick="closeAdminPinModal()" class="h-12 rounded-xl bg-zinc-800 text-zinc-300 font-bold text-sm">إلغاء</button>
+                <button onclick="verifyAdminPin()" class="h-12 rounded-xl bg-fuchsia-600 text-white font-black text-sm">دخول</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         لوحة تحكم المشرف السرية (Admin Dashboard Modal)
+         ========================================================= -->
+    <div id="admin-dashboard-modal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+        <div class="bg-zinc-900 border border-zinc-700 rounded-3xl max-w-3xl w-full p-5 sm:p-7 shadow-2xl space-y-6 my-auto max-h-[92vh] overflow-y-auto">
+            
+            <div class="flex items-center justify-between border-b border-zinc-800 pb-4">
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-black text-white">⚙️ لوحة تحكم المشرف - CP1500</h2>
+                    <p class="text-xs text-zinc-400">إحصائيات الإيرادات، مخزون الورق، وإعدادات الدفع</p>
+                </div>
+                <button onclick="closeAdminDashboard()" class="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-sm">إغلاق ✕</button>
             </div>
 
-            <p class="text-xs text-zinc-400">لضمان عدم هدر الورق والحبر والحصول على طباعة كاملة الحواف، اضبط هذه الخيارات مرة واحدة في نافذة الطباعة:</p>
+            <!-- بطاقات الإحصائيات ومخزون الطابعة -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4">
+                    <span class="text-xs text-zinc-400 font-bold">جلسات اليوم المدفوعة</span>
+                    <div id="stat-sessions-count" class="text-3xl font-black text-white mt-1">0</div>
+                </div>
 
-            <ul class="space-y-2.5 text-sm">
-                <li class="bg-zinc-950 p-3 rounded-xl border border-zinc-800 flex justify-between items-center">
-                    <span class="text-zinc-400">حجم الورق (Paper Size):</span>
-                    <span class="font-extrabold text-amber-400" dir="ltr">Postcard 4x6 (100x148mm)</span>
-                </li>
-                <li class="bg-zinc-950 p-3 rounded-xl border border-zinc-800 flex justify-between items-center">
-                    <span class="text-zinc-400">الهوامش (Margins):</span>
-                    <span class="font-extrabold text-emerald-400">بلا هوامش (None)</span>
-                </li>
-                <li class="bg-zinc-950 p-3 rounded-xl border border-zinc-800 flex justify-between items-center">
-                    <span class="text-zinc-400">المقياس (Scale):</span>
-                    <span class="font-extrabold text-white">100%</span>
-                </li>
-                <li class="bg-zinc-950 p-3 rounded-xl border border-zinc-800 flex justify-between items-center">
-                    <span class="text-zinc-400">رسومات الخلفية (Background):</span>
-                    <span class="font-extrabold text-emerald-400">مفعّل (ON)</span>
-                </li>
-            </ul>
+                <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4">
+                    <span class="text-xs text-zinc-400 font-bold">إجمالي الإيرادات</span>
+                    <div class="text-2xl sm:text-3xl font-black text-emerald-400 mt-1"><span id="stat-total-revenue">0</span> <span class="text-sm">د.ع</span></div>
+                </div>
 
-            <button onclick="togglePrinterGuide(false)" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-sm">تم، فهمت الإعدادات</button>
+                <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 flex flex-col justify-between">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-zinc-400 font-bold">ورق CP1500 المتبقي</span>
+                        <span class="text-[11px] text-amber-400 font-bold">علبة 36 ورقة</span>
+                    </div>
+                    <div class="flex items-center justify-between mt-1">
+                        <div class="text-3xl font-black text-amber-400"><span id="stat-paper-left">36</span> <span class="text-xs text-zinc-400">/ 36</span></div>
+                        <button onclick="refillPrinterPaper()" class="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-black">إعادة تعبئة 36 ↻</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- إعدادات التشغيل والدفع -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-zinc-950 border border-zinc-800 rounded-2xl p-4 sm:p-5">
+                <div>
+                    <label class="block text-xs font-bold text-zinc-400 mb-1.5">اسم الكشك / المكان:</label>
+                    <input type="text" id="admin-kiosk-name" class="w-full h-11 bg-zinc-900 border border-zinc-700 rounded-xl px-3 text-sm text-white outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-zinc-400 mb-1.5">سعر الجلسة (دينار عراقي):</label>
+                    <input type="number" id="admin-session-price" step="500" class="w-full h-11 bg-zinc-900 border border-zinc-700 rounded-xl px-3 text-sm text-white font-mono outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-zinc-400 mb-1.5">طريقة الدفع المفعلة للزبائن:</label>
+                    <select id="admin-payment-mode" class="w-full h-11 bg-zinc-900 border border-zinc-700 rounded-xl px-3 text-sm text-white outline-none">
+                        <option value="both">كلاهما (دفع إلكتروني QR + نقدي كاش)</option>
+                        <option value="qr">دفع إلكتروني QR فقط (زين كاش / بطاقة)</option>
+                        <option value="cash">دفع نقدي (كاش / رمز الكاشير) فقط</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-zinc-400 mb-1.5">رقم محفظة زين كاش / الحساب للـ QR:</label>
+                    <input type="text" id="admin-wallet-number" dir="ltr" class="w-full h-11 bg-zinc-900 border border-zinc-700 rounded-xl px-3 text-sm text-white font-mono outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-zinc-400 mb-1.5">رمز PIN للمشرف والكاشير:</label>
+                    <input type="text" id="admin-new-pin" maxlength="8" class="w-full h-11 bg-zinc-900 border border-zinc-700 rounded-xl px-3 text-sm text-white font-mono outline-none">
+                </div>
+
+                <div class="flex items-center justify-between bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2.5">
+                    <div>
+                        <span class="text-xs font-bold text-white block">طباعة تلقائية فور انتهاء التصوير</span>
+                        <span class="text-[10px] text-zinc-400">تخطي شاشة المراجعة والطباعة مباشرة</span>
+                    </div>
+                    <input type="checkbox" id="admin-auto-print" class="w-5 h-5 accent-emerald-500 cursor-pointer">
+                </div>
+            </div>
+
+            <!-- أزرار الحفظ وتصفير الإحصائيات -->
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+                <button onclick="resetDailyStats()" class="px-4 py-3 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/40 text-rose-300 text-xs font-black">
+                    تصفير عداد اليوم
+                </button>
+                <div class="flex gap-2.5">
+                    <button onclick="saveAdminSettings()" class="px-8 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm shadow-lg">
+                        حفظ الإعدادات ✓
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         /**
          * ============================================================================
-         * إعدادات وحالة التطبيق (Application State)
+         * حالة الكشك والإعدادات المحفوظة (Kiosk State & Persistence)
          * ============================================================================
          */
-        const app = {
-            layout: 'strip3',        // 'strip3' | 'grid4' | 'single'
-            theme: 'white',          // 'white' | 'wedding' | 'birthday' | 'luxury' | 'polaroid'
-            eventTitle: 'ذكرى جميلة ✨',
-            eventDate: '23 / 11 / 2026',
+        const DEFAULT_SETTINGS = {
+            kioskName: 'استوديو الذكريات الفوري',
+            price: 5000,
+            paymentMode: 'both', // 'both' | 'qr' | 'cash'
+            walletNumber: '0780 000 5000',
+            pin: '1234',
+            autoPrint: false,
+            paperRemaining: 36,
+            sessionsCount: 0,
+            totalRevenue: 0
+        };
+
+        let settings = { ...DEFAULT_SETTINGS };
+
+        const kiosk = {
+            step: 'welcome',     // 'welcome' | 'customize' | 'payment' | 'camera' | 'result' | 'thankyou'
+            layout: 'strip3',    // 'strip3' | 'grid4' | 'single'
+            theme: 'royal',      // 'royal' | 'baghdadi' | 'classic' | 'party' | 'neon' | 'soft'
+            customerNote: '',
             filter: 'none',
-            isMirrored: true,
             isMuted: false,
-            isKioskLocked: false,
             isCapturing: false,
             photos: [],
             stream: null,
-            audioCtx: null
+            audioCtx: null,
+            payTimerInterval: null,
+            thankYouInterval: null
         };
 
         const LAYOUTS = {
-            strip3: { count: 3, width: 1200, height: 1800, orientation: 'portrait', name: 'شريط مزدوج (4×6)' },
-            grid4:  { count: 4, width: 1200, height: 1800, orientation: 'portrait', name: 'بطاقة رباعية (4×6)' },
-            single: { count: 1, width: 1800, height: 1200, orientation: 'landscape', name: 'صورة كبيرة (6×4)' }
+            strip3: { count: 3, width: 1200, height: 1800, orientation: 'portrait', label: 'شريط مزدوج (2×6)' },
+            grid4:  { count: 4, width: 1200, height: 1800, orientation: 'portrait', label: 'بطاقة شبكية (2×2)' },
+            single: { count: 1, width: 1800, height: 1200, orientation: 'landscape', label: 'صورة كاملة (6×4)' }
+        };
+
+        const THEMES_META = {
+            royal:    { name: 'ملكي ذهبي' },
+            baghdadi: { name: 'تراثي بغدادي' },
+            classic:  { name: 'كلاسيكي أنيق' },
+            party:    { name: 'احتفال وألوان' },
+            neon:     { name: 'نيون عصري' },
+            soft:     { name: 'بسيط ناعم' }
         };
 
         const FILTERS = {
-            none: 'none',
-            bw: 'grayscale(100%) contrast(115%)',
-            warm: 'sepia(28%) contrast(106%) saturate(115%)'
+            none:   'none',
+            beauty: 'brightness(107%) contrast(103%) saturate(108%)',
+            bw:     'grayscale(100%) contrast(118%)',
+            warm:   'sepia(25%) contrast(106%) saturate(115%)'
         };
+
+        function loadSettings() {
+            try {
+                const saved = localStorage.getItem('cp1500_kiosk_settings');
+                if (saved) {
+                    settings = { ...DEFAULT_SETTINGS, ...JSON.parse(saved) };
+                }
+            } catch (e) {}
+            applySettingsToUI();
+        }
+
+        function persistSettings() {
+            try {
+                localStorage.setItem('cp1500_kiosk_settings', JSON.stringify(settings));
+            } catch (e) {}
+            applySettingsToUI();
+        }
+
+        function applySettingsToUI() {
+            document.getElementById('header-kiosk-name').textContent = settings.kioskName;
+            const formattedPrice = Number(settings.price).toLocaleString('en-US');
+            document.querySelectorAll('.price-display').forEach(el => el.textContent = formattedPrice);
+            document.getElementById('display-wallet-number').textContent = settings.walletNumber;
+
+            // تنبيه نفاد الورق
+            const paperBanner = document.getElementById('out-of-paper-banner');
+            if (settings.paperRemaining <= 2) {
+                paperBanner.classList.remove('hidden');
+            } else {
+                paperBanner.classList.add('hidden');
+            }
+        }
 
         /**
          * ============================================================================
          * المؤثرات الصوتية (Web Audio API)
          * ============================================================================
          */
-        function ensureAudioContext() {
-            if (!app.audioCtx) {
+        function ensureAudio() {
+            if (!kiosk.audioCtx) {
                 const AC = window.AudioContext || window.webkitAudioContext;
-                if (AC) app.audioCtx = new AC();
+                if (AC) kiosk.audioCtx = new AC();
             }
-            if (app.audioCtx && app.audioCtx.state === 'suspended') {
-                app.audioCtx.resume();
+            if (kiosk.audioCtx && kiosk.audioCtx.state === 'suspended') {
+                kiosk.audioCtx.resume();
             }
         }
 
-        function playBeep(isLast = false) {
-            if (app.isMuted) return;
+        function playTone(freq = 540, duration = 0.18, type = 'sine') {
+            if (kiosk.isMuted) return;
             try {
-                ensureAudioContext();
-                if (!app.audioCtx) return;
-                const osc = app.audioCtx.createOscillator();
-                const gain = app.audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(isLast ? 880 : 540, app.audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.2, app.audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, app.audioCtx.currentTime + (isLast ? 0.35 : 0.18));
+                ensureAudio();
+                if (!kiosk.audioCtx) return;
+                const osc = kiosk.audioCtx.createOscillator();
+                const gain = kiosk.audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, kiosk.audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.22, kiosk.audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, kiosk.audioCtx.currentTime + duration);
                 osc.connect(gain);
-                gain.connect(app.audioCtx.destination);
+                gain.connect(kiosk.audioCtx.destination);
                 osc.start();
-                osc.stop(app.audioCtx.currentTime + (isLast ? 0.35 : 0.18));
+                osc.stop(kiosk.audioCtx.currentTime + duration);
             } catch (e) {}
         }
 
-        function playShutter() {
-            if (app.isMuted) return;
+        function playShutterSound() {
+            if (kiosk.isMuted) return;
             try {
-                ensureAudioContext();
-                if (!app.audioCtx) return;
-                const ctx = app.audioCtx;
+                ensureAudio();
+                if (!kiosk.audioCtx) return;
+                const ctx = kiosk.audioCtx;
                 const len = ctx.sampleRate * 0.14;
                 const buf = ctx.createBuffer(1, len, ctx.sampleRate);
                 const data = buf.getChannelData(0);
@@ -556,189 +873,329 @@
         }
 
         function toggleMute() {
-            app.isMuted = !app.isMuted;
-            document.getElementById('icon-sound-on').classList.toggle('hidden', app.isMuted);
-            document.getElementById('icon-sound-off').classList.toggle('hidden', !app.isMuted);
-            showToast(app.isMuted ? 'تم كتم الصوت 🔇' : 'تم تفعيل الصوت 🔊');
+            kiosk.isMuted = !kiosk.isMuted;
+            document.getElementById('icon-sound-on').classList.toggle('hidden', kiosk.isMuted);
+            document.getElementById('icon-sound-off').classList.toggle('hidden', !kiosk.isMuted);
         }
 
-        /**
-         * ============================================================================
-         * التحكم بالواجهة، وضع الضيوف (Kiosk Lock)، ودرج الإعدادات
-         * ============================================================================
-         */
         function showToast(msg) {
-            const container = document.getElementById('toast-container');
+            const c = document.getElementById('toast-container');
             const el = document.createElement('div');
-            el.className = 'bg-zinc-900/95 border border-zinc-700 text-white px-4 py-2.5 rounded-2xl shadow-2xl text-xs sm:text-sm font-bold text-center backdrop-blur-md transition-opacity duration-300';
+            el.className = 'bg-zinc-900/95 border border-zinc-700 text-white px-5 py-3 rounded-2xl shadow-2xl text-sm font-bold text-center backdrop-blur-md transition-opacity duration-300';
             el.textContent = msg;
-            container.appendChild(el);
+            c.appendChild(el);
             setTimeout(() => {
                 el.style.opacity = '0';
                 setTimeout(() => el.remove(), 300);
             }, 2600);
         }
 
-        function toggleSettingsDrawer(forceState = null) {
-            if (app.isKioskLocked) {
-                showToast('وضع الضيوف مفعل 🔒 افتح القفل أولاً');
-                return;
-            }
-            const drawer = document.getElementById('settings-drawer');
-            if (forceState === true) {
-                drawer.classList.remove('hidden');
-            } else if (forceState === false) {
-                drawer.classList.add('hidden');
+        /**
+         * ============================================================================
+         * التنقل بين خطوات الكشك (Kiosk Flow Navigation)
+         * ============================================================================
+         */
+        function goToStep(stepName) {
+            clearInterval(kiosk.payTimerInterval);
+            clearInterval(kiosk.thankYouInterval);
+
+            kiosk.step = stepName;
+            const screens = ['welcome', 'customize', 'payment', 'camera', 'result', 'thankyou'];
+            screens.forEach(s => {
+                const el = document.getElementById(`screen-${s}`);
+                if (s === stepName) {
+                    el.classList.remove('hidden');
+                    el.classList.add('flex');
+                } else {
+                    el.classList.add('hidden');
+                    el.classList.remove('flex');
+                }
+            });
+
+            // زر الإلغاء يظهر فقط في مرحلتي التصميم والدفع قبل استلام المال
+            const btnReset = document.getElementById('btn-home-reset');
+            if (stepName === 'customize' || stepName === 'payment') {
+                btnReset.classList.remove('hidden');
             } else {
-                drawer.classList.toggle('hidden');
+                btnReset.classList.add('hidden');
+            }
+
+            // تحديث مؤشر الخطوات العلوي
+            const stepMap = { customize: 1, payment: 2, camera: 3, result: 4, thankyou: 4 };
+            const activeNum = stepMap[stepName] || 0;
+            for (let i = 1; i <= 4; i++) {
+                const badge = document.getElementById(`step-badge-${i}`);
+                if (!badge) continue;
+                badge.className = i === activeNum
+                    ? 'text-fuchsia-400 font-black'
+                    : (i < activeNum ? 'text-emerald-400' : 'text-zinc-500');
+            }
+
+            if (stepName === 'customize') {
+                updateLiveKioskPreview();
+            } else if (stepName === 'payment') {
+                setupPaymentScreen();
+            } else if (stepName === 'camera') {
+                initCamera();
+                updateCameraProgressUI();
             }
         }
 
-        function toggleKioskLock() {
-            app.isKioskLocked = !app.isKioskLocked;
-            const drawer = document.getElementById('settings-drawer');
-            const btnSettings = document.getElementById('btn-toggle-settings');
-            const btnGuide = document.getElementById('btn-printer-guide');
-            const btnLock = document.getElementById('btn-kiosk-lock');
-
-            if (app.isKioskLocked) {
-                drawer.classList.add('hidden');
-                btnSettings.classList.add('hidden');
-                btnGuide.classList.add('hidden');
-                document.getElementById('icon-unlocked').classList.add('hidden');
-                document.getElementById('icon-locked').classList.remove('hidden');
-                document.getElementById('kiosk-lock-text').textContent = 'مقفل للضيوف';
-                btnLock.classList.add('border-amber-500/60', 'bg-amber-500/10', 'text-amber-300');
-                showToast('تم تفعيل وضع الضيوف 🔒 الإعدادات محمية');
-            } else {
-                btnSettings.classList.remove('hidden');
-                btnGuide.classList.remove('hidden');
-                document.getElementById('icon-unlocked').classList.remove('hidden');
-                document.getElementById('icon-locked').classList.add('hidden');
-                document.getElementById('kiosk-lock-text').textContent = 'وضع الضيوف';
-                btnLock.classList.remove('border-amber-500/60', 'bg-amber-500/10', 'text-amber-300');
-                showToast('تم فتح قفل الإعدادات 🔓');
-            }
-        }
-
-        function togglePrinterGuide(show) {
-            document.getElementById('printer-guide-modal').classList.toggle('hidden', !show);
+        function resetToWelcome() {
+            kiosk.isCapturing = false;
+            kiosk.photos = [];
+            kiosk.customerNote = '';
+            document.getElementById('customer-note-input').value = '';
+            document.getElementById('final-result-image').src = '';
+            document.getElementById('print-image').src = '';
+            selectCustomerLayout('strip3');
+            selectCustomerTheme('royal');
+            goToStep('welcome');
         }
 
         /**
          * ============================================================================
-         * اختيار التخطيط والثيم
+         * الشاشة 2: تخصيص القالب والثيم للزبون
          * ============================================================================
          */
-        function setLayout(layoutKey) {
-            if (app.isCapturing) return;
-            app.layout = layoutKey;
-            app.photos = new Array(LAYOUTS[layoutKey].count).fill(null);
+        function selectCustomerLayout(layoutKey) {
+            kiosk.layout = layoutKey;
+            kiosk.photos = new Array(LAYOUTS[layoutKey].count).fill(null);
 
-            document.querySelectorAll('.layout-btn').forEach(btn => {
+            document.querySelectorAll('.c-layout-btn').forEach(btn => {
                 const active = btn.dataset.layout === layoutKey;
                 btn.className = active
-                    ? 'layout-btn p-2.5 rounded-2xl border-2 border-fuchsia-500 bg-fuchsia-500/15 flex flex-col items-center text-center transition active:scale-95'
-                    : 'layout-btn p-2.5 rounded-2xl border-2 border-zinc-800 bg-zinc-950 hover:border-zinc-700 flex flex-col items-center text-center transition active:scale-95';
+                    ? 'c-layout-btn p-3.5 rounded-2xl border-2 border-fuchsia-500 bg-fuchsia-500/15 flex flex-col items-center text-center transition active:scale-95'
+                    : 'c-layout-btn p-3.5 rounded-2xl border-2 border-zinc-800 bg-zinc-950 hover:border-zinc-700 flex flex-col items-center text-center transition active:scale-95';
             });
 
-            // تحديث اتجاه ورقة الطباعة @page
             const cfg = LAYOUTS[layoutKey];
             document.getElementById('dynamic-page-style').innerHTML =
                 cfg.orientation === 'landscape'
                     ? '@page { size: 6in 4in; margin: 0; }'
                     : '@page { size: 4in 6in; margin: 0; }';
 
-            document.getElementById('header-status-badge').textContent = `جاهز • ${cfg.name}`;
-            updateCaptureUI();
-            updateLiveMiniPreview();
+            updateLiveKioskPreview();
         }
 
-        function setTheme(themeKey) {
-            app.theme = themeKey;
-            document.querySelectorAll('.theme-btn').forEach(btn => {
+        function selectCustomerTheme(themeKey) {
+            kiosk.theme = themeKey;
+            document.querySelectorAll('.c-theme-btn').forEach(btn => {
                 const active = btn.dataset.theme === themeKey;
                 btn.classList.toggle('border-fuchsia-500', active);
-                btn.classList.toggle('bg-fuchsia-500/10', active);
+                btn.classList.toggle('bg-fuchsia-500/15', active);
                 btn.classList.toggle('border-zinc-800', !active);
                 btn.classList.toggle('bg-zinc-950', !active);
             });
-            updateLiveMiniPreview();
+            updateLiveKioskPreview();
         }
 
-        function updateLiveMiniPreview() {
-            app.eventTitle = document.getElementById('input-event-title').value.trim();
-            app.eventDate = document.getElementById('input-event-date').value.trim();
-            const miniCanvas = document.getElementById('mini-preview-canvas');
-            renderCardToCanvas(miniCanvas, [], true);
+        function setQuickPhrase(phrase) {
+            document.getElementById('customer-note-input').value = phrase;
+            updateLiveKioskPreview();
+        }
+
+        function clearCustomerNote() {
+            document.getElementById('customer-note-input').value = '';
+            updateLiveKioskPreview();
+        }
+
+        function updateLiveKioskPreview() {
+            kiosk.customerNote = document.getElementById('customer-note-input').value.trim();
+            const previewCanvas = document.getElementById('kiosk-live-preview');
+            renderCardToCanvas(previewCanvas, [], true);
         }
 
         /**
          * ============================================================================
-         * الكاميرا والالتقاط
+         * الشاشة 3: بوابة الدفع الذاتي (5,000 د.ع)
          * ============================================================================
          */
-        async function initCamera(deviceId = null) {
+        function setupPaymentScreen() {
+            document.getElementById('pay-summary-layout').textContent = LAYOUTS[kiosk.layout].label;
+            document.getElementById('pay-summary-theme').textContent = THEMES_META[kiosk.theme].name;
+            document.getElementById('cashier-quick-pin').value = '';
+
+            // توليد رمز QR احترافي على الكانفس
+            drawStyledQRCode();
+
+            // ضبط التبويبات حسب إعدادات المشرف
+            const tabsBar = document.getElementById('payment-method-tabs');
+            if (settings.paymentMode === 'both') {
+                tabsBar.classList.remove('hidden');
+                switchPaymentTab('qr');
+            } else if (settings.paymentMode === 'qr') {
+                tabsBar.classList.add('hidden');
+                switchPaymentTab('qr');
+            } else {
+                tabsBar.classList.add('hidden');
+                switchPaymentTab('cash');
+            }
+
+            // مؤقت دقيقتين لإتمام الدفع قبل العودة للرئيسية
+            let secondsLeft = 120;
+            const timerEl = document.getElementById('payment-timer-text');
+            timerEl.textContent = '02:00';
+            kiosk.payTimerInterval = setInterval(() => {
+                secondsLeft--;
+                const m = String(Math.floor(secondsLeft / 60)).padStart(2, '0');
+                const s = String(secondsLeft % 60).padStart(2, '0');
+                timerEl.textContent = `${m}:${s}`;
+                if (secondsLeft <= 0) {
+                    clearInterval(kiosk.payTimerInterval);
+                    showToast('انتهت مهلة الدفع، تم الرجوع للبداية');
+                    resetToWelcome();
+                }
+            }, 1000);
+        }
+
+        function switchPaymentTab(tab) {
+            const isQR = tab === 'qr';
+            document.getElementById('panel-pay-qr').classList.toggle('hidden', !isQR);
+            document.getElementById('panel-pay-qr').classList.toggle('flex', isQR);
+            document.getElementById('panel-pay-cash').classList.toggle('hidden', isQR);
+
+            document.getElementById('tab-pay-qr').className = isQR
+                ? 'py-3 px-4 rounded-xl font-black text-sm bg-fuchsia-600 text-white transition'
+                : 'py-3 px-4 rounded-xl font-black text-sm text-zinc-400 hover:text-white transition';
+            document.getElementById('tab-pay-cash').className = !isQR
+                ? 'py-3 px-4 rounded-xl font-black text-sm bg-emerald-600 text-white transition'
+                : 'py-3 px-4 rounded-xl font-black text-sm text-zinc-400 hover:text-white transition';
+        }
+
+        function drawStyledQRCode() {
+            const canvas = document.getElementById('payment-qr-canvas');
+            const ctx = canvas.getContext('2d');
+            const size = canvas.width;
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, size, size);
+
+            const cells = 21;
+            const cellSize = Math.floor((size - 16) / cells);
+            const offset = Math.floor((size - cells * cellSize) / 2);
+
+            // توليد نمط حتمي بناءً على رقم المحفظة والسعر
+            const seedStr = `${settings.walletNumber}-${settings.price}`;
+            let hash = 0;
+            for (let i = 0; i < seedStr.length; i++) {
+                hash = ((hash << 5) - hash) + seedStr.charCodeAt(i);
+                hash |= 0;
+            }
+
+            ctx.fillStyle = '#09090b';
+            for (let r = 0; r < cells; r++) {
+                for (let c = 0; c < cells; c++) {
+                    // مربعات الزوايا الثلاثة القياسية للـ QR
+                    const inTopLeft = r < 7 && c < 7;
+                    const inTopRight = r < 7 && c >= cells - 7;
+                    const inBottomLeft = r >= cells - 7 && c < 7;
+
+                    if (inTopLeft || inTopRight || inBottomLeft) {
+                        const lr = inBottomLeft ? r - (cells - 7) : r;
+                        const lc = inTopRight ? c - (cells - 7) : c;
+                        const isBorder = lr === 0 || lr === 6 || lc === 0 || lc === 6;
+                        const isCenter = lr >= 2 && lr <= 4 && lc >= 2 && lc <= 4;
+                        if (isBorder || isCenter) {
+                            ctx.fillRect(offset + c * cellSize, offset + r * cellSize, cellSize, cellSize);
+                        }
+                    } else {
+                        const bit = Math.abs(Math.sin(hash + r * 31 + c * 17)) > 0.48;
+                        if (bit) {
+                            ctx.fillRect(offset + c * cellSize, offset + r * cellSize, cellSize, cellSize);
+                        }
+                    }
+                }
+            }
+        }
+
+        function verifyCashierPin() {
+            const entered = document.getElementById('cashier-quick-pin').value.trim();
+            if (entered === settings.pin) {
+                confirmPaymentSuccess('نقدي - تفعيل الكاشير');
+            } else {
+                playTone(220, 0.3, 'sawtooth');
+                showToast('رمز الكاشير غير صحيح ❌');
+            }
+        }
+
+        function confirmPaymentSuccess(methodLabel) {
+            clearInterval(kiosk.payTimerInterval);
+            playTone(880, 0.25);
+
+            // تسجيل العملية في إحصائيات المشرف وخصم ورقة واحدة من الطابعة
+            settings.sessionsCount += 1;
+            settings.totalRevenue += Number(settings.price);
+            if (settings.paperRemaining > 0) {
+                settings.paperRemaining -= 1;
+            }
+            persistSettings();
+
+            showToast(`تم تأكيد الدفع (${Number(settings.price).toLocaleString('en-US')} د.ع) ✓ استعد للتصوير!`);
+            kiosk.photos = new Array(LAYOUTS[kiosk.layout].count).fill(null);
+            goToStep('camera');
+        }
+
+        /**
+         * ============================================================================
+         * الشاشة 4: الكاميرا والتصوير الذاتي
+         * ============================================================================
+         */
+        async function initCamera() {
             const video = document.getElementById('webcam-video');
             const fallback = document.getElementById('camera-fallback-box');
-            try {
-                if (app.stream) {
-                    app.stream.getTracks().forEach(t => t.stop());
-                }
-                const constraints = {
-                    audio: false,
-                    video: deviceId
-                        ? { deviceId: { exact: deviceId }, width: { ideal: 1920 }, height: { ideal: 1080 } }
-                        : { facingMode: 'user', width: { ideal: 1920 }, height: { ideal: 1080 } }
-                };
-                app.stream = await navigator.mediaDevices.getUserMedia(constraints);
-                video.srcObject = app.stream;
+            if (kiosk.stream && kiosk.stream.active) {
+                video.srcObject = kiosk.stream;
                 fallback.classList.add('hidden');
-                await loadCameraDevices();
+                return;
+            }
+            try {
+                kiosk.stream = await navigator.mediaDevices.getUserMedia({
+                    audio: false,
+                    video: { facingMode: 'user', width: { ideal: 1920 }, height: { ideal: 1080 } }
+                });
+                video.srcObject = kiosk.stream;
+                fallback.classList.add('hidden');
             } catch (err) {
                 fallback.classList.remove('hidden');
             }
         }
 
-        async function loadCameraDevices() {
-            try {
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                const cams = devices.filter(d => d.kind === 'videoinput');
-                const select = document.getElementById('camera-select');
-                const currentId = app.stream?.getVideoTracks()[0]?.getSettings()?.deviceId;
-                select.innerHTML = '';
-                cams.forEach((cam, i) => {
-                    const opt = document.createElement('option');
-                    opt.value = cam.deviceId;
-                    opt.text = cam.label || `كاميرا ${i + 1}`;
-                    if (cam.deviceId === currentId) opt.selected = true;
-                    select.appendChild(opt);
-                });
-            } catch (e) {}
-        }
-
-        function switchCamera(id) {
-            if (id) initCamera(id);
-        }
-
-        function toggleMirror() {
-            app.isMirrored = !app.isMirrored;
-            const video = document.getElementById('webcam-video');
-            video.classList.toggle('-scale-x-100', app.isMirrored);
-        }
-
-        function setFilter(f) {
-            app.filter = f;
-            document.getElementById('webcam-video').style.filter = FILTERS[f] || 'none';
-            document.querySelectorAll('.filter-chip').forEach(btn => {
-                const active = btn.dataset.filter === f;
+        function setCameraFilter(filterKey) {
+            kiosk.filter = filterKey;
+            document.getElementById('webcam-video').style.filter = FILTERS[filterKey] || 'none';
+            document.querySelectorAll('.cam-filter-btn').forEach(btn => {
+                const active = btn.dataset.filter === filterKey;
                 btn.className = active
-                    ? 'filter-chip px-3 py-1 rounded-xl text-xs font-extrabold bg-white text-black transition'
-                    : 'filter-chip px-3 py-1 rounded-xl text-xs font-bold text-zinc-300 hover:text-white transition';
+                    ? 'cam-filter-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-black bg-fuchsia-600 text-white transition'
+                    : 'cam-filter-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold text-zinc-300 hover:text-white transition';
             });
         }
 
-        function captureFrame() {
+        function updateCameraProgressUI() {
+            const ind = document.getElementById('camera-shots-indicator');
+            const strip = document.getElementById('camera-thumbs-strip');
+            ind.innerHTML = '';
+            strip.innerHTML = '';
+
+            kiosk.photos.forEach((photo, idx) => {
+                const dot = document.createElement('span');
+                dot.className = photo
+                    ? 'w-7 h-2.5 rounded-full bg-emerald-500 transition-all'
+                    : 'w-7 h-2.5 rounded-full bg-zinc-700 transition-all';
+                ind.appendChild(dot);
+
+                const box = document.createElement('div');
+                box.className = 'w-20 h-16 lg:w-full lg:h-24 rounded-2xl bg-zinc-900 border border-zinc-800 overflow-hidden flex items-center justify-center shrink-0 relative';
+                if (photo) {
+                    box.innerHTML = `<img src="${photo}" class="w-full h-full object-cover"><span class="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/75 text-[11px] font-black flex items-center justify-center">${idx + 1}</span>`;
+                } else {
+                    box.innerHTML = `<span class="text-sm font-black text-zinc-600">#${idx + 1}</span>`;
+                }
+                strip.appendChild(box);
+            });
+        }
+
+        function captureSingleFrame() {
             const video = document.getElementById('webcam-video');
             if (!video.videoWidth) return null;
 
@@ -747,38 +1204,35 @@
             canvas.height = video.videoHeight;
             const ctx = canvas.getContext('2d');
 
-            ctx.filter = FILTERS[app.filter] || 'none';
-            if (app.isMirrored) {
-                ctx.translate(canvas.width, 0);
-                ctx.scale(-1, 1);
-            }
+            ctx.filter = FILTERS[kiosk.filter] || 'none';
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            // فلاش + صوت الغالق
             const flash = document.getElementById('flash-overlay');
             flash.classList.remove('flash-active');
             void flash.offsetWidth;
             flash.classList.add('flash-active');
-            playShutter();
+            playShutterSound();
 
             return canvas.toDataURL('image/jpeg', 0.95);
         }
 
-        function countdownStep(seconds, currentShot, totalShots) {
+        function runCountdown(seconds, shotIdx, totalShots) {
             return new Promise(resolve => {
                 const overlay = document.getElementById('countdown-overlay');
                 const num = document.getElementById('countdown-number');
                 const sub = document.getElementById('countdown-subtext');
 
                 overlay.classList.remove('hidden');
-                sub.textContent = `لقطة ${currentShot + 1} من ${totalShots} — استعد! 📸`;
+                sub.textContent = `لقطة ${shotIdx + 1} من ${totalShots} — استعد! 📸`;
 
                 let rem = seconds;
                 num.textContent = rem;
                 num.classList.remove('count-pop');
                 void num.offsetWidth;
                 num.classList.add('count-pop');
-                playBeep(false);
+                playTone(540, 0.18);
 
                 const timer = setInterval(() => {
                     rem--;
@@ -787,7 +1241,7 @@
                         num.classList.remove('count-pop');
                         void num.offsetWidth;
                         num.classList.add('count-pop');
-                        playBeep(rem === 1);
+                        playTone(rem === 1 ? 880 : 540, rem === 1 ? 0.3 : 0.18);
                     } else {
                         clearInterval(timer);
                         overlay.classList.add('hidden');
@@ -797,187 +1251,149 @@
             });
         }
 
-        // بدء جلسة الالتقاط التلقائي
-        async function startCaptureSequence() {
-            if (app.isCapturing) return;
+        async function runCaptureSession() {
+            if (kiosk.isCapturing) return;
             const video = document.getElementById('webcam-video');
-            if (!video.srcObject && app.photos.every(p => p === null)) {
-                showToast('يرجى تشغيل الكاميرا أو اختيار صور أولاً');
+            if (!video.srcObject) {
+                showToast('يرجى التأكد من توصيل الكاميرا أولاً');
                 return;
             }
 
-            ensureAudioContext();
-            // إغلاق درج الإعدادات تلقائياً لتوفير مساحة الرؤية
-            document.getElementById('settings-drawer').classList.add('hidden');
-
-            app.isCapturing = true;
-            const btn = document.getElementById('btn-start-shoot');
+            ensureAudio();
+            kiosk.isCapturing = true;
+            const btn = document.getElementById('btn-start-capture');
             btn.disabled = true;
             btn.classList.add('opacity-50');
 
-            const sec = parseInt(document.getElementById('select-countdown').value, 10) || 3;
-            const total = app.photos.length;
-
+            const total = kiosk.photos.length;
             for (let i = 0; i < total; i++) {
-                if (app.photos[i] !== null) continue;
-                await countdownStep(sec, i, total);
-                const shot = captureFrame();
+                if (kiosk.photos[i] !== null) continue;
+                await runCountdown(3, i, total);
+                const shot = captureSingleFrame();
                 if (shot) {
-                    app.photos[i] = shot;
-                    updateCaptureUI();
+                    kiosk.photos[i] = shot;
+                    updateCameraProgressUI();
                 }
                 if (i < total - 1) {
-                    await new Promise(r => setTimeout(r, 600));
+                    await new Promise(r => setTimeout(r, 650));
                 }
             }
 
-            app.isCapturing = false;
+            kiosk.isCapturing = false;
             btn.disabled = false;
             btn.classList.remove('opacity-50');
-            updateCaptureUI();
 
-            if (app.photos.every(p => p !== null)) {
-                await showFinalResult();
+            if (kiosk.photos.every(p => p !== null)) {
+                await prepareResultScreen();
             }
         }
 
-        // إعادة التقاط صورة واحدة محددة من شاشة النتيجة
-        async function retakeSinglePhoto(index) {
-            if (app.isCapturing) return;
-            app.photos[index] = null;
-            document.getElementById('result-screen').classList.add('hidden');
-            document.getElementById('result-screen').classList.remove('flex');
-            updateCaptureUI();
+        async function retakeOneShot(index) {
+            if (kiosk.isCapturing) return;
+            kiosk.photos[index] = null;
+            goToStep('camera');
+            updateCameraProgressUI();
 
-            app.isCapturing = true;
-            const sec = parseInt(document.getElementById('select-countdown').value, 10) || 3;
-            await countdownStep(sec, index, app.photos.length);
-            const shot = captureFrame();
+            kiosk.isCapturing = true;
+            await runCountdown(3, index, kiosk.photos.length);
+            const shot = captureSingleFrame();
             if (shot) {
-                app.photos[index] = shot;
+                kiosk.photos[index] = shot;
             }
-            app.isCapturing = false;
-            updateCaptureUI();
+            kiosk.isCapturing = false;
+            updateCameraProgressUI();
 
-            if (app.photos.every(p => p !== null)) {
-                await showFinalResult(false); // لا تكرر الطباعة التلقائية عند التعديل الفردي إلا بطلب المستخدم
+            if (kiosk.photos.every(p => p !== null)) {
+                await prepareResultScreen(true);
             }
         }
 
         function handleManualUpload(event) {
             const files = Array.from(event.target.files);
             if (!files.length) return;
-            const count = LAYOUTS[app.layout].count;
-            app.photos = new Array(count).fill(null);
+            const count = LAYOUTS[kiosk.layout].count;
+            kiosk.photos = new Array(count).fill(null);
 
             let loaded = 0;
             files.slice(0, count).forEach((file, idx) => {
                 const reader = new FileReader();
                 reader.onload = async (e) => {
-                    app.photos[idx] = e.target.result;
+                    kiosk.photos[idx] = e.target.result;
                     loaded++;
-                    updateCaptureUI();
-                    if (loaded === Math.min(files.length, count) && app.photos.every(p => p !== null)) {
+                    updateCameraProgressUI();
+                    if (loaded === Math.min(files.length, count) && kiosk.photos.every(p => p !== null)) {
                         document.getElementById('camera-fallback-box').classList.add('hidden');
-                        await showFinalResult();
+                        await prepareResultScreen();
                     }
                 };
                 reader.readAsDataURL(file);
             });
         }
 
-        function updateCaptureUI() {
-            const total = app.photos.length;
-            const pills = document.getElementById('progress-pills');
-            const thumbsBar = document.getElementById('live-thumbs-bar');
-
-            pills.innerHTML = '';
-            thumbsBar.innerHTML = '';
-
-            app.photos.forEach((photo, idx) => {
-                // نقاط التقدم العلوية
-                const pill = document.createElement('span');
-                pill.className = photo
-                    ? 'w-6 h-2.5 rounded-full bg-emerald-500 transition-all'
-                    : 'w-6 h-2.5 rounded-full bg-zinc-700 transition-all';
-                pills.appendChild(pill);
-
-                // مصغرات الصور
-                const thumb = document.createElement('div');
-                thumb.className = 'w-20 h-16 lg:w-full lg:h-24 rounded-2xl bg-zinc-900 border border-zinc-800 overflow-hidden flex items-center justify-center shrink-0 relative';
-                if (photo) {
-                    thumb.innerHTML = `<img src="${photo}" class="w-full h-full object-cover"><span class="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/70 text-[10px] font-bold flex items-center justify-center">${idx + 1}</span>`;
-                } else {
-                    thumb.innerHTML = `<span class="text-xs font-extrabold text-zinc-600">#${idx + 1}</span>`;
-                }
-                thumbsBar.appendChild(thumb);
-            });
-        }
-
         /**
          * ============================================================================
-         * محرك الرسم عالي الدقة (300 DPI) وعرض النتيجة
+         * الشاشة 5 و 6: المراجعة، الطباعة الفورية CP1500، وشاشة الشكر
          * ============================================================================
          */
-        async function showFinalResult(allowAutoPrint = true) {
+        async function prepareResultScreen(skipAutoPrint = false) {
             const hdCanvas = document.getElementById('hd-canvas');
-            await renderCardToCanvas(hdCanvas, app.photos, false);
+            await renderCardToCanvas(hdCanvas, kiosk.photos, false);
 
             const dataUrl = hdCanvas.toDataURL('image/png', 1.0);
             document.getElementById('final-result-image').src = dataUrl;
             document.getElementById('print-image').src = dataUrl;
 
-            // بناء أزرار إعادة التقاط لقطة واحدة
-            const retakeGrid = document.getElementById('retake-single-grid');
-            retakeGrid.innerHTML = '';
-            app.photos.forEach((photo, idx) => {
+            if (!skipAutoPrint && settings.autoPrint) {
+                executePrintAndFinish();
+                return;
+            }
+
+            // بناء أزرار إعادة لقطة واحدة
+            const grid = document.getElementById('single-retake-grid');
+            grid.innerHTML = '';
+            kiosk.photos.forEach((photo, idx) => {
                 const btn = document.createElement('button');
-                btn.onclick = () => retakeSinglePhoto(idx);
-                btn.className = 'relative aspect-square rounded-xl overflow-hidden border-2 border-zinc-700 hover:border-rose-500 group transition active:scale-95';
+                btn.onclick = () => retakeOneShot(idx);
+                btn.className = 'relative aspect-square rounded-2xl overflow-hidden border-2 border-zinc-700 hover:border-rose-500 transition active:scale-95';
                 btn.innerHTML = `
                     <img src="${photo}" class="w-full h-full object-cover">
                     <div class="absolute inset-0 bg-black/55 flex flex-col items-center justify-center text-white">
-                        <span class="text-xs font-black">↻ ${idx + 1}</span>
+                        <span class="text-sm font-black">↻ ${idx + 1}</span>
                     </div>
                 `;
-                retakeGrid.appendChild(btn);
+                grid.appendChild(btn);
             });
 
-            const resScreen = document.getElementById('result-screen');
-            resScreen.classList.remove('hidden');
-            resScreen.classList.add('flex');
-
-            // الطباعة التلقائية إذا كانت مفعلة
-            const isAutoPrint = document.getElementById('check-auto-print').checked;
-            if (allowAutoPrint && isAutoPrint) {
-                setTimeout(() => triggerPrintCP1500(), 450);
-            }
+            goToStep('result');
         }
 
-        function startNewSession() {
-            app.photos = new Array(LAYOUTS[app.layout].count).fill(null);
-            updateCaptureUI();
-            const resScreen = document.getElementById('result-screen');
-            resScreen.classList.add('hidden');
-            resScreen.classList.remove('flex');
-        }
-
-        function triggerPrintCP1500() {
+        function executePrintAndFinish() {
             const img = document.getElementById('print-image');
             if (!img.src) return;
+
+            // إرسال أمر الطباعة للمتصفح (Canon SELPHY CP1500)
             window.print();
+
+            // الانتقال لشاشة الشكر والعد التنازلي للخصوصية
+            goToStep('thankyou');
+            let sec = 15;
+            const el = document.getElementById('thankyou-countdown');
+            el.textContent = sec;
+            kiosk.thankYouInterval = setInterval(() => {
+                sec--;
+                el.textContent = sec;
+                if (sec <= 0) {
+                    clearInterval(kiosk.thankYouInterval);
+                    resetToWelcome();
+                }
+            }, 1000);
         }
 
-        function downloadImage() {
-            const hdCanvas = document.getElementById('hd-canvas');
-            const link = document.createElement('a');
-            link.download = `CP1500-PhotoBooth-${Date.now()}.png`;
-            link.href = hdCanvas.toDataURL('image/png', 1.0);
-            link.click();
-            showToast('تم حفظ الصورة بجودة عالية ✓');
-        }
-
-        // تحميل صورة مساعدة
+        /**
+         * ============================================================================
+         * محرك الرسم عالي الدقة (300 DPI) مع الثيمات الستة (بما فيها البغدادي)
+         * ============================================================================
+         */
         function loadImg(src) {
             return new Promise(resolve => {
                 const img = new Image();
@@ -987,7 +1403,6 @@
             });
         }
 
-        // رسم الصورة بدون تشويه النسب (Cover Fit)
         function drawCoverImage(ctx, img, x, y, w, h, radius = 0) {
             ctx.save();
             if (radius > 0) {
@@ -1002,7 +1417,7 @@
             }
 
             if (!img) {
-                ctx.fillStyle = 'rgba(130,130,140,0.2)';
+                ctx.fillStyle = 'rgba(130,130,145,0.22)';
                 ctx.fillRect(x, y, w, h);
                 ctx.restore();
                 return;
@@ -1026,77 +1441,110 @@
             ctx.restore();
         }
 
-        // رسم خلفية الثيمات الخمسة
-        function paintThemeSurface(ctx, x, y, w, h, theme) {
+        function paintKioskTheme(ctx, x, y, w, h, theme) {
             ctx.save();
             ctx.beginPath();
             ctx.rect(x, y, w, h);
             ctx.clip();
 
-            if (theme === 'white') {
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(x, y, w, h);
-                ctx.strokeStyle = '#e4e4e7';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(x + 14, y + 14, w - 28, h - 28);
-
-            } else if (theme === 'wedding') {
+            if (theme === 'royal') {
                 const g = ctx.createLinearGradient(x, y, x + w, y + h);
-                g.addColorStop(0, '#fffdf9');
-                g.addColorStop(1, '#f7efe0');
+                g.addColorStop(0, '#fffdf7');
+                g.addColorStop(1, '#f6ebd2');
                 ctx.fillStyle = g;
                 ctx.fillRect(x, y, w, h);
                 ctx.strokeStyle = '#c59b48';
                 ctx.lineWidth = 4;
-                ctx.strokeRect(x + 18, y + 18, w - 36, h - 36);
+                ctx.strokeRect(x + 16, y + 16, w - 32, h - 32);
 
-            } else if (theme === 'birthday') {
+            } else if (theme === 'baghdadi') {
+                // ثيم تراثي بغدادي دافئ (خشب جوزي وزخارف هندسية نحاسية)
                 const g = ctx.createLinearGradient(x, y, x, y + h);
-                g.addColorStop(0, '#fff4f8');
-                g.addColorStop(1, '#fef9eb');
+                g.addColorStop(0, '#2a160c');
+                g.addColorStop(0.5, '#3b1f11');
+                g.addColorStop(1, '#231109');
                 ctx.fillStyle = g;
                 ctx.fillRect(x, y, w, h);
-                const colors = ['#ec4899', '#f59e0b', '#06b6d4', '#8b5cf6'];
-                for (let i = 0; i < 36; i++) {
-                    ctx.fillStyle = colors[i % colors.length];
-                    const px = x + ((i * 149) % w);
-                    const py = y + ((i * 233) % h);
+
+                // زخرفة معينات هندسية خفيفة بالخلفية
+                ctx.strokeStyle = 'rgba(217, 160, 91, 0.14)';
+                ctx.lineWidth = 2;
+                const step = 48;
+                for (let py = y; py < y + h + step; py += step) {
+                    for (let px = x; px < x + w + step; px += step) {
+                        ctx.beginPath();
+                        ctx.moveTo(px, py - step / 2);
+                        ctx.lineTo(px + step / 2, py);
+                        ctx.lineTo(px, py + step / 2);
+                        ctx.lineTo(px - step / 2, py);
+                        ctx.closePath();
+                        ctx.stroke();
+                    }
+                }
+                // إطار نحاسي مزدوج
+                ctx.strokeStyle = '#d9a05b';
+                ctx.lineWidth = 4;
+                ctx.strokeRect(x + 16, y + 16, w - 32, h - 32);
+                ctx.strokeStyle = 'rgba(217, 160, 91, 0.45)';
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(x + 24, y + 24, w - 48, h - 48);
+
+            } else if (theme === 'classic') {
+                ctx.fillStyle = '#121215';
+                ctx.fillRect(x, y, w, h);
+                ctx.strokeStyle = '#d4d4d8';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(x + 16, y + 16, w - 32, h - 32);
+
+            } else if (theme === 'party') {
+                const g = ctx.createLinearGradient(x, y, x + w, y + h);
+                g.addColorStop(0, '#fff3f8');
+                g.addColorStop(1, '#fef9e7');
+                ctx.fillStyle = g;
+                ctx.fillRect(x, y, w, h);
+                const cols = ['#ec4899', '#f59e0b', '#06b6d4', '#8b5cf6', '#10b981'];
+                for (let i = 0; i < 42; i++) {
+                    ctx.fillStyle = cols[i % cols.length];
                     ctx.beginPath();
-                    ctx.arc(px, py, 6, 0, Math.PI * 2);
+                    ctx.arc(x + ((i * 157) % w), y + ((i * 241) % h), 6, 0, Math.PI * 2);
                     ctx.fill();
                 }
 
-            } else if (theme === 'luxury') {
-                ctx.fillStyle = '#111113';
+            } else if (theme === 'neon') {
+                const g = ctx.createLinearGradient(x, y, x + w, y + h);
+                g.addColorStop(0, '#090418');
+                g.addColorStop(1, '#1a0936');
+                ctx.fillStyle = g;
                 ctx.fillRect(x, y, w, h);
-                ctx.strokeStyle = '#d4af37';
-                ctx.lineWidth = 3;
-                ctx.strokeRect(x + 18, y + 18, w - 36, h - 36);
+                ctx.strokeStyle = '#e879f9';
+                ctx.lineWidth = 4;
+                ctx.strokeRect(x + 16, y + 16, w - 32, h - 32);
 
-            } else if (theme === 'polaroid') {
-                ctx.fillStyle = '#f5f2eb';
+            } else if (theme === 'soft') {
+                ctx.fillStyle = '#fdf2f4';
                 ctx.fillRect(x, y, w, h);
-                ctx.strokeStyle = '#d6d3cb';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(x + 12, y + 12, w - 24, h - 24);
+                ctx.strokeStyle = '#fda4af';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(x + 16, y + 16, w - 32, h - 32);
             }
             ctx.restore();
         }
 
-        function getThemeTextStyle(theme) {
+        function getThemeTypography(theme) {
             switch (theme) {
-                case 'wedding':  return { title: '#7c5818', date: '#a37c35', font: 'Amiri, serif' };
-                case 'birthday': return { title: '#db2777', date: '#d97706', font: 'Cairo, sans-serif' };
-                case 'luxury':   return { title: '#f3d06b', date: '#a1a1aa', font: 'Cairo, sans-serif' };
-                case 'polaroid': return { title: '#292524', date: '#78716c', font: 'Cairo, sans-serif' };
+                case 'royal':    return { title: '#7c5818', date: '#a37c35', font: 'Amiri, serif' };
+                case 'baghdadi': return { title: '#f5c784', date: '#d9a05b', font: 'Amiri, serif' };
+                case 'classic':  return { title: '#ffffff', date: '#a1a1aa', font: 'Cairo, sans-serif' };
+                case 'party':    return { title: '#db2777', date: '#d97706', font: 'Cairo, sans-serif' };
+                case 'neon':     return { title: '#22d3ee', date: '#f0abfc', font: 'Cairo, sans-serif' };
+                case 'soft':     return { title: '#be123c', date: '#e11d48', font: 'Cairo, sans-serif' };
                 default:         return { title: '#18181b', date: '#71717a', font: 'Cairo, sans-serif' };
             }
         }
 
-        // الرسم النهائي على الكانفس بدقة 300 DPI
         async function renderCardToCanvas(canvas, photoUrls, isPreview = false) {
-            const cfg = LAYOUTS[app.layout];
-            const scale = isPreview ? 0.35 : 1;
+            const cfg = LAYOUTS[kiosk.layout];
+            const scale = isPreview ? 0.34 : 1;
             const W = Math.round(cfg.width * scale);
             const H = Math.round(cfg.height * scale);
 
@@ -1109,18 +1557,20 @@
             const imgs = await Promise.all(
                 Array.from({ length: cfg.count }, (_, i) => photoUrls[i] ? loadImg(photoUrls[i]) : Promise.resolve(null))
             );
-            const txtStyle = getThemeTextStyle(app.theme);
 
-            if (app.layout === 'strip3') {
-                // شريطان متطابقان 2×6 جنباً إلى جنب على ورقة 4×6
+            const typo = getThemeTypography(kiosk.theme);
+            const mainTitle = kiosk.customerNote || settings.kioskName;
+            const dateStr = new Date().toLocaleDateString('ar-IQ', { year: 'numeric', month: '2-digit', day: '2-digit' });
+
+            if (kiosk.layout === 'strip3') {
                 const stripW = W / 2;
                 for (let s = 0; s < 2; s++) {
                     const ox = s * stripW;
-                    paintThemeSurface(ctx, ox, 0, stripW, H, app.theme);
+                    paintKioskTheme(ctx, ox, 0, stripW, H, kiosk.theme);
 
-                    const padX = stripW * 0.08;
-                    const topPad = H * 0.035;
-                    const footerH = app.theme === 'polaroid' ? H * 0.18 : H * 0.14;
+                    const padX = stripW * 0.085;
+                    const topPad = H * 0.036;
+                    const footerH = H * 0.145;
                     const gap = H * 0.018;
                     const photoH = (H - topPad - footerH - gap * 2) / 3;
                     const photoW = stripW - padX * 2;
@@ -1129,18 +1579,17 @@
                         drawCoverImage(ctx, imgs[i], ox + padX, topPad + i * (photoH + gap), photoW, photoH, 8 * scale);
                     }
 
-                    // النص أسفل الشريط
                     ctx.save();
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    const ty = H - footerH * 0.6;
-                    ctx.fillStyle = txtStyle.title;
-                    ctx.font = `bold ${Math.round(34 * scale)}px ${txtStyle.font}`;
-                    ctx.fillText(app.eventTitle || 'فوتو بوث', ox + stripW / 2, ty, stripW - 36 * scale);
+                    const ty = H - footerH * 0.58;
+                    ctx.fillStyle = typo.title;
+                    ctx.font = `bold ${Math.round(33 * scale)}px ${typo.font}`;
+                    ctx.fillText(mainTitle, ox + stripW / 2, ty, stripW - 36 * scale);
 
-                    ctx.fillStyle = txtStyle.date;
-                    ctx.font = `600 ${Math.round(22 * scale)}px Cairo, sans-serif`;
-                    ctx.fillText(app.eventDate || '', ox + stripW / 2, ty + 38 * scale, stripW - 36 * scale);
+                    ctx.fillStyle = typo.date;
+                    ctx.font = `600 ${Math.round(21 * scale)}px Cairo, sans-serif`;
+                    ctx.fillText(dateStr, ox + stripW / 2, ty + 38 * scale, stripW - 36 * scale);
                     ctx.restore();
                 }
 
@@ -1155,11 +1604,11 @@
                 ctx.stroke();
                 ctx.restore();
 
-            } else if (app.layout === 'grid4') {
-                paintThemeSurface(ctx, 0, 0, W, H, app.theme);
+            } else if (kiosk.layout === 'grid4') {
+                paintKioskTheme(ctx, 0, 0, W, H, kiosk.theme);
                 const padX = W * 0.06;
                 const topPad = H * 0.045;
-                const footerH = app.theme === 'polaroid' ? H * 0.20 : H * 0.16;
+                const footerH = H * 0.165;
                 const gap = W * 0.032;
                 const cw = (W - padX * 2 - gap) / 2;
                 const ch = (H - topPad - footerH - gap) / 2;
@@ -1173,43 +1622,153 @@
                 ctx.save();
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                const ty = H - footerH * 0.56;
-                ctx.fillStyle = txtStyle.title;
-                ctx.font = `bold ${Math.round(52 * scale)}px ${txtStyle.font}`;
-                ctx.fillText(app.eventTitle || 'ذكرى جميلة', W / 2, ty, W - 90 * scale);
+                const ty = H - footerH * 0.55;
+                ctx.fillStyle = typo.title;
+                ctx.font = `bold ${Math.round(50 * scale)}px ${typo.font}`;
+                ctx.fillText(mainTitle, W / 2, ty, W - 90 * scale);
 
-                ctx.fillStyle = txtStyle.date;
-                ctx.font = `600 ${Math.round(30 * scale)}px Cairo, sans-serif`;
-                ctx.fillText(app.eventDate || '', W / 2, ty + 54 * scale, W - 90 * scale);
+                ctx.fillStyle = typo.date;
+                ctx.font = `600 ${Math.round(28 * scale)}px Cairo, sans-serif`;
+                ctx.fillText(dateStr, W / 2, ty + 52 * scale, W - 90 * scale);
                 ctx.restore();
 
-            } else if (app.layout === 'single') {
-                paintThemeSurface(ctx, 0, 0, W, H, app.theme);
+            } else if (kiosk.layout === 'single') {
+                paintKioskTheme(ctx, 0, 0, W, H, kiosk.theme);
                 const padX = W * 0.05;
                 const topPad = H * 0.055;
-                const footerH = app.theme === 'polaroid' ? H * 0.22 : H * 0.18;
+                const footerH = H * 0.185;
                 drawCoverImage(ctx, imgs[0], padX, topPad, W - padX * 2, H - topPad - footerH, 16 * scale);
 
                 ctx.save();
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                const ty = H - footerH * 0.55;
-                ctx.fillStyle = txtStyle.title;
-                ctx.font = `bold ${Math.round(56 * scale)}px ${txtStyle.font}`;
-                ctx.fillText(app.eventTitle || 'ذكرى جميلة', W / 2, ty, W - 110 * scale);
+                const ty = H - footerH * 0.54;
+                ctx.fillStyle = typo.title;
+                ctx.font = `bold ${Math.round(54 * scale)}px ${typo.font}`;
+                ctx.fillText(mainTitle, W / 2, ty, W - 110 * scale);
 
-                ctx.fillStyle = txtStyle.date;
-                ctx.font = `600 ${Math.round(32 * scale)}px Cairo, sans-serif`;
-                ctx.fillText(app.eventDate || '', W / 2, ty + 56 * scale, W - 110 * scale);
+                ctx.fillStyle = typo.date;
+                ctx.font = `600 ${Math.round(30 * scale)}px Cairo, sans-serif`;
+                ctx.fillText(dateStr, W / 2, ty + 54 * scale, W - 110 * scale);
                 ctx.restore();
             }
         }
 
-        // التشغيل الأولي عند فتح الصفحة
+        /**
+         * ============================================================================
+         * لوحة تحكم المشرف السرية (3 ثوانٍ ضغط مطول على الشعار)
+         * ============================================================================
+         */
+        function setupSecretAdminTrigger() {
+            const trigger = document.getElementById('secret-admin-trigger');
+            const bar = document.getElementById('admin-hold-bar');
+            let holdTimer = null;
+            let progressInterval = null;
+            let startTime = 0;
+
+            const startHold = (e) => {
+                startTime = Date.now();
+                progressInterval = setInterval(() => {
+                    const pct = Math.min(100, ((Date.now() - startTime) / 3000) * 100);
+                    bar.style.height = `${pct}%`;
+                }, 40);
+
+                holdTimer = setTimeout(() => {
+                    clearInterval(progressInterval);
+                    bar.style.height = '0%';
+                    openAdminPinModal();
+                }, 3000);
+            };
+
+            const cancelHold = () => {
+                clearTimeout(holdTimer);
+                clearInterval(progressInterval);
+                bar.style.height = '0%';
+            };
+
+            trigger.addEventListener('mousedown', startHold);
+            trigger.addEventListener('touchstart', startHold, { passive: true });
+            trigger.addEventListener('mouseup', cancelHold);
+            trigger.addEventListener('mouseleave', cancelHold);
+            trigger.addEventListener('touchend', cancelHold);
+            trigger.addEventListener('touchcancel', cancelHold);
+        }
+
+        function openAdminPinModal() {
+            document.getElementById('admin-pin-input').value = '';
+            document.getElementById('admin-pin-modal').classList.remove('hidden');
+        }
+
+        function closeAdminPinModal() {
+            document.getElementById('admin-pin-modal').classList.add('hidden');
+        }
+
+        function verifyAdminPin() {
+            const val = document.getElementById('admin-pin-input').value.trim();
+            if (val === settings.pin) {
+                closeAdminPinModal();
+                openAdminDashboard();
+            } else {
+                playTone(220, 0.3, 'sawtooth');
+                showToast('رمز المشرف غير صحيح ❌');
+            }
+        }
+
+        function openAdminDashboard() {
+            document.getElementById('stat-sessions-count').textContent = settings.sessionsCount;
+            document.getElementById('stat-total-revenue').textContent = Number(settings.totalRevenue).toLocaleString('en-US');
+            document.getElementById('stat-paper-left').textContent = settings.paperRemaining;
+
+            document.getElementById('admin-kiosk-name').value = settings.kioskName;
+            document.getElementById('admin-session-price').value = settings.price;
+            document.getElementById('admin-payment-mode').value = settings.paymentMode;
+            document.getElementById('admin-wallet-number').value = settings.walletNumber;
+            document.getElementById('admin-new-pin').value = settings.pin;
+            document.getElementById('admin-auto-print').checked = settings.autoPrint;
+
+            document.getElementById('admin-dashboard-modal').classList.remove('hidden');
+        }
+
+        function closeAdminDashboard() {
+            document.getElementById('admin-dashboard-modal').classList.add('hidden');
+        }
+
+        function refillPrinterPaper() {
+            settings.paperRemaining = 36;
+            persistSettings();
+            document.getElementById('stat-paper-left').textContent = 36;
+            showToast('تمت إعادة ضبط عداد ورق CP1500 إلى 36 ورقة ✓');
+        }
+
+        function resetDailyStats() {
+            settings.sessionsCount = 0;
+            settings.totalRevenue = 0;
+            persistSettings();
+            document.getElementById('stat-sessions-count').textContent = 0;
+            document.getElementById('stat-total-revenue').textContent = 0;
+            showToast('تم تصفير عداد الإيرادات والجلسات ✓');
+        }
+
+        function saveAdminSettings() {
+            settings.kioskName = document.getElementById('admin-kiosk-name').value.trim() || 'استوديو الذكريات الفوري';
+            settings.price = Math.max(0, parseInt(document.getElementById('admin-session-price').value, 10) || 5000);
+            settings.paymentMode = document.getElementById('admin-payment-mode').value;
+            settings.walletNumber = document.getElementById('admin-wallet-number').value.trim() || '0780 000 5000';
+            settings.pin = document.getElementById('admin-new-pin').value.trim() || '1234';
+            settings.autoPrint = document.getElementById('admin-auto-print').checked;
+
+            persistSettings();
+            closeAdminDashboard();
+            showToast('تم حفظ إعدادات الكشك بنجاح ✓');
+        }
+
+        // تهيئة الكشك عند الفتح
         window.addEventListener('DOMContentLoaded', () => {
-            setLayout('strip3');
-            setTheme('white');
-            initCamera();
+            loadSettings();
+            setupSecretAdminTrigger();
+            selectCustomerLayout('strip3');
+            selectCustomerTheme('royal');
+            goToStep('welcome');
         });
     </script>
 </body>
