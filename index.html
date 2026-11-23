@@ -1,2390 +1,1216 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>فوتو بوث الذكريات | طباعة حسب قياس الطابعة بدون قص</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>فوتو بوث CP1500 - عملي وسريع</title>
+    <!-- خط القاهرة العربي الواضح للمس والشاشات -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Cairo:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Cairo', 'sans-serif'],
+                        serif: ['Amiri', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #09090b;
+            color: #fafafa;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
+        /* تأثير فلاش التصوير */
+        @keyframes cameraFlash {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        .flash-active {
+            animation: cameraFlash 0.55s ease-out forwards;
+        }
 
-  <!-- Arabic Font -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&display=swap" rel="stylesheet" />
+        /* حركة العد التنازلي */
+        @keyframes pulseScale {
+            0% { transform: scale(0.5); opacity: 0; }
+            60% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .count-pop {
+            animation: pulseScale 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
 
-  <style id="dynamicPageStyle">
-    @page {
-      size: auto;
-      margin: 0;
-    }
-  </style>
+        /* شريط تمرير مدمج */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #18181b; }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 999px; }
 
-  <style>
-    /* Strict Kiosk Viewport & Touch Lock */
-    html, body, #app {
-      width: 100%;
-      height: 100dvh;
-      min-height: 100vh;
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      overscroll-behavior: none;
-      touch-action: none;
-      user-select: none;
-      -webkit-user-select: none;
-      -webkit-touch-callout: none;
-      font-family: 'Cairo', sans-serif;
-      background-color: #050814;
-      color: #f8fafc;
-    }
+        /* =========================================================
+           تنسيق الطباعة الصارم لطابعة Canon SELPHY CP1500 (4x6 in)
+           ========================================================= */
+        #print-area {
+            display: none;
+        }
 
-    button, [role="button"] {
-      touch-action: manipulation;
-      cursor: pointer;
-      position: relative;
-      z-index: 2;
-      -webkit-tap-highlight-color: rgba(255, 255, 255, 0.14);
-    }
-
-    .blurred-camera-bg {
-      filter: blur(14px) brightness(0.74);
-      transform: scale(1.08);
-    }
-
-    .blurred-camera-bg.mirrored {
-      transform: scaleX(-1) scale(1.08);
-    }
-
-    #framingGuideOverlay {
-      position: fixed;
-      inset: 0;
-      z-index: 15;
-      pointer-events: none;
-      overflow: hidden;
-      background: radial-gradient(circle at center, rgba(15, 23, 42, 0.25) 0%, rgba(2, 6, 23, 0.72) 100%);
-    }
-
-    #framingGuideBackdrop {
-      position: absolute;
-      inset: 0;
-      backdrop-filter: blur(18px) saturate(0.85) brightness(0.56);
-      -webkit-backdrop-filter: blur(18px) saturate(0.85) brightness(0.56);
-      background: rgba(2, 6, 23, 0.36);
-    }
-
-    #framingGuideClearWindow {
-      position: absolute;
-      overflow: hidden;
-      border-radius: 28px;
-      border: 2px solid rgba(255, 255, 255, 0.72);
-      background: #090d1a;
-      box-shadow:
-        0 24px 70px rgba(0, 0, 0, 0.65),
-        0 0 0 1px rgba(255, 255, 255, 0.14),
-        inset 0 0 24px rgba(255, 255, 255, 0.1);
-      transition: left 0.2s ease, top 0.2s ease, width 0.2s ease, height 0.2s ease;
-    }
-
-    #framingGuideClearVideo,
-    #framingGuideClearCanvas {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      pointer-events: none;
-      transform-origin: center center;
-    }
-
-    #framingGuideClearVideo.mirrored,
-    #framingGuideClearCanvas.mirrored {
-      transform: scaleX(-1);
-    }
-
-    @keyframes capturePulse {
-      0%, 100% {
-        box-shadow: 0 0 36px rgba(99, 102, 241, 0.55), 0 0 72px rgba(236, 72, 153, 0.28);
-        transform: scale(1);
-      }
-      50% {
-        box-shadow: 0 0 52px rgba(99, 102, 241, 0.8), 0 0 95px rgba(236, 72, 153, 0.45);
-        transform: scale(1.02);
-      }
-    }
-
-    .capture-btn-pulse {
-      animation: capturePulse 2.8s infinite ease-in-out;
-    }
-
-    @keyframes flashBurst {
-      0% { opacity: 0.96; }
-      100% { opacity: 0; }
-    }
-
-    .flash-burst {
-      animation: flashBurst 0.42s ease-out forwards;
-    }
-
-    @keyframes countPop {
-      0% { transform: scale(0.45); opacity: 0; }
-      35% { transform: scale(1.12); opacity: 1; }
-      85% { transform: scale(1); opacity: 1; }
-      100% { transform: scale(0.85); opacity: 0; }
-    }
-
-    .count-pop {
-      animation: countPop 0.92s ease-in-out forwards;
-    }
-
-    .glass-panel {
-      background: rgba(15, 23, 42, 0.8);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-    }
-
-    /* Print-only container hidden during normal kiosk viewing */
-    #printOnlyContainer {
-      display: none;
-    }
-
-    /* Adaptive full-page fit for any paper size & iOS Safari print compatibility */
-    @media print {
-      @page {
-        size: auto;
-        margin: 0;
-      }
-
-      * {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        box-sizing: border-box !important;
-      }
-
-      html, body {
-        width: 100% !important;
-        height: auto !important;
-        min-height: 0 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        overflow: visible !important;
-        background: #ffffff !important;
-      }
-
-      #app,
-      #fullScreenPreviewModal,
-      #cameraDiagModal,
-      #cameraStatusBadge,
-      #kioskStatusToast,
-      #flashOverlay {
-        display: none !important;
-      }
-
-      #printOnlyContainer {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        width: 100vw !important;
-        height: 100vh !important;
-        max-width: 100% !important;
-        max-height: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        background: #ffffff !important;
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-      }
-
-      #printOnlyImg {
-        display: block !important;
-        width: auto !important;
-        height: auto !important;
-        max-width: 100% !important;
-        max-height: 100% !important;
-        object-fit: contain !important;
-        object-position: center center !important;
-        margin: 0 auto !important;
-        padding: 0 !important;
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-      }
-    }
-  </style>
+        @media print {
+            body > *:not(#print-area) {
+                display: none !important;
+            }
+            html, body {
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                background: #ffffff !important;
+                overflow: hidden !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            #print-area {
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+                position: fixed;
+                inset: 0;
+                width: 100vw;
+                height: 100vh;
+                margin: 0;
+                padding: 0;
+                background: #ffffff;
+                z-index: 99999;
+            }
+            #print-image {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                display: block;
+                margin: 0;
+                padding: 0;
+            }
+        }
+    </style>
+    <style id="dynamic-page-style">
+        @page {
+            size: 4in 6in;
+            margin: 0;
+        }
+    </style>
 </head>
-<body>
-  <!-- Printer-sized full output container (adapts to any paper size on desktop & iOS Safari) -->
-  <div id="printOnlyContainer" aria-hidden="true">
-    <img id="printOnlyImg" alt="Full Uncropped Printer Output" />
-  </div>
+<body class="h-screen w-screen overflow-hidden flex flex-col bg-zinc-950 text-zinc-100">
 
-  <div id="app" class="relative w-full h-full overflow-hidden">
+    <!-- طبقة الفلاش -->
+    <div id="flash-overlay" class="fixed inset-0 bg-white pointer-events-none opacity-0 z-50"></div>
 
-    <!-- Full-screen flash overlay on photo capture -->
-    <div id="flashOverlay" class="fixed inset-0 bg-white pointer-events-none opacity-0 z-50"></div>
+    <!-- إشعارات سريعة -->
+    <div id="toast-container" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 w-11/12 max-w-sm pointer-events-none"></div>
 
-    <!-- Non-intrusive Camera Status Pill & Diagnostic Modal -->
-    <div id="cameraStatusBadge" class="hidden fixed top-3 left-3 z-40 max-w-[82vw]">
-      <button
-        id="btnOpenCameraDiag"
-        type="button"
-        onclick="openCameraDiagnostics(true)"
-        class="px-3 py-1.5 rounded-2xl bg-amber-950/90 hover:bg-amber-900 border border-amber-300/50 text-amber-100 text-xs font-extrabold shadow-lg flex items-center gap-2"
-      >
-        <span class="w-2.5 h-2.5 rounded-full bg-amber-400 shrink-0"></span>
-        <span id="cameraStatusBadgeText">وضع المعاينة الافتراضية — اضغط للتشخيص</span>
-      </button>
-    </div>
-
-    <div id="cameraDiagModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-      <div class="w-full max-w-lg glass-panel rounded-3xl p-5 sm:p-6 border border-white/20 shadow-2xl flex flex-col gap-4 text-right">
-        <div class="flex items-center justify-between gap-2 border-b border-white/10 pb-3">
-          <h3 class="text-lg sm:text-xl font-black text-white">تشخيص الكاميرا وإعادة التشغيل</h3>
-          <button
-            type="button"
-            onclick="closeCameraDiagnostics()"
-            class="px-3 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-bold"
-          >
-            إغلاق
-          </button>
-        </div>
-
-        <div class="bg-slate-950/75 rounded-2xl p-3.5 border border-white/10 flex flex-col gap-1.5">
-          <div id="diagErrorCode" class="text-xs font-black text-amber-300">حالة الكاميرا</div>
-          <p id="diagExplanation" class="text-sm font-bold text-slate-100 leading-relaxed"></p>
-          <p id="diagSuggestion" class="text-xs font-semibold text-slate-300 leading-relaxed"></p>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-2.5">
-          <button
-            type="button"
-            onclick="initCamera(true)"
-            class="flex-1 min-w-[160px] py-3 px-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black text-sm shadow-lg transition"
-          >
-            إعادة تشغيل الكاميرا
-          </button>
-          <button
-            type="button"
-            onclick="toggleFacingModeAndRestart()"
-            class="py-3 px-4 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-white/15 text-slate-100 font-extrabold text-sm transition"
-          >
-            تبديل الكاميرا (أمامية / خلفية)
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===================================================================== -->
-    <!-- SCREEN 1: START SCREEN                                                -->
-    <!-- ===================================================================== -->
-    <section id="homeScreen" class="relative w-full h-full flex items-center justify-center p-6 overflow-hidden">
-      <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <video id="bgVideo" autoplay playsinline webkit-playsinline="true" muted class="w-full h-full object-cover blurred-camera-bg mirrored hidden"></video>
-        <canvas id="bgSimCanvas" width="1280" height="720" class="w-full h-full object-cover blurred-camera-bg"></canvas>
-        <div class="fixed inset-0 bg-slate-950/35"></div>
-      </div>
-
-      <div class="relative z-10 w-full max-w-md flex flex-col items-center justify-center gap-3">
-        <!-- Separate 3 or 4 Shots Picker -->
-        <div class="w-full grid grid-cols-2 gap-3 glass-panel p-2 rounded-3xl" role="group" aria-label="عدد الصور">
-          <button
-            id="btnShots3"
-            type="button"
-            data-action="select-shots"
-            data-shots="3"
-            class="shot-count-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2.5 transition bg-indigo-600/45 border-amber-300 text-white shadow"
-          >
-            <svg class="w-5 h-5 shrink-0 text-amber-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
-              <rect x="4" y="3" width="16" height="5" rx="1.5" />
-              <rect x="4" y="9.5" width="16" height="5" rx="1.5" />
-              <rect x="4" y="16" width="16" height="5" rx="1.5" />
-            </svg>
-            <span class="text-base sm:text-lg font-black">3 صور</span>
-          </button>
-
-          <button
-            id="btnShots4"
-            type="button"
-            data-action="select-shots"
-            data-shots="4"
-            class="shot-count-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2.5 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35"
-          >
-            <svg class="w-5 h-5 shrink-0 text-sky-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
-              <rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1.5" />
-              <rect x="13" y="3.5" width="7.5" height="7.5" rx="1.5" />
-              <rect x="3.5" y="13" width="7.5" height="7.5" rx="1.5" />
-              <rect x="13" y="13" width="7.5" height="7.5" rx="1.5" />
-            </svg>
-            <span class="text-base sm:text-lg font-black">4 صور</span>
-          </button>
-        </div>
-
-        <!-- Layout Mode Picker (Postcard or Dual Strip) -->
-        <div class="w-full grid grid-cols-2 gap-3 glass-panel p-2 rounded-3xl" role="group" aria-label="تخطيط الصور">
-          <button
-            id="btnStartFullFrame"
-            type="button"
-            data-action="select-layout"
-            data-layout="postcard"
-            class="home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2 transition bg-indigo-600/45 border-amber-300 text-white shadow"
-          >
-            <svg class="w-5 h-5 shrink-0 text-pink-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
-              <rect x="4.5" y="2.5" width="15" height="19" rx="2.5" />
-              <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 15l3-3 2.5 2.5 3.5-4 1.5 1.5" />
-            </svg>
-            <span class="text-sm sm:text-base font-black">بوست كارت</span>
-          </button>
-
-          <button
-            id="btnStartDualStrip"
-            type="button"
-            data-action="select-layout"
-            data-layout="dual_strip"
-            class="home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35"
-          >
-            <svg class="w-5 h-5 shrink-0 text-amber-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
-              <rect x="3.5" y="3.5" width="7" height="17" rx="1.5" />
-              <rect x="13.5" y="3.5" width="7" height="17" rx="1.5" />
-            </svg>
-            <span class="text-sm sm:text-base font-black">شريطين</span>
-          </button>
-        </div>
-
-        <!-- Single Centered Capture Button with Price -->
-        <button
-          id="startCaptureBtn"
-          type="button"
-          data-action="start-capture"
-          class="capture-btn-pulse w-full px-8 py-9 sm:px-10 sm:py-10 rounded-[2.25rem] bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 active:scale-95 text-white border-2 border-white/25 transition-all duration-200 flex flex-col items-center justify-center gap-3"
-        >
-          <svg class="w-12 h-12 sm:w-14 sm:h-14 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-            <circle cx="12" cy="13" r="3.5" />
-          </svg>
-          <span id="startCaptureBtnLabel" class="text-2xl sm:text-3xl font-black tracking-tight text-center leading-snug">
-            أخذ صورة ذكرى بسعر 5,000 د.ع
-          </span>
-        </button>
-      </div>
-    </section>
-
-    <!-- ===================================================================== -->
-    <!-- SCREEN 2: FULL-SCREEN UNBLURRED CAPTURE (6s INITIAL -> 3s BETWEEN)   -->
-    <!-- ===================================================================== -->
-    <section id="captureScreen" class="hidden relative w-full h-full flex items-center justify-center bg-slate-950 overflow-hidden">
-      <video id="liveVideo" autoplay playsinline webkit-playsinline="true" muted class="sr-only"></video>
-      <canvas id="liveSimCanvas" width="1280" height="720" class="sr-only"></canvas>
-
-      <div id="framingGuideOverlay" aria-hidden="true">
-        <div id="framingGuideBackdrop"></div>
-        <div id="framingGuideClearWindow">
-          <video id="framingGuideClearVideo" autoplay playsinline webkit-playsinline="true" muted class="hidden"></video>
-          <canvas id="framingGuideClearCanvas" width="1280" height="720" class="hidden"></canvas>
-        </div>
-      </div>
-
-      <div class="fixed top-4 right-4 z-20 pointer-events-none">
-        <div id="captureShotCounter" class="px-4 py-2 rounded-2xl bg-slate-950/75 border border-white/20 text-sm sm:text-base font-black text-white shadow-lg">
-          1 / 3
-        </div>
-      </div>
-
-      <div id="countdownOverlay" class="hidden fixed inset-0 z-20 flex flex-col items-center justify-center pointer-events-none bg-black/20">
-        <div id="countdownNumber" class="count-pop text-8xl sm:text-[9rem] font-black text-white drop-shadow-[0_10px_35px_rgba(0,0,0,0.85)] leading-none">
-          6
-        </div>
-      </div>
-    </section>
-
-    <!-- ===================================================================== -->
-    <!-- SCREEN 3: THEMES + PRINTER-MATCHED NO-CROP PRINT                      -->
-    <!-- ===================================================================== -->
-    <section id="editorScreen" class="hidden relative w-full h-full p-3 sm:p-5 lg:p-6 flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch justify-center overflow-hidden">
-      <!-- Left / Top Preview Column -->
-      <div class="lg:w-1/2 h-[42%] lg:h-full glass-panel rounded-3xl p-3 sm:p-5 flex flex-col items-center justify-center gap-2 relative overflow-hidden">
-        <img
-          id="composedPreviewImg"
-          alt="معاينة الطباعة الكاملة بدون قص"
-          class="max-w-full max-h-full w-auto h-auto rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.85)] border-2 border-white/20 object-contain"
-        />
-      </div>
-
-      <!-- Controls Column -->
-      <div class="lg:w-1/2 h-[58%] lg:h-full glass-panel rounded-3xl p-3.5 sm:p-5 lg:p-6 flex flex-col justify-between gap-2.5 overflow-hidden">
-        <div class="flex flex-col gap-2.5 overflow-y-auto pr-0.5">
-          <div class="flex items-center justify-between gap-2">
-            <h2 class="text-base sm:text-xl font-black text-white">اختر الثيم</h2>
-            <span id="editorModeBadge" class="px-3 py-1 rounded-xl bg-slate-900/90 border border-white/15 text-xs sm:text-sm font-black text-amber-300">
-              3 صور • حسب الطابعة
-            </span>
-          </div>
-
-          <!-- Simple One-Tap Themes Grid -->
-          <div id="themesGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            <button
-              type="button"
-              data-action="select-theme"
-              data-theme="kids"
-              class="theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-amber-500/25 border-amber-300 text-white shadow"
-            >
-              <span class="w-5 h-5 rounded-full shrink-0 border border-white/40 bg-gradient-to-br from-amber-300 to-sky-400"></span>
-              <span class="text-xs sm:text-sm font-black leading-tight">أطفال</span>
-            </button>
-
-            <button
-              type="button"
-              data-action="select-theme"
-              data-theme="girls"
-              class="theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-slate-900/75 border-white/15 hover:border-pink-400/60 text-slate-200"
-            >
-              <span class="w-5 h-5 rounded-full shrink-0 border border-white/40 bg-gradient-to-br from-pink-400 to-rose-500"></span>
-              <span class="text-xs sm:text-sm font-black leading-tight">بنات</span>
-            </button>
-
-            <button
-              type="button"
-              data-action="select-theme"
-              data-theme="boys"
-              class="theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-slate-900/75 border-white/15 hover:border-cyan-400/60 text-slate-200"
-            >
-              <span class="w-5 h-5 rounded-full shrink-0 border border-white/40 bg-gradient-to-br from-cyan-400 to-blue-600"></span>
-              <span class="text-xs sm:text-sm font-black leading-tight">أولاد</span>
-            </button>
-
-            <button
-              type="button"
-              data-action="select-theme"
-              data-theme="adults"
-              class="theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-slate-900/75 border-white/15 hover:border-yellow-400/60 text-slate-200"
-            >
-              <span class="w-5 h-5 rounded-full shrink-0 border border-white/40 bg-gradient-to-br from-neutral-900 to-amber-500"></span>
-              <span class="text-xs sm:text-sm font-black leading-tight">كبار</span>
-            </button>
-
-            <button
-              type="button"
-              data-action="select-theme"
-              data-theme="royal_white"
-              class="theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-slate-900/75 border-white/15 hover:border-amber-200/70 text-slate-200"
-            >
-              <span class="w-5 h-5 rounded-full shrink-0 border border-slate-400 bg-gradient-to-br from-white to-amber-200"></span>
-              <span class="text-xs sm:text-sm font-black leading-tight">أبيض ملكي</span>
-            </button>
-
-            <button
-              type="button"
-              data-action="select-theme"
-              data-theme="pastel"
-              class="theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-slate-900/75 border-white/15 hover:border-teal-300/60 text-slate-200"
-            >
-              <span class="w-5 h-5 rounded-full shrink-0 border border-white/40 bg-gradient-to-br from-emerald-200 via-purple-200 to-rose-200"></span>
-              <span class="text-xs sm:text-sm font-black leading-tight">باستيل</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Primary Print, Save Image & Reset Actions -->
-        <div class="flex flex-col gap-2 pt-2 border-t border-white/10 shrink-0">
-          <div class="w-full flex items-center justify-between gap-3 bg-slate-900/85 border border-white/15 rounded-2xl px-3.5 py-2">
-            <div class="flex flex-col text-right">
-              <span class="text-xs font-bold text-slate-300">5,000 د.ع للطبعة • قياس الطابعة بدون قص</span>
-              <span id="printTotalPriceLabel" class="text-sm sm:text-base font-black text-amber-300">المجموع: 5,000 د.ع</span>
-            </div>
-
-            <div class="flex items-center gap-2 shrink-0">
-              <button
-                id="btnDecCopies"
-                type="button"
-                data-action="change-copies"
-                data-delta="-1"
-                aria-label="تقليل عدد الطبعات"
-                class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 border border-white/15 text-white font-black text-lg flex items-center justify-center transition"
-              >
-                -
-              </button>
-              <span id="printCopiesValue" class="min-w-[2rem] text-center text-base sm:text-lg font-black text-white">1</span>
-              <button
-                id="btnIncCopies"
-                type="button"
-                data-action="change-copies"
-                data-delta="1"
-                aria-label="زيادة عدد الطبعات"
-                class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 border border-white/15 text-white font-black text-lg flex items-center justify-center transition"
-              >
-                +
-              </button>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-2">
-            <button
-              id="btnOpenFullScreenPreview"
-              type="button"
-              data-action="open-fullscreen-preview"
-              class="py-2.5 px-3 rounded-2xl bg-indigo-600/80 hover:bg-indigo-500 active:scale-[0.98] border border-amber-300/40 text-white font-black text-xs sm:text-sm shadow-lg transition flex items-center justify-center gap-1.5"
-            >
-              <span>معاينة كاملة</span>
-            </button>
-
-            <button
-              id="btnDownloadImage"
-              type="button"
-              data-action="download-image"
-              class="py-2.5 px-3 rounded-2xl bg-sky-600/85 hover:bg-sky-500 active:scale-[0.98] border border-sky-300/40 text-white font-black text-xs sm:text-sm shadow-lg transition flex items-center justify-center gap-1.5"
-            >
-              <span>حفظ الصورة</span>
-            </button>
-          </div>
-
-          <button
-            id="btnDirectPrint"
-            type="button"
-            data-action="direct-print"
-            class="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 active:scale-[0.98] text-white font-black text-base sm:text-lg shadow-xl transition flex items-center justify-center gap-2"
-          >
-            <span id="btnDirectPrintLabel">طباعة فورية حسب الطابعة — 5,000 د.ع</span>
-          </button>
-
-          <button
-            id="btnFinishReset"
-            type="button"
-            data-action="reset-kiosk"
-            class="w-full py-3 px-5 rounded-2xl bg-slate-800 hover:bg-slate-700 active:scale-[0.98] border border-white/15 text-slate-100 font-extrabold text-sm sm:text-base transition flex items-center justify-center gap-2"
-          >
-            <span>بدء من جديد</span>
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <div id="kioskLiveStatus" role="status" aria-live="polite" class="sr-only"></div>
-
-    <div
-      id="kioskStatusToast"
-      class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-2xl bg-slate-950/90 border border-emerald-400/50 text-emerald-200 text-xs sm:text-sm font-black shadow-2xl pointer-events-none"
-    ></div>
-
-    <!-- Full-Screen Pre-Print Preview Modal -->
-    <div id="fullScreenPreviewModal" class="hidden fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-xl flex flex-col items-center justify-between p-3 sm:p-5 select-none">
-      <div class="w-full max-w-5xl flex items-center justify-between gap-3 shrink-0">
+    <!-- =========================================================
+         الشريط العلوي المدمج (أدوات سريعة + قفل الضيوف)
+         ========================================================= -->
+    <header class="h-14 shrink-0 bg-zinc-900/90 border-b border-zinc-800 px-3 sm:px-5 flex items-center justify-between z-30">
+        <!-- الشعار والحالة -->
         <div class="flex items-center gap-2.5">
-          <span class="px-3.5 py-1.5 rounded-2xl bg-indigo-600/35 border border-amber-300/60 text-amber-200 text-xs sm:text-sm font-black">
-            معاينة كاملة بدون قص • حسب الطابعة
-          </span>
-          <span id="fullScreenPreviewMeta" class="text-xs sm:text-sm font-bold text-slate-300"></span>
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-fuchsia-600 to-amber-500 flex items-center justify-center shadow">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                    <circle cx="12" cy="13" r="3" stroke-width="2.2"></circle>
+                </svg>
+            </div>
+            <div>
+                <h1 class="font-extrabold text-sm sm:text-base leading-tight text-white">فوتو بوث CP1500</h1>
+                <p id="header-status-badge" class="text-[11px] text-emerald-400 font-semibold">جاهز • شريط مزدوج (4×6)</p>
+            </div>
         </div>
 
+        <!-- أزرار التحكم السريعة -->
         <div class="flex items-center gap-2">
-          <button
-            id="btnFullScreenPrint"
-            type="button"
-            data-action="direct-print"
-            class="px-4 py-2 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white text-xs sm:text-sm font-black shadow-lg transition"
-          >
-            <span id="btnFullScreenPrintLabel">طباعة فورية</span>
-          </button>
-          <button
-            id="btnCloseFullScreenPreview"
-            type="button"
-            data-action="close-fullscreen-preview"
-            class="px-4 py-2 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-white/20 text-white text-xs sm:text-sm font-black transition"
-          >
-            إغلاق المعاينة
-          </button>
+            <!-- زر كتم/تفعيل الصوت -->
+            <button onclick="toggleMute()" id="btn-mute" class="w-10 h-10 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 flex items-center justify-center text-zinc-200 transition active:scale-95" title="الصوت">
+                <svg id="icon-sound-on" class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>
+                </svg>
+                <svg id="icon-sound-off" class="w-5 h-5 text-rose-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"></path>
+                </svg>
+            </button>
+
+            <!-- دليل ضبط الطابعة (يختفي في وضع الضيوف) -->
+            <button onclick="togglePrinterGuide(true)" id="btn-printer-guide" class="h-10 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-xs sm:text-sm font-bold text-amber-300 flex items-center gap-1.5 transition active:scale-95">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                </svg>
+                <span class="hidden sm:inline">ضبط الطابعة</span>
+            </button>
+
+            <!-- زر فتح/إغلاق درج الإعدادات (يختفي في وضع الضيوف) -->
+            <button onclick="toggleSettingsDrawer()" id="btn-toggle-settings" class="h-10 px-3.5 rounded-xl bg-fuchsia-600/20 hover:bg-fuchsia-600/30 border border-fuchsia-500/50 text-xs sm:text-sm font-bold text-fuchsia-300 flex items-center gap-1.5 transition active:scale-95">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                </svg>
+                <span>القالب والثيم</span>
+            </button>
+
+            <!-- زر وضع الضيوف (Kiosk Lock) -->
+            <button onclick="toggleKioskLock()" id="btn-kiosk-lock" class="h-10 px-3.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-xs sm:text-sm font-bold text-zinc-200 flex items-center gap-1.5 transition active:scale-95" title="قفل الإعدادات للضيوف">
+                <svg id="icon-unlocked" class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path>
+                </svg>
+                <svg id="icon-locked" class="w-4 h-4 text-amber-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                </svg>
+                <span id="kiosk-lock-text" class="hidden md:inline">وضع الضيوف</span>
+            </button>
         </div>
-      </div>
+    </header>
 
-      <div class="flex-1 w-full max-w-5xl min-h-0 flex items-center justify-center py-3 overflow-hidden">
-        <img
-          id="fullScreenComposedImg"
-          alt="معاينة كاملة بدون قص قبل الطباعة"
-          class="max-w-full max-h-full w-auto h-auto rounded-3xl shadow-[0_24px_70px_rgba(0,0,0,0.9)] border-2 border-white/25 object-contain"
-        />
-      </div>
+    <!-- =========================================================
+         المنطقة الرئيسية (Single-Screen Workspace)
+         ========================================================= -->
+    <main class="flex-1 relative flex overflow-hidden">
 
-      <div class="text-xs font-bold text-slate-400 shrink-0 text-center">
-        يتم ضبط الحجم تلقائياً حسب ورق الطابعة المختار دون قص أي جزء من الصورة
-      </div>
+        <!-- 1. لوحة الإعدادات السريعة القابلة للطي (Drawer) -->
+        <aside id="settings-drawer" class="w-full sm:w-96 bg-zinc-900 border-l border-zinc-800 h-full overflow-y-auto p-4 flex flex-col gap-5 z-20 transition-all duration-300 shrink-0">
+            <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+                <h2 class="font-extrabold text-base text-white">إعداد القالب والثيم</h2>
+                <button onclick="toggleSettingsDrawer(false)" class="px-3 py-1 rounded-lg bg-zinc-800 text-xs font-bold text-zinc-300 hover:text-white">إخفاء ✕</button>
+            </div>
+
+            <!-- الخطوة 1: اختيار التخطيط العملي -->
+            <div>
+                <label class="block text-xs font-bold text-zinc-400 mb-2">1. شكل الورقة (مقاس CP1500 4×6):</label>
+                <div class="grid grid-cols-3 gap-2" id="layout-selector">
+                    <button type="button" onclick="setLayout('strip3')" data-layout="strip3" class="layout-btn p-2.5 rounded-2xl border-2 border-fuchsia-500 bg-fuchsia-500/15 flex flex-col items-center text-center transition active:scale-95">
+                        <span class="text-lg mb-1">🎞️</span>
+                        <span class="text-xs font-extrabold text-white">شريط مزدوج</span>
+                        <span class="text-[10px] text-zinc-400">3 صور (2×6 ×2)</span>
+                    </button>
+
+                    <button type="button" onclick="setLayout('grid4')" data-layout="grid4" class="layout-btn p-2.5 rounded-2xl border-2 border-zinc-800 bg-zinc-950 hover:border-zinc-700 flex flex-col items-center text-center transition active:scale-95">
+                        <span class="text-lg mb-1">🪟</span>
+                        <span class="text-xs font-extrabold text-white">بطاقة رباعية</span>
+                        <span class="text-[10px] text-zinc-400">4 صور (4×6)</span>
+                    </button>
+
+                    <button type="button" onclick="setLayout('single')" data-layout="single" class="layout-btn p-2.5 rounded-2xl border-2 border-zinc-800 bg-zinc-950 hover:border-zinc-700 flex flex-col items-center text-center transition active:scale-95">
+                        <span class="text-lg mb-1">🖼️</span>
+                        <span class="text-xs font-extrabold text-white">صورة كبيرة</span>
+                        <span class="text-[10px] text-zinc-400">1 صورة (6×4)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- الخطوة 2: اختيار الثيم (5 ثيمات عملية) -->
+            <div>
+                <label class="block text-xs font-bold text-zinc-400 mb-2">2. ثيم الإطار:</label>
+                <div class="grid grid-cols-2 gap-2" id="theme-selector">
+                    <button type="button" onclick="setTheme('white')" data-theme="white" class="theme-btn p-2.5 rounded-xl border-2 border-fuchsia-500 bg-fuchsia-500/10 flex items-center gap-2.5 text-right transition active:scale-95">
+                        <span class="w-6 h-6 rounded-lg bg-white border border-zinc-300 shrink-0"></span>
+                        <div>
+                            <div class="text-xs font-extrabold text-white">أبيض كلاسيكي</div>
+                            <div class="text-[10px] text-zinc-400">بسيط وسريع الطباعة</div>
+                        </div>
+                    </button>
+
+                    <button type="button" onclick="setTheme('wedding')" data-theme="wedding" class="theme-btn p-2.5 rounded-xl border-2 border-zinc-800 bg-zinc-950 hover:border-zinc-700 flex items-center gap-2.5 text-right transition active:scale-95">
+                        <span class="w-6 h-6 rounded-lg bg-[#fdf8ee] border-2 border-amber-500 shrink-0"></span>
+                        <div>
+                            <div class="text-xs font-extrabold text-white">زفاف ذهبي</div>
+                            <div class="text-[10px] text-zinc-400">عاجي مع إطار ذهبي</div>
+                        </div>
+                    </button>
+
+                    <button type="button" onclick="setTheme('birthday')" data-theme="birthday" class="theme-btn p-2.5 rounded-xl border-2 border-zinc-800 bg-zinc-950 hover:border-zinc-700 flex items-center gap-2.5 text-right transition active:scale-95">
+                        <span class="w-6 h-6 rounded-lg bg-gradient-to-tr from-pink-500 to-amber-400 shrink-0"></span>
+                        <div>
+                            <div class="text-xs font-extrabold text-white">عيد ميلاد</div>
+                            <div class="text-[10px] text-zinc-400">ألوان احتفالية مبهجة</div>
+                        </div>
+                    </button>
+
+                    <button type="button" onclick="setTheme('luxury')" data-theme="luxury" class="theme-btn p-2.5 rounded-xl border-2 border-zinc-800 bg-zinc-950 hover:border-zinc-700 flex items-center gap-2.5 text-right transition active:scale-95">
+                        <span class="w-6 h-6 rounded-lg bg-zinc-900 border border-amber-400/60 shrink-0"></span>
+                        <div>
+                            <div class="text-xs font-extrabold text-white">أسود فاخر</div>
+                            <div class="text-[10px] text-zinc-400">داكن بلمسة ذهبية</div>
+                        </div>
+                    </button>
+
+                    <button type="button" onclick="setTheme('polaroid')" data-theme="polaroid" class="theme-btn col-span-2 p-2.5 rounded-xl border-2 border-zinc-800 bg-zinc-950 hover:border-zinc-700 flex items-center gap-2.5 text-right transition active:scale-95">
+                        <span class="w-6 h-6 rounded-lg bg-[#f4f1ea] border border-stone-400 shrink-0"></span>
+                        <div>
+                            <div class="text-xs font-extrabold text-white">إطار فوري (Polaroid Retro)</div>
+                            <div class="text-[10px] text-zinc-400">ملمس ورقي كلاسيكي بمساحة كتابة واسعة</div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- الخطوة 3: نص المناسبة والتاريخ + معاينة مصغرة -->
+            <div class="space-y-2.5">
+                <label class="block text-xs font-bold text-zinc-400">3. النص المطبوع أسفل البطاقة:</label>
+                <input type="text" id="input-event-title" value="ذكرى جميلة ✨" maxlength="30" oninput="updateLiveMiniPreview()" placeholder="عنوان المناسبة (مثال: زفاف أحمد وسارة)" class="w-full bg-zinc-950 border border-zinc-700 focus:border-fuchsia-500 rounded-xl px-3.5 py-2.5 text-sm text-white outline-none">
+                <input type="text" id="input-event-date" value="23 / 11 / 2026" maxlength="25" oninput="updateLiveMiniPreview()" placeholder="التاريخ أو عبارة قصيرة" class="w-full bg-zinc-950 border border-zinc-700 focus:border-fuchsia-500 rounded-xl px-3.5 py-2.5 text-sm text-white outline-none">
+            </div>
+
+            <!-- خيارات التشغيل السريع -->
+            <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-3 space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-zinc-300">مؤقت العد التنازلي:</span>
+                    <select id="select-countdown" class="bg-zinc-900 border border-zinc-700 rounded-lg px-2.5 py-1 text-xs font-bold text-white outline-none">
+                        <option value="3" selected>3 ثوانٍ</option>
+                        <option value="5">5 ثوانٍ</option>
+                    </select>
+                </div>
+
+                <label class="flex items-center justify-between cursor-pointer pt-2 border-t border-zinc-800/80">
+                    <div>
+                        <span class="text-xs font-bold text-emerald-400 block">طباعة تلقائية بعد التصوير</span>
+                        <span class="text-[10px] text-zinc-500">يفتح أمر الطباعة فور انتهاء اللقطات</span>
+                    </div>
+                    <input type="checkbox" id="check-auto-print" class="w-5 h-5 accent-emerald-500 rounded cursor-pointer">
+                </label>
+            </div>
+
+            <!-- معاينة مصغرة حية للبطاقة -->
+            <div class="flex flex-col items-center bg-zinc-950 rounded-2xl p-3 border border-zinc-800">
+                <span class="text-[10px] text-zinc-400 mb-2">معاينة حية للتصميم (300 DPI)</span>
+                <canvas id="mini-preview-canvas" class="max-h-44 rounded shadow-lg"></canvas>
+            </div>
+
+            <button onclick="toggleSettingsDrawer(false)" class="w-full py-3 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-extrabold text-sm shadow-lg transition active:scale-95">
+                حفظ والعودة للكاميرا ✓
+            </button>
+        </aside>
+
+        <!-- 2. شاشة الكاميرا الرئيسية (تأخذ 70%+ من الشاشة) -->
+        <section id="camera-workspace" class="flex-1 h-full flex flex-col p-3 sm:p-4 gap-3 relative overflow-hidden">
+            
+            <!-- شريط أدوات الكاميرا العلوي -->
+            <div class="flex flex-wrap items-center justify-between gap-2 shrink-0">
+                <div class="flex items-center gap-2">
+                    <!-- اختيار الكاميرا -->
+                    <select id="camera-select" onchange="switchCamera(this.value)" class="h-10 bg-zinc-900 border border-zinc-700 rounded-xl px-3 text-xs sm:text-sm font-semibold text-zinc-200 max-w-[170px] sm:max-w-[230px] outline-none">
+                        <option value="">جاري تشغيل الكاميرا...</option>
+                    </select>
+
+                    <!-- زر قلب المرآة -->
+                    <button onclick="toggleMirror()" id="btn-mirror" class="h-10 px-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-xs sm:text-sm font-bold text-zinc-200 flex items-center gap-1.5 transition active:scale-95">
+                        <svg class="w-4 h-4 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                        </svg>
+                        <span class="hidden sm:inline">عكس المرآة</span>
+                    </button>
+                </div>
+
+                <!-- مؤشر التقدم -->
+                <div id="progress-pills" class="flex items-center gap-1.5 bg-zinc-900 px-3.5 py-2 rounded-xl border border-zinc-800">
+                    <!-- يولد ديناميكياً -->
+                </div>
+            </div>
+
+            <!-- إطار الكاميرا + مصغرات اللقطات -->
+            <div class="flex-1 flex flex-col lg:flex-row gap-3 min-h-0">
+                
+                <!-- شاشة العرض المباشر (Viewfinder) -->
+                <div class="flex-1 relative bg-black rounded-3xl overflow-hidden border-2 border-zinc-800 shadow-2xl flex items-center justify-center min-h-[260px]">
+                    <video id="webcam-video" autoplay playsinline muted class="w-full h-full object-cover transform -scale-x-100"></video>
+
+                    <!-- العد التنازلي العملاق -->
+                    <div id="countdown-overlay" class="hidden absolute inset-0 bg-black/45 backdrop-blur-[2px] flex flex-col items-center justify-center z-20">
+                        <div id="countdown-number" class="text-8xl sm:text-9xl font-black text-white drop-shadow-[0_0_30px_rgba(217,70,239,0.95)]">3</div>
+                        <div id="countdown-subtext" class="mt-3 px-5 py-1.5 rounded-full bg-black/70 text-fuchsia-200 font-bold text-base sm:text-lg">ابتسم للكاميرا! 📸</div>
+                    </div>
+
+                    <!-- رسالة في حال تعذر الوصول للكاميرا -->
+                    <div id="camera-fallback-box" class="hidden absolute inset-0 bg-zinc-950/95 p-6 flex flex-col items-center justify-center text-center z-30">
+                        <p class="text-lg font-extrabold text-white mb-2">الكاميرا غير متاحة حالياً</p>
+                        <p class="text-xs sm:text-sm text-zinc-400 max-w-md mb-4">تأكد من السماح للمتصفح باستخدام الكاميرا، أو اختر صوراً من جهازك للتجربة والطباعة فوراً.</p>
+                        <div class="flex gap-3">
+                            <button onclick="initCamera()" class="px-5 py-2.5 rounded-xl bg-fuchsia-600 text-white font-bold text-sm">إعادة المحاولة</button>
+                            <label class="px-5 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-sm cursor-pointer">
+                                <span>اختيار صور من الجهاز</span>
+                                <input type="file" accept="image/*" multiple onchange="handleManualUpload(event)" class="hidden">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- فلاتر سريعة أسفل شاشة الكاميرا -->
+                    <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 bg-black/75 backdrop-blur-md p-1.5 rounded-2xl border border-white/10">
+                        <button onclick="setFilter('none')" data-filter="none" class="filter-chip px-3 py-1 rounded-xl text-xs font-extrabold bg-white text-black transition">طبيعي</button>
+                        <button onclick="setFilter('bw')" data-filter="bw" class="filter-chip px-3 py-1 rounded-xl text-xs font-bold text-zinc-300 hover:text-white transition">أبيض وأسود</button>
+                        <button onclick="setFilter('warm')" data-filter="warm" class="filter-chip px-3 py-1 rounded-xl text-xs font-bold text-zinc-300 hover:text-white transition">دافئ</button>
+                    </div>
+                </div>
+
+                <!-- شريط مصغرات اللقطات الملتقطة (جانبي في الشاشات الكبيرة وسفلي في الموبايل) -->
+                <div id="live-thumbs-bar" class="lg:w-36 shrink-0 flex lg:flex-col gap-2 overflow-x-auto lg:overflow-y-auto justify-center">
+                    <!-- يولد ديناميكياً -->
+                </div>
+            </div>
+
+            <!-- زر البدء العملاق أسفل الكاميرا -->
+            <div class="shrink-0 flex items-center justify-center gap-3 pt-1">
+                <button id="btn-start-shoot" onclick="startCaptureSequence()" class="w-full sm:w-auto min-w-[280px] h-16 px-10 rounded-2xl bg-gradient-to-l from-rose-600 via-fuchsia-600 to-indigo-600 hover:from-rose-500 hover:to-indigo-500 text-white font-black text-xl sm:text-2xl shadow-xl shadow-fuchsia-600/30 flex items-center justify-center gap-3 transition-transform active:scale-95">
+                    <span class="w-4 h-4 rounded-full bg-white animate-ping"></span>
+                    <span id="btn-start-label">ابدأ التصوير</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- 3. شاشة النتيجة الفورية والطباعة (Result & Print Screen) -->
+        <section id="result-screen" class="hidden absolute inset-0 bg-zinc-950 z-20 flex-col lg:flex-row p-4 sm:p-6 gap-6 overflow-y-auto">
+            
+            <!-- عرض البطاقة النهائية عالية الدقة -->
+            <div class="flex-1 bg-zinc-900/80 border border-zinc-800 rounded-3xl p-4 flex flex-col items-center justify-center min-h-[320px]">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                    <span class="text-xs sm:text-sm font-bold text-emerald-400">جاهزة للطباعة بدقة 300 DPI (مقاس 4×6 بوصة)</span>
+                </div>
+                <img id="final-result-image" alt="النتيجة النهائية" class="max-h-[62vh] w-auto object-contain rounded-lg shadow-[0_15px_50px_rgba(0,0,0,0.85)] border border-white/10">
+            </div>
+
+            <!-- لوحة أزرار الطباعة وإعادة اللقطة -->
+            <div class="lg:w-96 shrink-0 flex flex-col justify-center gap-4">
+                <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 space-y-4">
+                    <h2 class="text-2xl font-black text-white text-center">تم التقاط الصور! 🎉</h2>
+
+                    <!-- زر الطباعة الفورية العملاق -->
+                    <button onclick="triggerPrintCP1500()" class="w-full h-16 px-6 rounded-2xl bg-gradient-to-l from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-black text-xl shadow-xl shadow-emerald-600/30 flex items-center justify-center gap-3 transition-transform active:scale-95">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                        </svg>
+                        <span>طباعة فورية</span>
+                    </button>
+
+                    <!-- زر التحميل وزر التصوير الجديد -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="downloadImage()" class="h-14 px-4 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-base flex items-center justify-center gap-2 transition active:scale-95">
+                            <svg class="w-5 h-5 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                            <span>تحميل</span>
+                        </button>
+
+                        <button onclick="startNewSession()" class="h-14 px-4 rounded-2xl bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-extrabold text-base flex items-center justify-center gap-2 transition active:scale-95">
+                            <span>تصوير جديد</span>
+                            <span>↻</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- إعادة التقاط صورة واحدة فقط (في حال أغمض أحد عينيه) -->
+                <div class="bg-zinc-900/80 border border-zinc-800 rounded-3xl p-4">
+                    <p class="text-xs font-bold text-zinc-400 mb-2.5 text-center">هل أغمض أحدهم عينيه؟ اضغط لإعادة لقطة واحدة فقط:</p>
+                    <div id="retake-single-grid" class="grid grid-cols-4 gap-2">
+                        <!-- يولد ديناميكياً -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- حاوية الطباعة المخفية المخصصة لـ @media print -->
+    <div id="print-area">
+        <img id="print-image" src="" alt="Print Ready">
     </div>
 
-    <!-- Printer-Matched Composition Canvas -->
-    <canvas id="selphyCanvas" width="1200" height="1800" class="hidden"></canvas>
-  </div>
+    <!-- كانفس المعالجة عالي الدقة 300 DPI -->
+    <canvas id="hd-canvas" class="hidden"></canvas>
 
-  <script>
-    const STATE = {
-      screen: 'start',
-      shotCount: 3,
-      initialCountdownSec: 6,
-      betweenShotsSec: 3,
-      selectedTheme: 'kids',
-      printLayout: 'postcard',
-      printCopies: 1,
-      pricePerCopy: 5000,
-      facingMode: 'user',
-      mirrorCamera: true,
-      stream: null,
-      hasLiveVideoStream: false,
-      isInitializingCamera: false,
-      lastCameraError: {
-        code: '',
-        name: '',
-        explanation: '',
-        suggestion: ''
-      },
-      capturedPhotos: [],
-      isCaptureRunning: false,
-      isStartingSequence: false,
-      sessionId: 0,
-      themeVariantSeed: Math.floor(Math.random() * 100000) + 1,
-      themeCaptionClickIndex: {},
-      simAnimFrame: null,
-      simPhase: 0,
-      audioCtx: null
-    };
+    <!-- =========================================================
+         نافذة دليل ضبط طابعة Canon SELPHY CP1500
+         ========================================================= -->
+    <div id="printer-guide-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-700 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+                <h3 class="text-lg font-black text-white flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                    ضبط المتصفح لطابعة CP1500
+                </h3>
+                <button onclick="togglePrinterGuide(false)" class="w-8 h-8 rounded-full bg-zinc-800 text-zinc-400 hover:text-white">✕</button>
+            </div>
 
-    const THEMES = {
-      kids: {
-        id: 'kids',
-        label: 'أطفال',
-        topCaptions: [
-          'أحلى لحظات العمر',
-          'عالم البراءة والمرح',
-          'بسمة تفرح القلب',
-          'يوم مليان ألعاب وضحك'
-        ],
-        bottomCaptions: [
-          'ضحكتك تنور المكان',
-          'ذكريات طفولة ما تُنسى',
-          'أحلى أوقات الصغار',
-          'فرحة تكبر كل يوم'
-        ],
-        bgTop: '#FFF7ED',
-        bgBottom: '#E0F2FE',
-        matColor: '#FEF3C7',
-        borderColor: '#F59E0B',
-        accentColor: '#0284C7',
-        textColor: '#0F172A',
-        stickerLeft: '⭐',
-        stickerRight: '🎈',
-        pattern: 'stars',
-        overlayStickers: ['⭐', '🎈', '🌈', '🧸', '☀️', '🍭']
-      },
-      girls: {
-        id: 'girls',
-        label: 'بنات',
-        topCaptions: [
-          'لحظات تبقى بالقلب',
-          'أناقة وجمال اللحظة',
-          'صحبة أحلى من الورد',
-          'تفاصيل يومنا الجميل'
-        ],
-        bottomCaptions: [
-          'إشراقة لا مثيل لها',
-          'ذكريات بنات تبقى للأبد',
-          'ضحكاتنا أحلى لحن',
-          'كل لحظة حكاية لطيفة'
-        ],
-        bgTop: '#FFF1F2',
-        bgBottom: '#FCE7F3',
-        matColor: '#FFE4E6',
-        borderColor: '#EC4899',
-        accentColor: '#E11D48',
-        textColor: '#831843',
-        stickerLeft: '💖',
-        stickerRight: '✨',
-        pattern: 'hearts',
-        overlayStickers: ['💖', '🎀', '🌸', '✨', '🦋', '🍓']
-      },
-      boys: {
-        id: 'boys',
-        label: 'أولاد',
-        topCaptions: [
-          'أسعد الأوقات معاً',
-          'فريق الأحلام والبطولة',
-          'طاقة وحماس بلا حدود',
-          'مغامرة اليوم المميز'
-        ],
-        bottomCaptions: [
-          'مغامرة وذكريات جميلة',
-          'رفقة العمر والمرح',
-          'قوة وحضور في كل لقطة',
-          'لحظات تبقى في البال'
-        ],
-        bgTop: '#061224',
-        bgBottom: '#0F172A',
-        matColor: '#0B1E38',
-        borderColor: '#06B6D4',
-        accentColor: '#3B82F6',
-        textColor: '#E0F2FE',
-        stickerLeft: '⚡',
-        stickerRight: '🎮',
-        pattern: 'neon',
-        overlayStickers: ['⚡', '🚀', '🎮', '🏆', '🌌', '🔥']
-      },
-      adults: {
-        id: 'adults',
-        label: 'كبار',
-        topCaptions: [
-          'ذكريات لا تُنسى',
-          'لحظة صفاء وحضور',
-          'تجمع الأحبة والأصدقاء',
-          'وقفة تقدير لأيامنا'
-        ],
-        bottomCaptions: [
-          'لحظات استثنائية تدوم',
-          'أثر جميل يبقى مع الزمن',
-          'لقطات تحفظ روح المكان',
-          'ذكرى راقية بكل معنى'
-        ],
-        bgTop: '#09090B',
-        bgBottom: '#1C1917',
-        matColor: '#1F1B18',
-        borderColor: '#EAB308',
-        accentColor: '#FACC15',
-        textColor: '#FEF08A',
-        stickerLeft: '✨',
-        stickerRight: '🥂',
-        pattern: 'gold',
-        overlayStickers: ['✨', '🥂', '👑', '🖤', '🌟', '🎞️']
-      },
-      royal_white: {
-        id: 'royal_white',
-        label: 'أبيض ملكي',
-        topCaptions: [
-          'بداية حكاية جميلة',
-          'فخامة ونقاء اللحظة',
-          'ذكرى بيضاء تليق بكم',
-          'أجمل حضور في المناسبة'
-        ],
-        bottomCaptions: [
-          'نقاء اللحظة وجمالها',
-          'تذكار ملكي يدوم طويلاً',
-          'صفاء ونور في كل صورة',
-          'لحظات محفورة بالمحبة'
-        ],
-        bgTop: '#FFFFFF',
-        bgBottom: '#F8FAFC',
-        matColor: '#F1F5F9',
-        borderColor: '#C5A059',
-        accentColor: '#A16207',
-        textColor: '#1E293B',
-        stickerLeft: '🤍',
-        stickerRight: '❖',
-        pattern: 'classic',
-        overlayStickers: ['🤍', '👑', '🕊️', '✨', '🌸', '💎']
-      },
-      pastel: {
-        id: 'pastel',
-        label: 'باستيل',
-        topCaptions: [
-          'أجمل ما في اليوم',
-          'هدوء وألوان الربيع',
-          'لمسة لطف وسلام',
-          'راحة بال ولقطة دافئة'
-        ],
-        bottomCaptions: [
-          'فرحة تملأ المكان',
-          'ذكريات هادئة وجميلة',
-          'ألوان ناعمة ليوم مميز',
-          'ابتسامة تلامس القلب'
-        ],
-        bgTop: '#ECFDF5',
-        bgBottom: '#F3E8FF',
-        matColor: '#FAF5FF',
-        borderColor: '#A78BFA',
-        accentColor: '#10B981',
-        textColor: '#312E81',
-        stickerLeft: '🌸',
-        stickerRight: '🌿',
-        pattern: 'pastel',
-        overlayStickers: ['🌸', '🌿', '☁️', '🌷', '🍡', '✨']
-      }
-    };
+            <p class="text-xs text-zinc-400">لضمان عدم هدر الورق والحبر والحصول على طباعة كاملة الحواف، اضبط هذه الخيارات مرة واحدة في نافذة الطباعة:</p>
 
-    function applyPrinterPageRule() {
-      const dynStyle = document.getElementById('dynamicPageStyle');
-      if (dynStyle) {
-        dynStyle.textContent = `@page { size: auto; margin: 0; }`;
-      }
-      const badge = document.getElementById('editorModeBadge');
-      if (badge) {
-        const countText = STATE.shotCount === 4 ? '4 صور' : '3 صور';
-        badge.textContent = `${countText} • حسب الطابعة`;
-      }
-      syncCameraVisualTargets();
-    }
+            <ul class="space-y-2.5 text-sm">
+                <li class="bg-zinc-950 p-3 rounded-xl border border-zinc-800 flex justify-between items-center">
+                    <span class="text-zinc-400">حجم الورق (Paper Size):</span>
+                    <span class="font-extrabold text-amber-400" dir="ltr">Postcard 4x6 (100x148mm)</span>
+                </li>
+                <li class="bg-zinc-950 p-3 rounded-xl border border-zinc-800 flex justify-between items-center">
+                    <span class="text-zinc-400">الهوامش (Margins):</span>
+                    <span class="font-extrabold text-emerald-400">بلا هوامش (None)</span>
+                </li>
+                <li class="bg-zinc-950 p-3 rounded-xl border border-zinc-800 flex justify-between items-center">
+                    <span class="text-zinc-400">المقياس (Scale):</span>
+                    <span class="font-extrabold text-white">100%</span>
+                </li>
+                <li class="bg-zinc-950 p-3 rounded-xl border border-zinc-800 flex justify-between items-center">
+                    <span class="text-zinc-400">رسومات الخلفية (Background):</span>
+                    <span class="font-extrabold text-emerald-400">مفعّل (ON)</span>
+                </li>
+            </ul>
 
-    function getThemeCaptions(theme, variantSeed = 0) {
-      const topList = Array.isArray(theme.topCaptions) && theme.topCaptions.length > 0
-        ? theme.topCaptions
-        : [theme.topCaption || 'ذكريات جميلة'];
-      const bottomList = Array.isArray(theme.bottomCaptions) && theme.bottomCaptions.length > 0
-        ? theme.bottomCaptions
-        : [theme.bottomCaption || 'لحظات لا تُنسى'];
+            <button onclick="togglePrinterGuide(false)" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-sm">تم، فهمت الإعدادات</button>
+        </div>
+    </div>
 
-      const clickStep = Number(STATE.themeCaptionClickIndex[theme.id] || 0);
-      const topIdx = Math.abs(clickStep + (Number(variantSeed) || 0)) % topList.length;
-      const bottomIdx = Math.abs(clickStep * 2 + 1 + (Number(variantSeed) || 0)) % bottomList.length;
-
-      return {
-        topCaption: topList[topIdx],
-        bottomCaption: bottomList[bottomIdx]
-      };
-    }
-
-    function syncHomeSelectionButtons() {
-      const shots = STATE.shotCount === 4 ? 4 : 3;
-      STATE.shotCount = shots;
-
-      document.querySelectorAll('.shot-count-btn').forEach((btn) => {
-        const val = Number(btn.getAttribute('data-shots'));
-        const active = val === shots;
-        btn.className = active
-          ? 'shot-count-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2.5 transition bg-indigo-600/45 border-amber-300 text-white shadow'
-          : 'shot-count-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2.5 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35';
-      });
-
-      const layout = STATE.printLayout === 'dual_strip' ? 'dual_strip' : 'postcard';
-      STATE.printLayout = layout;
-
-      document.querySelectorAll('.home-layout-btn').forEach((btn) => {
-        const val = btn.getAttribute('data-layout');
-        const active = val === layout;
-        btn.className = active
-          ? 'home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2 transition bg-indigo-600/45 border-amber-300 text-white shadow'
-          : 'home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35';
-      });
-
-      applyPrinterPageRule();
-    }
-
-    function selectShotCount(count) {
-      if (count !== 3 && count !== 4) return;
-      STATE.shotCount = count;
-      syncHomeSelectionButtons();
-    }
-
-    function selectHomeLayout(layoutId) {
-      if (layoutId !== 'postcard' && layoutId !== 'dual_strip') return;
-      STATE.printLayout = layoutId;
-      syncHomeSelectionButtons();
-    }
-
-    function installViewportLocks() {
-      document.addEventListener('contextmenu', (e) => e.preventDefault());
-      document.addEventListener('gesturestart', (e) => e.preventDefault(), { passive: false });
-      document.addEventListener('gesturechange', (e) => e.preventDefault(), { passive: false });
-      document.addEventListener('gestureend', (e) => e.preventDefault(), { passive: false });
-
-      document.addEventListener('touchmove', (e) => {
-        if (e.target && e.target.closest && e.target.closest('#themesGrid')) return;
-        if (e.touches && e.touches.length > 1) e.preventDefault();
-      }, { passive: false });
-
-      let lastTouchEnd = 0;
-      document.addEventListener('touchend', (e) => {
-        if (e.target && e.target.closest && e.target.closest('button, [role="button"]')) return;
-        const now = Date.now();
-        if (now - lastTouchEnd <= 300) e.preventDefault();
-        lastTouchEnd = now;
-      }, { passive: false });
-    }
-
-    function playCountdownTone(isFinalBeat = false) {
-      try {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContextClass) return;
-        if (!STATE.audioCtx) STATE.audioCtx = new AudioContextClass();
-        if (STATE.audioCtx.state === 'suspended') STATE.audioCtx.resume().catch(() => {});
-
-        const ctx = STATE.audioCtx;
-        const now = ctx.currentTime;
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(isFinalBeat ? 880 : 620, now);
-        gain.gain.setValueAtTime(0.08, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now);
-        osc.stop(now + 0.12);
-      } catch (err) {}
-    }
-
-    function playShutterSound() {
-      try {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContextClass) return;
-        if (!STATE.audioCtx) STATE.audioCtx = new AudioContextClass();
-        if (STATE.audioCtx.state === 'suspended') STATE.audioCtx.resume().catch(() => {});
-
-        const ctx = STATE.audioCtx;
-        const now = ctx.currentTime;
-        const bufferSize = Math.floor(ctx.sampleRate * 0.09);
-        const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-        const data = noiseBuffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.25));
-        }
-
-        const noise = ctx.createBufferSource();
-        noise.buffer = noiseBuffer;
-        const filter = ctx.createBiquadFilter();
-        filter.type = 'bandpass';
-        filter.frequency.setValueAtTime(1800, now);
-        filter.Q.setValueAtTime(1.2, now);
-        const gain = ctx.createGain();
-        gain.gain.setValueAtTime(0.45, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.085);
-
-        noise.connect(filter);
-        filter.connect(gain);
-        gain.connect(ctx.destination);
-        noise.start(now);
-        noise.stop(now + 0.09);
-      } catch (err) {}
-    }
-
-    function drawStudioFallbackOnContext(ctx, w, h, t) {
-      if (!ctx || w <= 0 || h <= 0) return;
-      const grad = ctx.createLinearGradient(0, 0, w, h);
-      grad.addColorStop(0, '#1e1b4b');
-      grad.addColorStop(0.5, '#3b0764');
-      grad.addColorStop(1, '#0f172a');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, w, h);
-
-      const orbs = [
-        { x: w * (0.3 + 0.12 * Math.sin(t * 0.85)), y: h * (0.4 + 0.1 * Math.cos(t * 0.65)), r: w * 0.24, color: 'rgba(99, 102, 241, 0.36)' },
-        { x: w * (0.72 + 0.1 * Math.cos(t * 0.75)), y: h * (0.55 + 0.12 * Math.sin(t * 0.6)), r: w * 0.25, color: 'rgba(236, 72, 153, 0.32)' },
-        { x: w * 0.5, y: h * 0.48, r: w * 0.16, color: 'rgba(56, 189, 248, 0.2)' }
-      ];
-
-      orbs.forEach((orb) => {
-        const rg = ctx.createRadialGradient(orb.x, orb.y, 10, orb.x, orb.y, orb.r);
-        rg.addColorStop(0, orb.color);
-        rg.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = rg;
-        ctx.beginPath();
-        ctx.arc(orb.x, orb.y, orb.r, 0, Math.PI * 2);
-        ctx.fill();
-      });
-
-      ctx.save();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.arc(w * 0.5, h * 0.4, h * 0.13, 0, Math.PI * 2);
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.ellipse(w * 0.5, h * 0.74, h * 0.22, h * 0.16, 0, Math.PI, Math.PI * 2);
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    function startSimulatedCameraLoop() {
-      if (STATE.simAnimFrame) cancelAnimationFrame(STATE.simAnimFrame);
-      const bgCanvas = document.getElementById('bgSimCanvas');
-      const liveCanvas = document.getElementById('liveSimCanvas');
-      const guideCan = document.getElementById('framingGuideClearCanvas');
-
-      const renderFrame = (timeMs) => {
-        const t = timeMs * 0.001;
-        [bgCanvas, liveCanvas].filter(Boolean).forEach((canvas) => {
-          const ctx = canvas.getContext('2d');
-          if (ctx) drawStudioFallbackOnContext(ctx, canvas.width, canvas.height, t);
-        });
-
-        if (guideCan && !guideCan.classList.contains('hidden')) {
-          const gctx = guideCan.getContext('2d');
-          const rect = guideCan.getBoundingClientRect();
-          const targetW = Math.max(1, Math.round(rect.width || liveCanvas?.width || 1280));
-          const targetH = Math.max(1, Math.round(rect.height || liveCanvas?.height || 720));
-          if (gctx) {
-            if (guideCan.width !== targetW || guideCan.height !== targetH) {
-              guideCan.width = targetW;
-              guideCan.height = targetH;
-            }
-            drawStudioFallbackOnContext(gctx, targetW, targetH, t);
-          }
-        }
-
-        STATE.simPhase = t;
-        STATE.simAnimFrame = requestAnimationFrame(renderFrame);
-      };
-
-      STATE.simAnimFrame = requestAnimationFrame(renderFrame);
-    }
-
-    function renderFallbackStudioFrame(width = 1280, height = 720, phaseSec = null) {
-      const t = typeof phaseSec === 'number' ? phaseSec : (STATE.simPhase || (performance.now() * 0.001));
-      const offCanvas = document.createElement('canvas');
-      offCanvas.width = width;
-      offCanvas.height = height;
-      const ctx = offCanvas.getContext('2d');
-      drawStudioFallbackOnContext(ctx, width, height, t);
-      return offCanvas;
-    }
-
-    function setActiveScreen(target) {
-      STATE.screen = target;
-      const homeEl = document.getElementById('homeScreen');
-      const captureEl = document.getElementById('captureScreen');
-      const editorEl = document.getElementById('editorScreen');
-
-      if (homeEl) homeEl.classList.toggle('hidden', target !== 'start');
-      if (captureEl) captureEl.classList.toggle('hidden', target !== 'capture');
-      if (editorEl) editorEl.classList.toggle('hidden', target !== 'print');
-      syncCameraVisualTargets();
-    }
-
-    function computePageFrameGeometry(width, height) {
-      const safeInsetX = Math.max(44, Math.round(width * 0.05));
-      const safeInsetY = Math.max(48, Math.round(height * 0.032));
-      const frameX = safeInsetX;
-      const frameY = safeInsetY;
-      const frameW = Math.max(120, width - safeInsetX * 2);
-      const frameH = Math.max(220, height - safeInsetY * 2);
-
-      const footerInnerPad = Math.max(14, Math.round(height * 0.012));
-      const footerZoneH = Math.max(76, Math.min(126, Math.round(frameH * 0.072)));
-      const footerRect = {
-        x: frameX + Math.max(16, Math.round(frameW * 0.035)),
-        y: frameY + frameH - footerZoneH - footerInnerPad,
-        w: Math.max(80, frameW - Math.max(32, Math.round(frameW * 0.07))),
-        h: footerZoneH
-      };
-
-      return {
-        frameRect: { x: frameX, y: frameY, w: frameW, h: frameH },
-        footerRect
-      };
-    }
-
-    function computeCenteredPhotoSlots(width, height, count, isDualStrip = false) {
-      const safeCount = count === 4 ? 4 : 3;
-
-      if (isDualStrip) {
-        const stripW = width * 0.5;
-        const { frameRect, footerRect } = computePageFrameGeometry(stripW, height);
-        const padX = Math.max(24, Math.round(stripW * 0.085));
-        const topPad = frameRect.y + Math.round(height * 0.024);
-        const bottomLimit = footerRect.y - Math.round(height * 0.018);
-        const gap = Math.round(height * 0.014);
-        const availH = Math.max(90, bottomLimit - topPad - gap * (safeCount - 1));
-        const photoH = availH / safeCount;
-        const photoW = Math.max(60, stripW - padX * 2);
-        const totalStackH = photoH * safeCount + gap * (safeCount - 1);
-        const startY = topPad + Math.max(0, (availH - totalStackH) * 0.5);
-        const centeredX = Math.round((stripW - photoW) * 0.5);
-
-        return Array.from({ length: safeCount }, (_, i) => ({
-          x: centeredX,
-          y: startY + i * (photoH + gap),
-          w: photoW,
-          h: photoH
-        }));
-      }
-
-      const { frameRect, footerRect } = computePageFrameGeometry(width, height);
-      const topHeaderSpace = Math.round(height * 0.072);
-      const innerSidePad = Math.round(frameRect.w * 0.045);
-      const photosTopY = frameRect.y + topHeaderSpace + Math.round(height * 0.008);
-      const photosBottomY = footerRect.y - Math.round(height * 0.016);
-      const availPhotosH = Math.max(120, photosBottomY - photosTopY);
-      const fullContentW = Math.max(120, frameRect.w - innerSidePad * 2);
-
-      if (safeCount === 4) {
-        const cols = 2;
-        const rows = 2;
-        const gapX = Math.round(width * 0.024);
-        const gapY = Math.round(height * 0.018);
-        const cellW = (fullContentW - gapX) / cols;
-        const cellH = Math.max(60, (availPhotosH - gapY) / rows);
-        const gridTotalW = cellW * cols + gapX;
-        const gridTotalH = cellH * rows + gapY;
-        const gridStartX = Math.round((width - gridTotalW) * 0.5);
-        const gridStartY = Math.round(photosTopY + Math.max(0, (availPhotosH - gridTotalH) * 0.5));
-
-        return Array.from({ length: 4 }, (_, i) => {
-          const col = i % cols;
-          const row = Math.floor(i / cols);
-          return {
-            x: gridStartX + col * (cellW + gapX),
-            y: gridStartY + row * (cellH + gapY),
-            w: cellW,
-            h: cellH
-          };
-        });
-      }
-
-      const gap = Math.round(height * 0.016);
-      const cellH = Math.max(70, (availPhotosH - gap * (safeCount - 1)) / safeCount);
-      const cellW = fullContentW;
-      const totalStackH = cellH * safeCount + gap * (safeCount - 1);
-      const startY = Math.round(photosTopY + Math.max(0, (availPhotosH - totalStackH) * 0.5));
-      const centeredX = Math.round((width - cellW) * 0.5);
-
-      return Array.from({ length: safeCount }, (_, i) => ({
-        x: centeredX,
-        y: startY + i * (cellH + gap),
-        w: cellW,
-        h: cellH
-      }));
-    }
-
-    function getActiveSlotAspectRatio() {
-      const count = STATE.shotCount === 4 ? 4 : 3;
-      const slots = computeCenteredPhotoSlots(1200, 1800, count, STATE.printLayout === 'dual_strip');
-      const primarySlot = slots[0];
-      if (!primarySlot || !primarySlot.w || !primarySlot.h) return 2 / 3;
-      return Math.max(0.2, primarySlot.w / primarySlot.h);
-    }
-
-    function computeCoverGuideRect(containerW, containerH, targetAspect) {
-      const safeW = Math.max(1, containerW);
-      const safeH = Math.max(1, containerH);
-      const maxW = safeW * 0.72;
-      const maxH = safeH * 0.68;
-      const safeAspect = Math.max(0.25, Math.min(4.0, targetAspect || (2 / 3)));
-
-      let w = maxW;
-      let h = w / safeAspect;
-      if (h > maxH) {
-        h = maxH;
-        w = h * safeAspect;
-      }
-
-      const x = (safeW - w) * 0.5;
-      const y = (safeH - h) * 0.5;
-      return { x, y, w, h };
-    }
-
-    function updateFramingGuideOverlay(useLiveVideo, shouldMirror) {
-      const overlay = document.getElementById('framingGuideOverlay');
-      const backdrop = document.getElementById('framingGuideBackdrop');
-      const clearWin = document.getElementById('framingGuideClearWindow');
-      const clearVid = document.getElementById('framingGuideClearVideo');
-      const clearCan = document.getElementById('framingGuideClearCanvas');
-      const captureEl = document.getElementById('captureScreen');
-
-      if (!overlay || !backdrop || !clearWin) return;
-      if (STATE.screen !== 'capture') {
-        overlay.classList.add('hidden');
-        return;
-      }
-      overlay.classList.remove('hidden');
-
-      const rectSource = captureEl || document.getElementById('app') || document.body;
-      const rect = rectSource.getBoundingClientRect();
-      const cw = Math.max(320, rect.width || window.innerWidth || 1280);
-      const ch = Math.max(240, rect.height || window.innerHeight || 720);
-
-      const targetAspect = getActiveSlotAspectRatio();
-      const box = computeCoverGuideRect(cw, ch, targetAspect);
-
-      clearWin.style.left = `${Number(box.x.toFixed(2))}px`;
-      clearWin.style.top = `${Number(box.y.toFixed(2))}px`;
-      clearWin.style.width = `${Number(box.w.toFixed(2))}px`;
-      clearWin.style.height = `${Number(box.h.toFixed(2))}px`;
-      clearWin.style.borderRadius = '28px';
-
-      if (clearVid) {
-        clearVid.autoplay = true;
-        clearVid.playsInline = true;
-        clearVid.muted = true;
-        clearVid.defaultMuted = true;
-        if (STATE.stream && clearVid.srcObject !== STATE.stream) {
-          clearVid.srcObject = STATE.stream;
-        }
-        clearVid.classList.toggle('mirrored', Boolean(shouldMirror));
-        clearVid.classList.toggle('hidden', !useLiveVideo);
-        if (useLiveVideo && clearVid.paused) {
-          try {
-            const p = clearVid.play();
-            if (p && typeof p.catch === 'function') p.catch(() => {});
-          } catch (e) {}
-        }
-      }
-
-      if (clearCan) {
-        clearCan.classList.toggle('mirrored', Boolean(shouldMirror));
-        clearCan.classList.toggle('hidden', Boolean(useLiveVideo));
-      }
-    }
-
-    function cropDataUrlToTargetAspect(dataUrl, targetAspect) {
-      return new Promise((resolve) => {
-        if (!dataUrl || !targetAspect || targetAspect <= 0) {
-          resolve(dataUrl);
-          return;
-        }
-        const img = new Image();
-        img.onload = () => {
-          const sw = img.naturalWidth || img.width;
-          const sh = img.naturalHeight || img.height;
-          if (!sw || !sh) {
-            resolve(dataUrl);
-            return;
-          }
-
-          const srcAspect = sw / sh;
-          let cropW = sw;
-          let cropH = sh;
-          let cropX = 0;
-          let cropY = 0;
-
-          if (srcAspect > targetAspect) {
-            cropW = sh * targetAspect;
-            cropX = (sw - cropW) * 0.5;
-          } else if (srcAspect < targetAspect) {
-            cropH = sw / targetAspect;
-            cropY = (sh - cropH) * 0.5;
-          }
-
-          const outCanvas = document.createElement('canvas');
-          outCanvas.width = Math.max(1, Math.round(cropW));
-          outCanvas.height = Math.max(1, Math.round(cropH));
-          const octx = outCanvas.getContext('2d');
-          octx.imageSmoothingEnabled = true;
-          octx.imageSmoothingQuality = 'high';
-          octx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, outCanvas.width, outCanvas.height);
-          resolve(outCanvas.toDataURL('image/jpeg', 0.95));
+    <script>
+        /**
+         * ============================================================================
+         * إعدادات وحالة التطبيق (Application State)
+         * ============================================================================
+         */
+        const app = {
+            layout: 'strip3',        // 'strip3' | 'grid4' | 'single'
+            theme: 'white',          // 'white' | 'wedding' | 'birthday' | 'luxury' | 'polaroid'
+            eventTitle: 'ذكرى جميلة ✨',
+            eventDate: '23 / 11 / 2026',
+            filter: 'none',
+            isMirrored: true,
+            isMuted: false,
+            isKioskLocked: false,
+            isCapturing: false,
+            photos: [],
+            stream: null,
+            audioCtx: null
         };
-        img.onerror = () => resolve(dataUrl);
-        img.src = dataUrl;
-      });
-    }
 
-    function syncCameraVisualTargets() {
-      const bgVideo = document.getElementById('bgVideo');
-      const bgSim = document.getElementById('bgSimCanvas');
-      const liveVideo = document.getElementById('liveVideo');
-      const liveSim = document.getElementById('liveSimCanvas');
+        const LAYOUTS = {
+            strip3: { count: 3, width: 1200, height: 1800, orientation: 'portrait', name: 'شريط مزدوج (4×6)' },
+            grid4:  { count: 4, width: 1200, height: 1800, orientation: 'portrait', name: 'بطاقة رباعية (4×6)' },
+            single: { count: 1, width: 1800, height: 1200, orientation: 'landscape', name: 'صورة كبيرة (6×4)' }
+        };
 
-      const activeTracks = STATE.stream && typeof STATE.stream.getVideoTracks === 'function'
-        ? STATE.stream.getVideoTracks().filter((t) => t.readyState === 'live')
-        : [];
-      const hasActiveStream = Boolean(STATE.stream && activeTracks.length > 0);
-      const hasVideoDimensions = Boolean(
-        hasActiveStream && (
-          (liveVideo && liveVideo.videoWidth > 0 && liveVideo.videoHeight > 0) ||
-          (bgVideo && bgVideo.videoWidth > 0 && bgVideo.videoHeight > 0)
-        )
-      );
-      const useLiveVideo = Boolean(hasActiveStream && (STATE.hasLiveVideoStream || hasVideoDimensions));
-      const shouldMirror = STATE.mirrorCamera && STATE.facingMode === 'user';
+        const FILTERS = {
+            none: 'none',
+            bw: 'grayscale(100%) contrast(115%)',
+            warm: 'sepia(28%) contrast(106%) saturate(115%)'
+        };
 
-      [bgVideo, liveVideo].forEach((vid) => {
-        if (!vid) return;
-        vid.autoplay = true;
-        vid.playsInline = true;
-        vid.muted = true;
-        vid.defaultMuted = true;
-        vid.setAttribute('autoplay', '');
-        vid.setAttribute('playsinline', '');
-        vid.setAttribute('webkit-playsinline', '');
-        vid.setAttribute('muted', '');
-
-        if (hasActiveStream) {
-          if (vid.srcObject !== STATE.stream) vid.srcObject = STATE.stream;
-          vid.classList.toggle('mirrored', shouldMirror);
-          if (vid.paused || vid.readyState < 2) {
-            Promise.resolve().then(() => {
-              try {
-                const playPromise = vid.play();
-                if (playPromise && typeof playPromise.catch === 'function') playPromise.catch(() => {});
-              } catch (e) {}
-            });
-          }
+        /**
+         * ============================================================================
+         * المؤثرات الصوتية (Web Audio API)
+         * ============================================================================
+         */
+        function ensureAudioContext() {
+            if (!app.audioCtx) {
+                const AC = window.AudioContext || window.webkitAudioContext;
+                if (AC) app.audioCtx = new AC();
+            }
+            if (app.audioCtx && app.audioCtx.state === 'suspended') {
+                app.audioCtx.resume();
+            }
         }
-      });
 
-      [bgSim, liveSim].forEach((sim) => {
-        if (sim) sim.classList.toggle('mirrored', shouldMirror);
-      });
+        function playBeep(isLast = false) {
+            if (app.isMuted) return;
+            try {
+                ensureAudioContext();
+                if (!app.audioCtx) return;
+                const osc = app.audioCtx.createOscillator();
+                const gain = app.audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(isLast ? 880 : 540, app.audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.2, app.audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, app.audioCtx.currentTime + (isLast ? 0.35 : 0.18));
+                osc.connect(gain);
+                gain.connect(app.audioCtx.destination);
+                osc.start();
+                osc.stop(app.audioCtx.currentTime + (isLast ? 0.35 : 0.18));
+            } catch (e) {}
+        }
 
-      if (bgVideo) bgVideo.classList.toggle('hidden', !(STATE.screen === 'start' && useLiveVideo));
-      if (bgSim) bgSim.classList.toggle('hidden', !(STATE.screen === 'start' && !useLiveVideo));
-      updateFramingGuideOverlay(useLiveVideo, shouldMirror);
-    }
+        function playShutter() {
+            if (app.isMuted) return;
+            try {
+                ensureAudioContext();
+                if (!app.audioCtx) return;
+                const ctx = app.audioCtx;
+                const len = ctx.sampleRate * 0.14;
+                const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+                const data = buf.getChannelData(0);
+                for (let i = 0; i < len; i++) {
+                    data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.03));
+                }
+                const src = ctx.createBufferSource();
+                src.buffer = buf;
+                const gain = ctx.createGain();
+                gain.gain.setValueAtTime(0.55, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.14);
+                src.connect(gain);
+                gain.connect(ctx.destination);
+                src.start();
+            } catch (e) {}
+        }
 
-    function stopExistingStreamTracks() {
-      if (STATE.stream && typeof STATE.stream.getTracks === 'function') {
-        STATE.stream.getTracks().forEach((track) => {
-          try { track.stop(); } catch (e) {}
-        });
-      }
-      STATE.stream = null;
-      STATE.hasLiveVideoStream = false;
-    }
+        function toggleMute() {
+            app.isMuted = !app.isMuted;
+            document.getElementById('icon-sound-on').classList.toggle('hidden', app.isMuted);
+            document.getElementById('icon-sound-off').classList.toggle('hidden', !app.isMuted);
+            showToast(app.isMuted ? 'تم كتم الصوت 🔇' : 'تم تفعيل الصوت 🔊');
+        }
 
-    function attachStreamToVideos(stream) {
-      if (!stream) return;
-      STATE.stream = stream;
+        /**
+         * ============================================================================
+         * التحكم بالواجهة، وضع الضيوف (Kiosk Lock)، ودرج الإعدادات
+         * ============================================================================
+         */
+        function showToast(msg) {
+            const container = document.getElementById('toast-container');
+            const el = document.createElement('div');
+            el.className = 'bg-zinc-900/95 border border-zinc-700 text-white px-4 py-2.5 rounded-2xl shadow-2xl text-xs sm:text-sm font-bold text-center backdrop-blur-md transition-opacity duration-300';
+            el.textContent = msg;
+            container.appendChild(el);
+            setTimeout(() => {
+                el.style.opacity = '0';
+                setTimeout(() => el.remove(), 300);
+            }, 2600);
+        }
 
-      const bgVideo = document.getElementById('bgVideo');
-      const liveVideo = document.getElementById('liveVideo');
-      const shouldMirror = STATE.mirrorCamera && STATE.facingMode === 'user';
-
-      [bgVideo, liveVideo].forEach((vid) => {
-        if (!vid) return;
-        vid.autoplay = true;
-        vid.playsInline = true;
-        vid.muted = true;
-        vid.defaultMuted = true;
-        vid.classList.toggle('mirrored', shouldMirror);
-        if (vid.srcObject !== stream) vid.srcObject = stream;
-
-        const ensurePlaying = () => {
-          if (vid.srcObject !== stream) vid.srcObject = stream;
-          if (vid.videoWidth > 0 && vid.videoHeight > 0) STATE.hasLiveVideoStream = true;
-          try {
-            const playPromise = vid.play();
-            if (playPromise && typeof playPromise.then === 'function') {
-              playPromise.then(() => {
-                if (vid.videoWidth > 0 && vid.videoHeight > 0) STATE.hasLiveVideoStream = true;
-                syncCameraVisualTargets();
-              }).catch(() => syncCameraVisualTargets());
+        function toggleSettingsDrawer(forceState = null) {
+            if (app.isKioskLocked) {
+                showToast('وضع الضيوف مفعل 🔒 افتح القفل أولاً');
+                return;
+            }
+            const drawer = document.getElementById('settings-drawer');
+            if (forceState === true) {
+                drawer.classList.remove('hidden');
+            } else if (forceState === false) {
+                drawer.classList.add('hidden');
             } else {
-              syncCameraVisualTargets();
+                drawer.classList.toggle('hidden');
             }
-          } catch (err) {
-            syncCameraVisualTargets();
-          }
-        };
+        }
 
-        vid.onloadedmetadata = ensurePlaying;
-        vid.oncanplay = ensurePlaying;
-        ensurePlaying();
-      });
+        function toggleKioskLock() {
+            app.isKioskLocked = !app.isKioskLocked;
+            const drawer = document.getElementById('settings-drawer');
+            const btnSettings = document.getElementById('btn-toggle-settings');
+            const btnGuide = document.getElementById('btn-printer-guide');
+            const btnLock = document.getElementById('btn-kiosk-lock');
 
-      syncCameraVisualTargets();
-    }
+            if (app.isKioskLocked) {
+                drawer.classList.add('hidden');
+                btnSettings.classList.add('hidden');
+                btnGuide.classList.add('hidden');
+                document.getElementById('icon-unlocked').classList.add('hidden');
+                document.getElementById('icon-locked').classList.remove('hidden');
+                document.getElementById('kiosk-lock-text').textContent = 'مقفل للضيوف';
+                btnLock.classList.add('border-amber-500/60', 'bg-amber-500/10', 'text-amber-300');
+                showToast('تم تفعيل وضع الضيوف 🔒 الإعدادات محمية');
+            } else {
+                btnSettings.classList.remove('hidden');
+                btnGuide.classList.remove('hidden');
+                document.getElementById('icon-unlocked').classList.remove('hidden');
+                document.getElementById('icon-locked').classList.add('hidden');
+                document.getElementById('kiosk-lock-text').textContent = 'وضع الضيوف';
+                btnLock.classList.remove('border-amber-500/60', 'bg-amber-500/10', 'text-amber-300');
+                showToast('تم فتح قفل الإعدادات 🔓');
+            }
+        }
 
-    function requestRawMediaStream(constraints) {
-      if (navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function') {
-        return navigator.mediaDevices.getUserMedia(constraints);
-      }
-      const legacyGetUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
-      if (typeof legacyGetUserMedia === 'function') {
-        return new Promise((resolve, reject) => {
-          try { legacyGetUserMedia.call(navigator, constraints, resolve, reject); } catch (err) { reject(err); }
-        });
-      }
-      return Promise.reject(new Error('Camera API unavailable'));
-    }
+        function togglePrinterGuide(show) {
+            document.getElementById('printer-guide-modal').classList.toggle('hidden', !show);
+        }
 
-    async function getEnumeratedVideoDeviceIds() {
-      const deviceIds = [];
-      try {
-        if (navigator.mediaDevices && typeof navigator.mediaDevices.enumerateDevices === 'function') {
-          const devices = await navigator.mediaDevices.enumerateDevices();
-          if (Array.isArray(devices)) {
-            devices.forEach((dev) => {
-              if (dev && dev.kind === 'videoinput' && dev.deviceId) deviceIds.push(dev.deviceId);
+        /**
+         * ============================================================================
+         * اختيار التخطيط والثيم
+         * ============================================================================
+         */
+        function setLayout(layoutKey) {
+            if (app.isCapturing) return;
+            app.layout = layoutKey;
+            app.photos = new Array(LAYOUTS[layoutKey].count).fill(null);
+
+            document.querySelectorAll('.layout-btn').forEach(btn => {
+                const active = btn.dataset.layout === layoutKey;
+                btn.className = active
+                    ? 'layout-btn p-2.5 rounded-2xl border-2 border-fuchsia-500 bg-fuchsia-500/15 flex flex-col items-center text-center transition active:scale-95'
+                    : 'layout-btn p-2.5 rounded-2xl border-2 border-zinc-800 bg-zinc-950 hover:border-zinc-700 flex flex-col items-center text-center transition active:scale-95';
             });
-          }
-        }
-      } catch (err) {}
-      return deviceIds;
-    }
 
-    async function requestUserMediaWithFallbacks(facingMode) {
-      const constraintSteps = [
-        { audio: false, video: { facingMode: { ideal: facingMode }, width: { ideal: 1280 }, height: { ideal: 720 } } },
-        { audio: false, video: { facingMode: facingMode } },
-        { audio: false, video: true }
-      ];
-      let lastErr = new Error('Camera stream request failed');
-      for (const constraints of constraintSteps) {
-        try {
-          const stream = await requestRawMediaStream(constraints);
-          if (stream) return stream;
-        } catch (err) { lastErr = err || lastErr; }
-      }
-      const videoDeviceIds = await getEnumeratedVideoDeviceIds();
-      for (const deviceId of videoDeviceIds) {
-        try {
-          const stream = await requestRawMediaStream({ audio: false, video: { deviceId: { exact: deviceId } } });
-          if (stream) return stream;
-        } catch (err) { lastErr = err || lastErr; }
-      }
-      throw lastErr;
-    }
+            // تحديث اتجاه ورقة الطباعة @page
+            const cfg = LAYOUTS[layoutKey];
+            document.getElementById('dynamic-page-style').innerHTML =
+                cfg.orientation === 'landscape'
+                    ? '@page { size: 6in 4in; margin: 0; }'
+                    : '@page { size: 4in 6in; margin: 0; }';
 
-    function updateCameraBadgeAndDiagnostics(err = null) {
-      const badge = document.getElementById('cameraStatusBadge');
-      const codeEl = document.getElementById('diagErrorCode');
-      const expEl = document.getElementById('diagExplanation');
-      const sugEl = document.getElementById('diagSuggestion');
-
-      if (STATE.hasLiveVideoStream && STATE.stream) {
-        if (badge) badge.classList.add('hidden');
-        return;
-      }
-
-      const errName = (err && (err.name || err.code)) || 'CameraUnavailable';
-      STATE.lastCameraError = {
-        code: errName,
-        name: errName,
-        explanation: 'تعذر تشغيل بث الكاميرا الحية حالياً وتم تفعيل وضع المعاينة البديلة تلقائياً.',
-        suggestion: 'تحقق من منح إذن الكاميرا للمتصفح والاتصال عبر HTTPS أو localhost، ثم اضغط لإعادة المحاولة.'
-      };
-
-      if (badge) badge.classList.remove('hidden');
-      if (codeEl) codeEl.textContent = `رمز الحالة: ${STATE.lastCameraError.code}`;
-      if (expEl) expEl.textContent = STATE.lastCameraError.explanation;
-      if (sugEl) sugEl.textContent = STATE.lastCameraError.suggestion;
-    }
-
-    async function initCamera(forceRestart = false) {
-      const existingLiveTracks = STATE.stream && typeof STATE.stream.getVideoTracks === 'function'
-        ? STATE.stream.getVideoTracks().filter((t) => t.readyState === 'live')
-        : [];
-
-      if (!forceRestart && STATE.stream && existingLiveTracks.length > 0) {
-        attachStreamToVideos(STATE.stream);
-        syncCameraVisualTargets();
-        updateCameraBadgeAndDiagnostics();
-        return STATE.stream;
-      }
-
-      if (STATE.isInitializingCamera && !forceRestart) return STATE.stream;
-
-      STATE.isInitializingCamera = true;
-      try {
-        if (forceRestart || STATE.stream) stopExistingStreamTracks();
-        const stream = await requestUserMediaWithFallbacks(STATE.facingMode);
-        STATE.stream = stream;
-        STATE.hasLiveVideoStream = true;
-        attachStreamToVideos(stream);
-        updateCameraBadgeAndDiagnostics(null);
-        return stream;
-      } catch (err) {
-        stopExistingStreamTracks();
-        syncCameraVisualTargets();
-        updateCameraBadgeAndDiagnostics(err);
-        return null;
-      } finally {
-        STATE.isInitializingCamera = false;
-      }
-    }
-
-    async function unlockVideoPlaybackOnGesture() {
-      const bgVideo = document.getElementById('bgVideo');
-      const liveVideo = document.getElementById('liveVideo');
-      for (const vid of [liveVideo, bgVideo].filter(Boolean)) {
-        if (STATE.stream && vid.srcObject !== STATE.stream) vid.srcObject = STATE.stream;
-        if (vid.srcObject) {
-          try {
-            await vid.play();
-            if (vid.videoWidth > 0 && vid.videoHeight > 0) STATE.hasLiveVideoStream = true;
-          } catch (err) {}
-        }
-      }
-      syncCameraVisualTargets();
-    }
-
-    async function ensureCameraReady(forceRestart = false) {
-      const hasLiveTrack = STATE.stream && typeof STATE.stream.getVideoTracks === 'function'
-        ? STATE.stream.getVideoTracks().some((t) => t.readyState === 'live')
-        : false;
-      if (!forceRestart && hasLiveTrack && STATE.stream) {
-        attachStreamToVideos(STATE.stream);
-        await unlockVideoPlaybackOnGesture();
-        return STATE.stream;
-      }
-      const stream = await initCamera(forceRestart);
-      await unlockVideoPlaybackOnGesture();
-      return stream;
-    }
-
-    function openCameraDiagnostics(show = true) {
-      const modal = document.getElementById('cameraDiagModal');
-      if (!modal) return;
-      if (show) updateCameraBadgeAndDiagnostics(STATE.lastCameraError?.code ? { name: STATE.lastCameraError.code } : null);
-      modal.classList.toggle('hidden', !show);
-    }
-
-    function closeCameraDiagnostics() { openCameraDiagnostics(false); }
-
-    async function toggleFacingModeAndRestart() {
-      STATE.facingMode = STATE.facingMode === 'user' ? 'environment' : 'user';
-      await initCamera(true);
-    }
-
-    function announceKioskStatus(message, showToast = false) {
-      const liveRegion = document.getElementById('kioskLiveStatus');
-      if (liveRegion) liveRegion.textContent = message;
-      if (!showToast) return;
-      const toast = document.getElementById('kioskStatusToast');
-      if (!toast) return;
-      toast.textContent = message;
-      toast.classList.remove('hidden');
-      clearTimeout(announceKioskStatus._toastTimer);
-      announceKioskStatus._toastTimer = setTimeout(() => toast.classList.add('hidden'), 2400);
-    }
-
-    function drawPhotoFittedInRect(ctx, img, slotX, slotY, slotW, slotH, options = {}) {
-      if (!ctx || !img || slotW <= 0 || slotH <= 0) return;
-      const radius = typeof options.radius === 'number' ? options.radius : 22;
-      const borderColor = options.borderColor || 'rgba(255, 255, 255, 0.85)';
-      const borderWidth = typeof options.borderWidth === 'number' ? options.borderWidth : 4;
-
-      const imgW = img.naturalWidth || img.width || 1200;
-      const imgH = img.naturalHeight || img.height || 800;
-      const coverScale = Math.max(slotW / imgW, slotH / imgH);
-      const drawW = Math.max(1, imgW * coverScale);
-      const drawH = Math.max(1, imgH * coverScale);
-      const drawX = slotX + (slotW - drawW) * 0.5;
-      const drawY = slotY + (slotH - drawH) * 0.5;
-
-      ctx.save();
-      roundRectPath(ctx, slotX, slotY, slotW, slotH, radius);
-      ctx.clip();
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
-      ctx.drawImage(img, 0, 0, imgW, imgH, drawX, drawY, drawW, drawH);
-      ctx.restore();
-
-      if (borderWidth > 0) {
-        ctx.save();
-        ctx.strokeStyle = borderColor;
-        ctx.lineWidth = borderWidth;
-        roundRectPath(ctx, slotX, slotY, slotW, slotH, radius);
-        ctx.stroke();
-        ctx.restore();
-      }
-    }
-
-    function triggerCameraFlash() {
-      const flash = document.getElementById('flashOverlay');
-      if (!flash) return;
-      flash.classList.remove('flash-burst');
-      void flash.offsetWidth;
-      flash.classList.add('flash-burst');
-    }
-
-    function delayMs(ms, sessionToken) {
-      return new Promise((resolve) => setTimeout(() => resolve(sessionToken === STATE.sessionId), ms));
-    }
-
-    function captureFrameToDataUrl() {
-      const liveVideo = document.getElementById('liveVideo');
-      const bgVideo = document.getElementById('bgVideo');
-      const liveSim = document.getElementById('liveSimCanvas');
-      const bgSim = document.getElementById('bgSimCanvas');
-
-      let sourceEl = null;
-      let isHardwareVideo = false;
-      let srcW = 1280;
-      let srcH = 720;
-
-      if (liveVideo && liveVideo.readyState >= 2 && liveVideo.videoWidth > 0 && liveVideo.videoHeight > 0) {
-        sourceEl = liveVideo;
-        isHardwareVideo = true;
-        srcW = liveVideo.videoWidth;
-        srcH = liveVideo.videoHeight;
-      } else if (bgVideo && bgVideo.readyState >= 2 && bgVideo.videoWidth > 0 && bgVideo.videoHeight > 0) {
-        sourceEl = bgVideo;
-        isHardwareVideo = true;
-        srcW = bgVideo.videoWidth;
-        srcH = bgVideo.videoHeight;
-      } else if (liveSim && liveSim.width > 0 && liveSim.height > 0) {
-        sourceEl = liveSim;
-        srcW = liveSim.width;
-        srcH = liveSim.height;
-      } else if (bgSim && bgSim.width > 0 && bgSim.height > 0) {
-        sourceEl = bgSim;
-        srcW = bgSim.width;
-        srcH = bgSim.height;
-      } else {
-        sourceEl = renderFallbackStudioFrame(1280, 720);
-        srcW = sourceEl.width;
-        srcH = sourceEl.height;
-      }
-
-      const maxDim = 1200;
-      const scale = Math.min(1, maxDim / Math.max(srcW, srcH));
-      const outW = Math.max(1, Math.round(srcW * scale));
-      const outH = Math.max(1, Math.round(srcH * scale));
-
-      const snapCanvas = document.createElement('canvas');
-      snapCanvas.width = outW;
-      snapCanvas.height = outH;
-      const sctx = snapCanvas.getContext('2d');
-
-      const shouldMirror = STATE.mirrorCamera && STATE.facingMode === 'user';
-      if (shouldMirror) {
-        sctx.translate(outW, 0);
-        sctx.scale(-1, 1);
-      }
-
-      try {
-        sctx.drawImage(sourceEl, 0, 0, outW, outH);
-      } catch (err) {
-        const safeFallback = renderFallbackStudioFrame(outW, outH);
-        sctx.setTransform(1, 0, 0, 1, 0, 0);
-        sctx.drawImage(safeFallback, 0, 0, outW, outH);
-      }
-
-      if (isHardwareVideo) STATE.hasLiveVideoStream = true;
-      return snapCanvas.toDataURL('image/jpeg', 0.94);
-    }
-
-    function loadImageElement(src) {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => resolve(img);
-        img.onerror = reject;
-        img.src = src;
-      });
-    }
-
-    function roundRectPath(ctx, x, y, w, h, r) {
-      const radius = Math.max(0, Math.min(r, w / 2, h / 2));
-      ctx.beginPath();
-      ctx.moveTo(x + radius, y);
-      ctx.arcTo(x + w, y, x + w, y + h, radius);
-      ctx.arcTo(x + w, y + h, x, y + h, radius);
-      ctx.arcTo(x, y + h, x, y, radius);
-      ctx.arcTo(x, y, x + w, y, radius);
-      ctx.closePath();
-    }
-
-    async function runCountdown(seconds, sessionToken) {
-      closeFullScreenPreview();
-      const overlay = document.getElementById('countdownOverlay');
-      const numEl = document.getElementById('countdownNumber');
-      if (!overlay || !numEl) return false;
-      overlay.classList.remove('hidden');
-
-      for (let s = seconds; s >= 1; s--) {
-        if (sessionToken !== STATE.sessionId) {
-          overlay.classList.add('hidden');
-          return false;
-        }
-        numEl.textContent = String(s);
-        numEl.classList.remove('count-pop');
-        void numEl.offsetWidth;
-        numEl.classList.add('count-pop');
-        playCountdownTone(s === 1);
-
-        const ok = await delayMs(1000, sessionToken);
-        if (!ok) {
-          overlay.classList.add('hidden');
-          return false;
-        }
-      }
-
-      overlay.classList.add('hidden');
-      return true;
-    }
-
-    async function startPhotoSequence() {
-      if (STATE.isCaptureRunning) return;
-      STATE.isCaptureRunning = true;
-      STATE.sessionId += 1;
-      const sessionToken = STATE.sessionId;
-      STATE.capturedPhotos = [];
-      STATE.printCopies = 1;
-      STATE.themeVariantSeed = (Date.now() % 900000) + Math.floor(Math.random() * 99999) + 1;
-      updatePrintCopiesUI();
-
-      const totalShots = STATE.shotCount === 4 ? 4 : 3;
-      const counterEl = document.getElementById('captureShotCounter');
-
-      closeCameraDiagnostics();
-      setActiveScreen('capture');
-      await ensureCameraReady(!STATE.hasLiveVideoStream);
-      await unlockVideoPlaybackOnGesture();
-
-      for (let shotIdx = 1; shotIdx <= totalShots; shotIdx++) {
-        if (sessionToken !== STATE.sessionId) {
-          STATE.isCaptureRunning = false;
-          return;
+            document.getElementById('header-status-badge').textContent = `جاهز • ${cfg.name}`;
+            updateCaptureUI();
+            updateLiveMiniPreview();
         }
 
-        if (counterEl) counterEl.textContent = `${shotIdx} / ${totalShots}`;
-
-        const waitSec = shotIdx === 1 ? STATE.initialCountdownSec : STATE.betweenShotsSec;
-        const completed = await runCountdown(waitSec, sessionToken);
-        if (!completed || sessionToken !== STATE.sessionId) {
-          STATE.isCaptureRunning = false;
-          return;
+        function setTheme(themeKey) {
+            app.theme = themeKey;
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                const active = btn.dataset.theme === themeKey;
+                btn.classList.toggle('border-fuchsia-500', active);
+                btn.classList.toggle('bg-fuchsia-500/10', active);
+                btn.classList.toggle('border-zinc-800', !active);
+                btn.classList.toggle('bg-zinc-950', !active);
+            });
+            updateLiveMiniPreview();
         }
 
-        triggerCameraFlash();
-        playShutterSound();
-        const rawPhotoDataUrl = captureFrameToDataUrl();
-        const framedPhotoDataUrl = await cropDataUrlToTargetAspect(rawPhotoDataUrl, getActiveSlotAspectRatio());
-        STATE.capturedPhotos.push(framedPhotoDataUrl);
-
-        if (shotIdx < totalShots) {
-          const ok = await delayMs(180, sessionToken);
-          if (!ok) {
-            STATE.isCaptureRunning = false;
-            return;
-          }
+        function updateLiveMiniPreview() {
+            app.eventTitle = document.getElementById('input-event-title').value.trim();
+            app.eventDate = document.getElementById('input-event-date').value.trim();
+            const miniCanvas = document.getElementById('mini-preview-canvas');
+            renderCardToCanvas(miniCanvas, [], true);
         }
-      }
 
-      if (sessionToken !== STATE.sessionId) {
-        STATE.isCaptureRunning = false;
-        return;
-      }
-
-      STATE.isCaptureRunning = false;
-      setActiveScreen('print');
-      await renderSelphyComposition();
-    }
-
-    function handleStartBoothClick(event) {
-      if (event && typeof event.stopPropagation === 'function') event.stopPropagation();
-      unlockVideoPlaybackOnGesture().catch(() => {});
-      if (STATE.isStartingSequence || STATE.isCaptureRunning) return;
-      STATE.isStartingSequence = true;
-      announceKioskStatus(`بدء التقاط ${STATE.shotCount} صور`);
-      try {
-        startPhotoSequence().finally(() => { STATE.isStartingSequence = false; });
-      } catch (err) {
-        STATE.isStartingSequence = false;
-      }
-    }
-
-    function dispatchButtonAction(buttonEl, event) {
-      if (!buttonEl || buttonEl.disabled) return;
-      const explicitAction = buttonEl.getAttribute('data-action');
-      const btnId = buttonEl.id || '';
-
-      if (explicitAction === 'select-shots' || buttonEl.classList.contains('shot-count-btn')) {
-        const shots = Number(buttonEl.getAttribute('data-shots')) === 4 ? 4 : 3;
-        selectShotCount(shots);
-        announceKioskStatus(`تم اختيار ${shots} صور`);
-        return;
-      }
-
-      if (explicitAction === 'select-layout' || buttonEl.classList.contains('home-layout-btn')) {
-        const layoutId = buttonEl.getAttribute('data-layout');
-        if (layoutId === 'postcard' || layoutId === 'dual_strip') {
-          selectHomeLayout(layoutId);
-          announceKioskStatus(layoutId === 'postcard' ? 'تم اختيار بوست كارت' : 'تم اختيار شريطين');
+        /**
+         * ============================================================================
+         * الكاميرا والالتقاط
+         * ============================================================================
+         */
+        async function initCamera(deviceId = null) {
+            const video = document.getElementById('webcam-video');
+            const fallback = document.getElementById('camera-fallback-box');
+            try {
+                if (app.stream) {
+                    app.stream.getTracks().forEach(t => t.stop());
+                }
+                const constraints = {
+                    audio: false,
+                    video: deviceId
+                        ? { deviceId: { exact: deviceId }, width: { ideal: 1920 }, height: { ideal: 1080 } }
+                        : { facingMode: 'user', width: { ideal: 1920 }, height: { ideal: 1080 } }
+                };
+                app.stream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = app.stream;
+                fallback.classList.add('hidden');
+                await loadCameraDevices();
+            } catch (err) {
+                fallback.classList.remove('hidden');
+            }
         }
-        return;
-      }
 
-      if (explicitAction === 'start-capture' || btnId === 'startCaptureBtn') {
-        handleStartBoothClick(event);
-        return;
-      }
-
-      if (explicitAction === 'select-theme' || buttonEl.classList.contains('theme-pill-btn')) {
-        const themeId = buttonEl.getAttribute('data-theme');
-        if (themeId && THEMES[themeId]) {
-          selectTheme(themeId);
-          announceKioskStatus(`تم اختيار ثيم ${THEMES[themeId].label}`);
+        async function loadCameraDevices() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const cams = devices.filter(d => d.kind === 'videoinput');
+                const select = document.getElementById('camera-select');
+                const currentId = app.stream?.getVideoTracks()[0]?.getSettings()?.deviceId;
+                select.innerHTML = '';
+                cams.forEach((cam, i) => {
+                    const opt = document.createElement('option');
+                    opt.value = cam.deviceId;
+                    opt.text = cam.label || `كاميرا ${i + 1}`;
+                    if (cam.deviceId === currentId) opt.selected = true;
+                    select.appendChild(opt);
+                });
+            } catch (e) {}
         }
-        return;
-      }
 
-      if (explicitAction === 'change-copies') {
-        const delta = Number(buttonEl.getAttribute('data-delta')) || 0;
-        changePrintCopies(delta);
-        const total = (Number(STATE.printCopies) || 1) * (Number(STATE.pricePerCopy) || 5000);
-        announceKioskStatus(`عدد الطبعات ${STATE.printCopies} والمجموع ${total.toLocaleString('en-US')} دينار عراقي`);
-        return;
-      }
-
-      if (explicitAction === 'open-fullscreen-preview' || btnId === 'btnOpenFullScreenPreview') {
-        announceKioskStatus('فتح معاينة الطباعة الكاملة بدون قص', true);
-        openFullScreenPreview();
-        return;
-      }
-
-      if (explicitAction === 'download-image' || btnId === 'btnDownloadImage') {
-        downloadComposedImage();
-        return;
-      }
-
-      if (explicitAction === 'close-fullscreen-preview' || btnId === 'btnCloseFullScreenPreview') {
-        closeFullScreenPreview();
-        return;
-      }
-
-      if (explicitAction === 'direct-print' || btnId === 'btnDirectPrint') {
-        announceKioskStatus('جاري الطباعة حسب قياس الطابعة بدون قص', true);
-        triggerDirectPrint();
-        return;
-      }
-
-      if (explicitAction === 'reset-kiosk' || btnId === 'btnFinishReset') {
-        announceKioskStatus('تمت العودة إلى شاشة البداية');
-        resetToStartScreen();
-      }
-    }
-
-    function bindStartButtonEvents() {
-      const appRoot = document.getElementById('app') || document.body;
-      if (!appRoot || appRoot.dataset.kioskButtonsBound === '1') return;
-      appRoot.dataset.kioskButtonsBound = '1';
-
-      const recentActivations = new WeakMap();
-      const activateOnce = (buttonEl, event) => {
-        if (!buttonEl) return;
-        const now = Date.now();
-        const lastAt = recentActivations.get(buttonEl) || 0;
-        if (now - lastAt < 380) return;
-        recentActivations.set(buttonEl, now);
-        dispatchButtonAction(buttonEl, event);
-      };
-
-      appRoot.addEventListener('touchend', (event) => {
-        if (event.touches && event.touches.length > 0) return;
-        const target = event.target && event.target.closest ? event.target.closest('button, [role="button"]') : null;
-        if (!target || !appRoot.contains(target)) return;
-        if (event.cancelable) event.preventDefault();
-        activateOnce(target, event);
-      }, { passive: false });
-
-      appRoot.addEventListener('click', (event) => {
-        const target = event.target && event.target.closest ? event.target.closest('button, [role="button"]') : null;
-        if (!target || !appRoot.contains(target)) return;
-        activateOnce(target, event);
-      });
-    }
-
-    function createSeededRng(seedVal) {
-      let s = (Number(seedVal) || 1) % 2147483647;
-      if (s <= 0) s += 2147483646;
-      return () => {
-        s = (s * 16807) % 2147483647;
-        return (s - 1) / 2147483646;
-      };
-    }
-
-    function drawCuteStar(ctx, cx, cy, outerR, innerR, color) {
-      ctx.save();
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      for (let i = 0; i < 10; i++) {
-        const r = i % 2 === 0 ? outerR : innerR;
-        const angle = -Math.PI / 2 + (i * Math.PI) / 5;
-        const x = cx + Math.cos(angle) * r;
-        const y = cy + Math.sin(angle) * r;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.closePath();
-      ctx.fill();
-      ctx.restore();
-    }
-
-    function drawCuteHeart(ctx, cx, cy, size, color) {
-      ctx.save();
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      const topCurveHeight = size * 0.3;
-      ctx.moveTo(cx, cy + topCurveHeight);
-      ctx.bezierCurveTo(cx, cy, cx - size / 2, cy, cx - size / 2, cy + topCurveHeight);
-      ctx.bezierCurveTo(cx - size / 2, cy + (size + topCurveHeight) / 2, cx, cy + (size + topCurveHeight) / 1.25, cx, cy + size);
-      ctx.bezierCurveTo(cx, cy + (size + topCurveHeight) / 1.25, cx + size / 2, cy + (size + topCurveHeight) / 2, cx + size / 2, cy + topCurveHeight);
-      ctx.bezierCurveTo(cx + size / 2, cy, cx, cy, cx, cy + topCurveHeight);
-      ctx.closePath();
-      ctx.fill();
-      ctx.restore();
-    }
-
-    function drawCuteFlower(ctx, cx, cy, r, petalColor, centerColor) {
-      ctx.save();
-      for (let i = 0; i < 6; i++) {
-        const angle = (i * Math.PI) / 3;
-        const px = cx + Math.cos(angle) * (r * 0.65);
-        const py = cy + Math.sin(angle) * (r * 0.65);
-        ctx.fillStyle = petalColor;
-        ctx.beginPath();
-        ctx.arc(px, py, r * 0.45, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.fillStyle = centerColor;
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.36, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
-
-    function drawCuteSparkle(ctx, cx, cy, r, color) {
-      ctx.save();
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.moveTo(cx, cy - r);
-      ctx.quadraticCurveTo(cx, cy, cx + r, cy);
-      ctx.quadraticCurveTo(cx, cy, cx, cy + r);
-      ctx.quadraticCurveTo(cx, cy, cx - r, cy);
-      ctx.quadraticCurveTo(cx, cy, cx, cy - r);
-      ctx.closePath();
-      ctx.fill();
-      ctx.restore();
-    }
-
-    function drawCuteBalloon(ctx, cx, cy, scale, fillColor, stringColor) {
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.scale(scale, scale);
-      ctx.strokeStyle = stringColor;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(0, 22);
-      ctx.quadraticCurveTo(-8, 34, 2, 46);
-      ctx.stroke();
-
-      ctx.fillStyle = fillColor;
-      ctx.beginPath();
-      ctx.ellipse(0, 0, 17, 22, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
-      ctx.beginPath();
-      ctx.ellipse(-5, -7, 4.5, 7, -0.35, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
-
-    function drawCuteCrown(ctx, cx, cy, scale, color) {
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.scale(scale, scale);
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.moveTo(-20, 10);
-      ctx.lineTo(-22, -10);
-      ctx.lineTo(-9, 1);
-      ctx.lineTo(0, -14);
-      ctx.lineTo(9, 1);
-      ctx.lineTo(22, -10);
-      ctx.lineTo(20, 10);
-      ctx.closePath();
-      ctx.fill();
-      ctx.restore();
-    }
-
-    function drawThemeBackground(ctx, theme, width, height, variantSeed = 0) {
-      const rng = createSeededRng(variantSeed + theme.id.split('').reduce((a, b) => a + b.charCodeAt(0) * 31, 17));
-      const grad = ctx.createLinearGradient(0, 0, width * 0.25, height);
-      grad.addColorStop(0, theme.bgTop);
-      grad.addColorStop(1, theme.bgBottom);
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, width, height);
-
-      const { frameRect, footerRect } = computePageFrameGeometry(width, height);
-      const { x: frameX, y: frameY, w: frameW, h: frameH } = frameRect;
-
-      const puffCount = 5 + Math.floor(rng() * 4);
-      for (let p = 0; p < puffCount; p++) {
-        const px = frameX + rng() * Math.max(40, frameW);
-        const py = frameY + rng() * Math.max(40, frameH);
-        const pr = Math.max(60, Math.min(width, height) * (0.11 + rng() * 0.11));
-        const puffGrad = ctx.createRadialGradient(px, py, 8, px, py, pr);
-        puffGrad.addColorStop(0, `${theme.borderColor}26`);
-        puffGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
-        ctx.fillStyle = puffGrad;
-        ctx.beginPath();
-        ctx.arc(px, py, pr, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      const itemCount = 12 + Math.floor(rng() * 6);
-      for (let i = 0; i < itemCount; i++) {
-        const x = frameX + 20 + rng() * Math.max(40, frameW - 40);
-        const y = frameY + 24 + rng() * Math.max(40, frameH - 48);
-        const scale = 0.65 + rng() * 0.75;
-        const rot = (rng() - 0.5) * 0.55;
-
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(rot);
-
-        if (theme.pattern === 'stars') {
-          const mode = i % 3;
-          if (mode === 0) drawCuteStar(ctx, 0, 0, 20 * scale, 9 * scale, 'rgba(245, 158, 11, 0.28)');
-          else if (mode === 1) drawCuteBalloon(ctx, 0, 0, 0.8 * scale, 'rgba(56, 189, 248, 0.26)', 'rgba(245, 158, 11, 0.35)');
-          else drawCuteSparkle(ctx, 0, 0, 17 * scale, 'rgba(251, 146, 60, 0.26)');
-        } else if (theme.pattern === 'hearts') {
-          if (i % 3 === 0) drawCuteHeart(ctx, 0, 0, 26 * scale, 'rgba(236, 72, 153, 0.25)');
-          else if (i % 3 === 1) drawCuteFlower(ctx, 0, 0, 19 * scale, 'rgba(244, 114, 182, 0.25)', 'rgba(253, 224, 71, 0.35)');
-          else drawCuteSparkle(ctx, 0, 0, 19 * scale, 'rgba(244, 63, 94, 0.24)');
-        } else if (theme.pattern === 'neon') {
-          if (i % 2 === 0) drawCuteSparkle(ctx, 0, 0, 20 * scale, 'rgba(34, 211, 238, 0.28)');
-          else drawCuteStar(ctx, 0, 0, 18 * scale, 8 * scale, 'rgba(96, 165, 250, 0.26)');
-        } else if (theme.pattern === 'gold') {
-          if (i % 3 === 0) drawCuteCrown(ctx, 0, 0, 0.8 * scale, 'rgba(250, 204, 21, 0.25)');
-          else drawCuteSparkle(ctx, 0, 0, 20 * scale, 'rgba(250, 204, 21, 0.25)');
-        } else if (theme.pattern === 'pastel') {
-          if (i % 2 === 0) drawCuteFlower(ctx, 0, 0, 22 * scale, 'rgba(192, 132, 252, 0.28)', 'rgba(251, 191, 36, 0.35)');
-          else drawCuteHeart(ctx, 0, 0, 22 * scale, 'rgba(52, 211, 153, 0.24)');
-        } else {
-          if (i % 3 === 0) drawCuteCrown(ctx, 0, 0, 0.76 * scale, 'rgba(197, 160, 89, 0.24)');
-          else drawCuteSparkle(ctx, 0, 0, 18 * scale, 'rgba(197, 160, 89, 0.26)');
+        function switchCamera(id) {
+            if (id) initCamera(id);
         }
-        ctx.restore();
-      }
 
-      ctx.save();
-      ctx.strokeStyle = theme.borderColor;
-      ctx.lineWidth = Math.max(6, Math.round(width * 0.0075));
-      roundRectPath(ctx, frameX, frameY, frameW, frameH, 28);
-      ctx.stroke();
-      ctx.restore();
+        function toggleMirror() {
+            app.isMirrored = !app.isMirrored;
+            const video = document.getElementById('webcam-video');
+            video.classList.toggle('-scale-x-100', app.isMirrored);
+        }
 
-      return { frameRect, footerRect };
-    }
+        function setFilter(f) {
+            app.filter = f;
+            document.getElementById('webcam-video').style.filter = FILTERS[f] || 'none';
+            document.querySelectorAll('.filter-chip').forEach(btn => {
+                const active = btn.dataset.filter === f;
+                btn.className = active
+                    ? 'filter-chip px-3 py-1 rounded-xl text-xs font-extrabold bg-white text-black transition'
+                    : 'filter-chip px-3 py-1 rounded-xl text-xs font-bold text-zinc-300 hover:text-white transition';
+            });
+        }
 
-    function drawFooterCaptionCleanly(ctx, theme, text, footerRect, baseFontSize) {
-      if (!ctx || !footerRect || footerRect.w <= 10 || footerRect.h <= 10) return;
-      ctx.save();
-      roundRectPath(ctx, footerRect.x, footerRect.y, footerRect.w, footerRect.h, 18);
-      ctx.fillStyle = theme.matColor || 'rgba(255, 255, 255, 0.75)';
-      ctx.globalAlpha = 0.72;
-      ctx.fill();
-      ctx.globalAlpha = 1;
+        function captureFrame() {
+            const video = document.getElementById('webcam-video');
+            if (!video.videoWidth) return null;
 
-      const maxTextW = Math.max(50, footerRect.w - 28);
-      let fontSize = Math.min(baseFontSize, Math.round(footerRect.h * 0.46));
-      ctx.font = `800 ${fontSize}px Cairo, sans-serif`;
-      while (fontSize > 14 && ctx.measureText(text).width > maxTextW) {
-        fontSize -= 2;
-        ctx.font = `800 ${fontSize}px Cairo, sans-serif`;
-      }
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
 
-      ctx.fillStyle = theme.textColor;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(text, footerRect.x + footerRect.w * 0.5, footerRect.y + footerRect.h * 0.5 + 1);
-      ctx.restore();
-    }
+            ctx.filter = FILTERS[app.filter] || 'none';
+            if (app.isMirrored) {
+                ctx.translate(canvas.width, 0);
+                ctx.scale(-1, 1);
+            }
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    function drawThemeStickersOverPhotos(ctx, theme, photoRects, variantSeed = 0) {
-      if (!ctx || !theme || !Array.isArray(photoRects) || photoRects.length === 0) return;
-      const palette = Array.isArray(theme.overlayStickers) && theme.overlayStickers.length > 0
-        ? theme.overlayStickers
-        : [theme.stickerLeft, theme.stickerRight, '✨'];
+            // فلاش + صوت الغالق
+            const flash = document.getElementById('flash-overlay');
+            flash.classList.remove('flash-active');
+            void flash.offsetWidth;
+            flash.classList.add('flash-active');
+            playShutter();
 
-      photoRects.forEach((rect, idx) => {
-        if (!rect || rect.w <= 20 || rect.h <= 20) return;
-        const rng = createSeededRng(variantSeed + idx * 977 + theme.id.charCodeAt(0) * 131);
-        const cornerChoices = [
-          { x: rect.x + 18, y: rect.y + 18 },
-          { x: rect.x + rect.w - 18, y: rect.y + 18 },
-          { x: rect.x + 18, y: rect.y + rect.h - 18 },
-          { x: rect.x + rect.w - 18, y: rect.y + rect.h - 18 }
-        ];
+            return canvas.toDataURL('image/jpeg', 0.95);
+        }
 
-        const firstIdx = Math.floor(rng() * cornerChoices.length);
-        let secondIdx = Math.floor(rng() * cornerChoices.length);
-        if (secondIdx === firstIdx) secondIdx = (firstIdx + 2) % cornerChoices.length;
+        function countdownStep(seconds, currentShot, totalShots) {
+            return new Promise(resolve => {
+                const overlay = document.getElementById('countdown-overlay');
+                const num = document.getElementById('countdown-number');
+                const sub = document.getElementById('countdown-subtext');
 
-        [firstIdx, secondIdx].forEach((cIdx, sPos) => {
-          const spot = cornerChoices[cIdx];
-          const stickerChar = palette[Math.floor(rng() * palette.length)];
-          const fontPx = Math.max(24, Math.min(54, Math.round(Math.min(rect.w, rect.h) * (0.12 + rng() * 0.04))));
-          const angle = (rng() - 0.5) * 0.52;
-          const jitterX = (rng() - 0.5) * 8;
-          const jitterY = (rng() - 0.5) * 8;
+                overlay.classList.remove('hidden');
+                sub.textContent = `لقطة ${currentShot + 1} من ${totalShots} — استعد! 📸`;
 
-          ctx.save();
-          ctx.translate(spot.x + jitterX, spot.y + jitterY + (sPos === 1 ? 2 : 0));
-          ctx.rotate(angle);
-          ctx.font = `900 ${fontPx}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", Cairo, sans-serif`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.shadowColor = 'rgba(255, 255, 255, 0.85)';
-          ctx.shadowBlur = 10;
-          ctx.fillText(stickerChar, 0, 0);
-          ctx.restore();
+                let rem = seconds;
+                num.textContent = rem;
+                num.classList.remove('count-pop');
+                void num.offsetWidth;
+                num.classList.add('count-pop');
+                playBeep(false);
+
+                const timer = setInterval(() => {
+                    rem--;
+                    if (rem > 0) {
+                        num.textContent = rem;
+                        num.classList.remove('count-pop');
+                        void num.offsetWidth;
+                        num.classList.add('count-pop');
+                        playBeep(rem === 1);
+                    } else {
+                        clearInterval(timer);
+                        overlay.classList.add('hidden');
+                        resolve();
+                    }
+                }, 1000);
+            });
+        }
+
+        // بدء جلسة الالتقاط التلقائي
+        async function startCaptureSequence() {
+            if (app.isCapturing) return;
+            const video = document.getElementById('webcam-video');
+            if (!video.srcObject && app.photos.every(p => p === null)) {
+                showToast('يرجى تشغيل الكاميرا أو اختيار صور أولاً');
+                return;
+            }
+
+            ensureAudioContext();
+            // إغلاق درج الإعدادات تلقائياً لتوفير مساحة الرؤية
+            document.getElementById('settings-drawer').classList.add('hidden');
+
+            app.isCapturing = true;
+            const btn = document.getElementById('btn-start-shoot');
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+
+            const sec = parseInt(document.getElementById('select-countdown').value, 10) || 3;
+            const total = app.photos.length;
+
+            for (let i = 0; i < total; i++) {
+                if (app.photos[i] !== null) continue;
+                await countdownStep(sec, i, total);
+                const shot = captureFrame();
+                if (shot) {
+                    app.photos[i] = shot;
+                    updateCaptureUI();
+                }
+                if (i < total - 1) {
+                    await new Promise(r => setTimeout(r, 600));
+                }
+            }
+
+            app.isCapturing = false;
+            btn.disabled = false;
+            btn.classList.remove('opacity-50');
+            updateCaptureUI();
+
+            if (app.photos.every(p => p !== null)) {
+                await showFinalResult();
+            }
+        }
+
+        // إعادة التقاط صورة واحدة محددة من شاشة النتيجة
+        async function retakeSinglePhoto(index) {
+            if (app.isCapturing) return;
+            app.photos[index] = null;
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('flex');
+            updateCaptureUI();
+
+            app.isCapturing = true;
+            const sec = parseInt(document.getElementById('select-countdown').value, 10) || 3;
+            await countdownStep(sec, index, app.photos.length);
+            const shot = captureFrame();
+            if (shot) {
+                app.photos[index] = shot;
+            }
+            app.isCapturing = false;
+            updateCaptureUI();
+
+            if (app.photos.every(p => p !== null)) {
+                await showFinalResult(false); // لا تكرر الطباعة التلقائية عند التعديل الفردي إلا بطلب المستخدم
+            }
+        }
+
+        function handleManualUpload(event) {
+            const files = Array.from(event.target.files);
+            if (!files.length) return;
+            const count = LAYOUTS[app.layout].count;
+            app.photos = new Array(count).fill(null);
+
+            let loaded = 0;
+            files.slice(0, count).forEach((file, idx) => {
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    app.photos[idx] = e.target.result;
+                    loaded++;
+                    updateCaptureUI();
+                    if (loaded === Math.min(files.length, count) && app.photos.every(p => p !== null)) {
+                        document.getElementById('camera-fallback-box').classList.add('hidden');
+                        await showFinalResult();
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function updateCaptureUI() {
+            const total = app.photos.length;
+            const pills = document.getElementById('progress-pills');
+            const thumbsBar = document.getElementById('live-thumbs-bar');
+
+            pills.innerHTML = '';
+            thumbsBar.innerHTML = '';
+
+            app.photos.forEach((photo, idx) => {
+                // نقاط التقدم العلوية
+                const pill = document.createElement('span');
+                pill.className = photo
+                    ? 'w-6 h-2.5 rounded-full bg-emerald-500 transition-all'
+                    : 'w-6 h-2.5 rounded-full bg-zinc-700 transition-all';
+                pills.appendChild(pill);
+
+                // مصغرات الصور
+                const thumb = document.createElement('div');
+                thumb.className = 'w-20 h-16 lg:w-full lg:h-24 rounded-2xl bg-zinc-900 border border-zinc-800 overflow-hidden flex items-center justify-center shrink-0 relative';
+                if (photo) {
+                    thumb.innerHTML = `<img src="${photo}" class="w-full h-full object-cover"><span class="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/70 text-[10px] font-bold flex items-center justify-center">${idx + 1}</span>`;
+                } else {
+                    thumb.innerHTML = `<span class="text-xs font-extrabold text-zinc-600">#${idx + 1}</span>`;
+                }
+                thumbsBar.appendChild(thumb);
+            });
+        }
+
+        /**
+         * ============================================================================
+         * محرك الرسم عالي الدقة (300 DPI) وعرض النتيجة
+         * ============================================================================
+         */
+        async function showFinalResult(allowAutoPrint = true) {
+            const hdCanvas = document.getElementById('hd-canvas');
+            await renderCardToCanvas(hdCanvas, app.photos, false);
+
+            const dataUrl = hdCanvas.toDataURL('image/png', 1.0);
+            document.getElementById('final-result-image').src = dataUrl;
+            document.getElementById('print-image').src = dataUrl;
+
+            // بناء أزرار إعادة التقاط لقطة واحدة
+            const retakeGrid = document.getElementById('retake-single-grid');
+            retakeGrid.innerHTML = '';
+            app.photos.forEach((photo, idx) => {
+                const btn = document.createElement('button');
+                btn.onclick = () => retakeSinglePhoto(idx);
+                btn.className = 'relative aspect-square rounded-xl overflow-hidden border-2 border-zinc-700 hover:border-rose-500 group transition active:scale-95';
+                btn.innerHTML = `
+                    <img src="${photo}" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/55 flex flex-col items-center justify-center text-white">
+                        <span class="text-xs font-black">↻ ${idx + 1}</span>
+                    </div>
+                `;
+                retakeGrid.appendChild(btn);
+            });
+
+            const resScreen = document.getElementById('result-screen');
+            resScreen.classList.remove('hidden');
+            resScreen.classList.add('flex');
+
+            // الطباعة التلقائية إذا كانت مفعلة
+            const isAutoPrint = document.getElementById('check-auto-print').checked;
+            if (allowAutoPrint && isAutoPrint) {
+                setTimeout(() => triggerPrintCP1500(), 450);
+            }
+        }
+
+        function startNewSession() {
+            app.photos = new Array(LAYOUTS[app.layout].count).fill(null);
+            updateCaptureUI();
+            const resScreen = document.getElementById('result-screen');
+            resScreen.classList.add('hidden');
+            resScreen.classList.remove('flex');
+        }
+
+        function triggerPrintCP1500() {
+            const img = document.getElementById('print-image');
+            if (!img.src) return;
+            window.print();
+        }
+
+        function downloadImage() {
+            const hdCanvas = document.getElementById('hd-canvas');
+            const link = document.createElement('a');
+            link.download = `CP1500-PhotoBooth-${Date.now()}.png`;
+            link.href = hdCanvas.toDataURL('image/png', 1.0);
+            link.click();
+            showToast('تم حفظ الصورة بجودة عالية ✓');
+        }
+
+        // تحميل صورة مساعدة
+        function loadImg(src) {
+            return new Promise(resolve => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = () => resolve(null);
+                img.src = src;
+            });
+        }
+
+        // رسم الصورة بدون تشويه النسب (Cover Fit)
+        function drawCoverImage(ctx, img, x, y, w, h, radius = 0) {
+            ctx.save();
+            if (radius > 0) {
+                ctx.beginPath();
+                ctx.moveTo(x + radius, y);
+                ctx.arcTo(x + w, y, x + w, y + h, radius);
+                ctx.arcTo(x + w, y + h, x, y + h, radius);
+                ctx.arcTo(x, y + h, x, y, radius);
+                ctx.arcTo(x, y, x + w, y, radius);
+                ctx.closePath();
+                ctx.clip();
+            }
+
+            if (!img) {
+                ctx.fillStyle = 'rgba(130,130,140,0.2)';
+                ctx.fillRect(x, y, w, h);
+                ctx.restore();
+                return;
+            }
+
+            const imgRatio = img.width / img.height;
+            const boxRatio = w / h;
+            let dw, dh, ox, oy;
+            if (imgRatio > boxRatio) {
+                dh = h;
+                dw = h * imgRatio;
+                ox = x - (dw - w) / 2;
+                oy = y;
+            } else {
+                dw = w;
+                dh = w / imgRatio;
+                ox = x;
+                oy = y - (dh - h) / 2;
+            }
+            ctx.drawImage(img, ox, oy, dw, dh);
+            ctx.restore();
+        }
+
+        // رسم خلفية الثيمات الخمسة
+        function paintThemeSurface(ctx, x, y, w, h, theme) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(x, y, w, h);
+            ctx.clip();
+
+            if (theme === 'white') {
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(x, y, w, h);
+                ctx.strokeStyle = '#e4e4e7';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x + 14, y + 14, w - 28, h - 28);
+
+            } else if (theme === 'wedding') {
+                const g = ctx.createLinearGradient(x, y, x + w, y + h);
+                g.addColorStop(0, '#fffdf9');
+                g.addColorStop(1, '#f7efe0');
+                ctx.fillStyle = g;
+                ctx.fillRect(x, y, w, h);
+                ctx.strokeStyle = '#c59b48';
+                ctx.lineWidth = 4;
+                ctx.strokeRect(x + 18, y + 18, w - 36, h - 36);
+
+            } else if (theme === 'birthday') {
+                const g = ctx.createLinearGradient(x, y, x, y + h);
+                g.addColorStop(0, '#fff4f8');
+                g.addColorStop(1, '#fef9eb');
+                ctx.fillStyle = g;
+                ctx.fillRect(x, y, w, h);
+                const colors = ['#ec4899', '#f59e0b', '#06b6d4', '#8b5cf6'];
+                for (let i = 0; i < 36; i++) {
+                    ctx.fillStyle = colors[i % colors.length];
+                    const px = x + ((i * 149) % w);
+                    const py = y + ((i * 233) % h);
+                    ctx.beginPath();
+                    ctx.arc(px, py, 6, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+            } else if (theme === 'luxury') {
+                ctx.fillStyle = '#111113';
+                ctx.fillRect(x, y, w, h);
+                ctx.strokeStyle = '#d4af37';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(x + 18, y + 18, w - 36, h - 36);
+
+            } else if (theme === 'polaroid') {
+                ctx.fillStyle = '#f5f2eb';
+                ctx.fillRect(x, y, w, h);
+                ctx.strokeStyle = '#d6d3cb';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x + 12, y + 12, w - 24, h - 24);
+            }
+            ctx.restore();
+        }
+
+        function getThemeTextStyle(theme) {
+            switch (theme) {
+                case 'wedding':  return { title: '#7c5818', date: '#a37c35', font: 'Amiri, serif' };
+                case 'birthday': return { title: '#db2777', date: '#d97706', font: 'Cairo, sans-serif' };
+                case 'luxury':   return { title: '#f3d06b', date: '#a1a1aa', font: 'Cairo, sans-serif' };
+                case 'polaroid': return { title: '#292524', date: '#78716c', font: 'Cairo, sans-serif' };
+                default:         return { title: '#18181b', date: '#71717a', font: 'Cairo, sans-serif' };
+            }
+        }
+
+        // الرسم النهائي على الكانفس بدقة 300 DPI
+        async function renderCardToCanvas(canvas, photoUrls, isPreview = false) {
+            const cfg = LAYOUTS[app.layout];
+            const scale = isPreview ? 0.35 : 1;
+            const W = Math.round(cfg.width * scale);
+            const H = Math.round(cfg.height * scale);
+
+            canvas.width = W;
+            canvas.height = H;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, W, H);
+
+            const imgs = await Promise.all(
+                Array.from({ length: cfg.count }, (_, i) => photoUrls[i] ? loadImg(photoUrls[i]) : Promise.resolve(null))
+            );
+            const txtStyle = getThemeTextStyle(app.theme);
+
+            if (app.layout === 'strip3') {
+                // شريطان متطابقان 2×6 جنباً إلى جنب على ورقة 4×6
+                const stripW = W / 2;
+                for (let s = 0; s < 2; s++) {
+                    const ox = s * stripW;
+                    paintThemeSurface(ctx, ox, 0, stripW, H, app.theme);
+
+                    const padX = stripW * 0.08;
+                    const topPad = H * 0.035;
+                    const footerH = app.theme === 'polaroid' ? H * 0.18 : H * 0.14;
+                    const gap = H * 0.018;
+                    const photoH = (H - topPad - footerH - gap * 2) / 3;
+                    const photoW = stripW - padX * 2;
+
+                    for (let i = 0; i < 3; i++) {
+                        drawCoverImage(ctx, imgs[i], ox + padX, topPad + i * (photoH + gap), photoW, photoH, 8 * scale);
+                    }
+
+                    // النص أسفل الشريط
+                    ctx.save();
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    const ty = H - footerH * 0.6;
+                    ctx.fillStyle = txtStyle.title;
+                    ctx.font = `bold ${Math.round(34 * scale)}px ${txtStyle.font}`;
+                    ctx.fillText(app.eventTitle || 'فوتو بوث', ox + stripW / 2, ty, stripW - 36 * scale);
+
+                    ctx.fillStyle = txtStyle.date;
+                    ctx.font = `600 ${Math.round(22 * scale)}px Cairo, sans-serif`;
+                    ctx.fillText(app.eventDate || '', ox + stripW / 2, ty + 38 * scale, stripW - 36 * scale);
+                    ctx.restore();
+                }
+
+                // خط قص خفيف في المنتصف
+                ctx.save();
+                ctx.strokeStyle = 'rgba(160,160,160,0.45)';
+                ctx.lineWidth = 2 * scale;
+                ctx.setLineDash([12 * scale, 10 * scale]);
+                ctx.beginPath();
+                ctx.moveTo(W / 2, 0);
+                ctx.lineTo(W / 2, H);
+                ctx.stroke();
+                ctx.restore();
+
+            } else if (app.layout === 'grid4') {
+                paintThemeSurface(ctx, 0, 0, W, H, app.theme);
+                const padX = W * 0.06;
+                const topPad = H * 0.045;
+                const footerH = app.theme === 'polaroid' ? H * 0.20 : H * 0.16;
+                const gap = W * 0.032;
+                const cw = (W - padX * 2 - gap) / 2;
+                const ch = (H - topPad - footerH - gap) / 2;
+
+                const coords = [
+                    [padX, topPad], [padX + cw + gap, topPad],
+                    [padX, topPad + ch + gap], [padX + cw + gap, topPad + ch + gap]
+                ];
+                coords.forEach(([px, py], i) => drawCoverImage(ctx, imgs[i], px, py, cw, ch, 14 * scale));
+
+                ctx.save();
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                const ty = H - footerH * 0.56;
+                ctx.fillStyle = txtStyle.title;
+                ctx.font = `bold ${Math.round(52 * scale)}px ${txtStyle.font}`;
+                ctx.fillText(app.eventTitle || 'ذكرى جميلة', W / 2, ty, W - 90 * scale);
+
+                ctx.fillStyle = txtStyle.date;
+                ctx.font = `600 ${Math.round(30 * scale)}px Cairo, sans-serif`;
+                ctx.fillText(app.eventDate || '', W / 2, ty + 54 * scale, W - 90 * scale);
+                ctx.restore();
+
+            } else if (app.layout === 'single') {
+                paintThemeSurface(ctx, 0, 0, W, H, app.theme);
+                const padX = W * 0.05;
+                const topPad = H * 0.055;
+                const footerH = app.theme === 'polaroid' ? H * 0.22 : H * 0.18;
+                drawCoverImage(ctx, imgs[0], padX, topPad, W - padX * 2, H - topPad - footerH, 16 * scale);
+
+                ctx.save();
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                const ty = H - footerH * 0.55;
+                ctx.fillStyle = txtStyle.title;
+                ctx.font = `bold ${Math.round(56 * scale)}px ${txtStyle.font}`;
+                ctx.fillText(app.eventTitle || 'ذكرى جميلة', W / 2, ty, W - 110 * scale);
+
+                ctx.fillStyle = txtStyle.date;
+                ctx.font = `600 ${Math.round(32 * scale)}px Cairo, sans-serif`;
+                ctx.fillText(app.eventDate || '', W / 2, ty + 56 * scale, W - 110 * scale);
+                ctx.restore();
+            }
+        }
+
+        // التشغيل الأولي عند فتح الصفحة
+        window.addEventListener('DOMContentLoaded', () => {
+            setLayout('strip3');
+            setTheme('white');
+            initCamera();
         });
-      });
-    }
-
-    function renderSingleStrip(ctx, theme, captions, images, stripX, stripY, stripW, stripH, variantSeed = 0) {
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(stripX, stripY, stripW, stripH);
-      ctx.clip();
-
-      const tempCan = document.createElement('canvas');
-      tempCan.width = stripW;
-      tempCan.height = stripH;
-      const tctx = tempCan.getContext('2d');
-      const { footerRect } = drawThemeBackground(tctx, theme, stripW, stripH, variantSeed);
-      ctx.drawImage(tempCan, stripX, stripY);
-
-      const slots = computeCenteredPhotoSlots(stripW, stripH, images.length, true);
-      const drawnPhotoRects = [];
-
-      for (let i = 0; i < images.length && i < slots.length; i++) {
-        const slot = slots[i];
-        const px = stripX + slot.x;
-        const py = stripY + slot.y;
-        drawPhotoFittedInRect(ctx, images[i], px, py, slot.w, slot.h, {
-          borderColor: theme.accentColor,
-          borderWidth: 3.5,
-          radius: 16
-        });
-        drawnPhotoRects.push({ x: px, y: py, w: slot.w, h: slot.h });
-      }
-
-      drawThemeStickersOverPhotos(ctx, theme, drawnPhotoRects, variantSeed + 313);
-
-      drawFooterCaptionCleanly(
-        ctx,
-        theme,
-        `${theme.stickerLeft} ${captions.bottomCaption} ${theme.stickerRight}`,
-        {
-          x: stripX + footerRect.x,
-          y: stripY + footerRect.y,
-          w: footerRect.w,
-          h: footerRect.h
-        },
-        Math.round(stripW * 0.042)
-      );
-
-      ctx.restore();
-    }
-
-    async function renderSelphyComposition() {
-      const canvas = document.getElementById('selphyCanvas');
-      if (!canvas) return;
-      canvas.width = 1200;
-      canvas.height = 1800;
-
-      const ctx = canvas.getContext('2d');
-      const theme = THEMES[STATE.selectedTheme] || THEMES.kids;
-      const variantSeed = STATE.themeVariantSeed || 1;
-      const captions = getThemeCaptions(theme, variantSeed);
-
-      const sources = STATE.capturedPhotos.length > 0
-        ? STATE.capturedPhotos
-        : [captureFrameToDataUrl()];
-
-      const loadedImages = [];
-      for (let i = 0; i < sources.length; i++) {
-        try {
-          const img = await loadImageElement(sources[i]);
-          loadedImages.push(img);
-        } catch (err) {}
-      }
-
-      if (loadedImages.length === 0) {
-        const fallbackCanvas = document.createElement('canvas');
-        fallbackCanvas.width = 1200;
-        fallbackCanvas.height = 1800;
-        const fctx = fallbackCanvas.getContext('2d');
-        fctx.fillStyle = '#1e293b';
-        fctx.fillRect(0, 0, 1200, 1800);
-        const fallbackImg = await loadImageElement(fallbackCanvas.toDataURL('image/jpeg'));
-        loadedImages.push(fallbackImg);
-      }
-
-      const W = canvas.width;
-      const H = canvas.height;
-
-      if (STATE.printLayout === 'dual_strip') {
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, W, H);
-
-        renderSingleStrip(ctx, theme, captions, loadedImages, 0, 0, W * 0.5, H, variantSeed);
-        renderSingleStrip(ctx, theme, captions, loadedImages, W * 0.5, 0, W * 0.5, H, variantSeed + 97);
-
-        ctx.save();
-        ctx.setLineDash([12, 10]);
-        ctx.strokeStyle = 'rgba(100, 116, 139, 0.55)';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(W * 0.5, Math.round(H * 0.04));
-        ctx.lineTo(W * 0.5, H - Math.round(H * 0.04));
-        ctx.stroke();
-        ctx.restore();
-      } else {
-        const { frameRect, footerRect } = drawThemeBackground(ctx, theme, W, H, variantSeed);
-        const topHeaderSpace = Math.round(H * 0.072);
-        const count = loadedImages.length;
-
-        ctx.fillStyle = theme.textColor;
-        const headerFontPx = Math.max(24, Math.round(W * 0.031));
-        ctx.font = `900 ${headerFontPx}px Cairo, sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(
-          `${theme.stickerLeft}  ${captions.topCaption}  ${theme.stickerRight}`,
-          W * 0.5,
-          frameRect.y + topHeaderSpace * 0.55
-        );
-
-        const slots = computeCenteredPhotoSlots(W, H, count, false);
-        const drawnPhotoRects = [];
-
-        for (let i = 0; i < count && i < slots.length; i++) {
-          const slot = slots[i];
-          drawPhotoFittedInRect(ctx, loadedImages[i], slot.x, slot.y, slot.w, slot.h, {
-            borderColor: theme.accentColor,
-            borderWidth: 4.5,
-            radius: 22
-          });
-          drawnPhotoRects.push({ x: slot.x, y: slot.y, w: slot.w, h: slot.h });
-        }
-
-        drawThemeStickersOverPhotos(ctx, theme, drawnPhotoRects, variantSeed + 509);
-
-        drawFooterCaptionCleanly(
-          ctx,
-          theme,
-          `${theme.stickerLeft}  ${captions.bottomCaption}  ${theme.stickerRight}`,
-          footerRect,
-          Math.max(22, Math.round(W * 0.029))
-        );
-      }
-
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.96);
-      const previewImg = document.getElementById('composedPreviewImg');
-      const fullScreenImg = document.getElementById('fullScreenComposedImg');
-      const printImg = document.getElementById('printOnlyImg');
-      if (previewImg) previewImg.src = dataUrl;
-      if (fullScreenImg) fullScreenImg.src = dataUrl;
-      if (printImg) printImg.src = dataUrl;
-      syncFullScreenPreviewMeta();
-    }
-
-    async function selectTheme(themeId) {
-      if (!THEMES[themeId]) return;
-      STATE.selectedTheme = themeId;
-      const prevClick = Number(STATE.themeCaptionClickIndex[themeId] || 0);
-      STATE.themeCaptionClickIndex[themeId] = prevClick + 1;
-      STATE.themeVariantSeed = ((Number(STATE.themeVariantSeed) || 1) + 7919 + Math.floor(Math.random() * 997)) % 1000000;
-
-      document.querySelectorAll('.theme-pill-btn').forEach((btn) => {
-        const isSelected = btn.getAttribute('data-theme') === themeId;
-        btn.className = isSelected
-          ? 'theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-indigo-600/35 border-amber-300 text-white shadow'
-          : 'theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-slate-900/75 border-white/15 hover:border-white/35 text-slate-200';
-      });
-
-      if (STATE.screen === 'print') {
-        await renderSelphyComposition();
-      }
-    }
-
-    function updatePrintCopiesUI() {
-      const copies = Math.max(1, Number(STATE.printCopies) || 1);
-      const unitPrice = Number(STATE.pricePerCopy) || 5000;
-      const totalPrice = copies * unitPrice;
-      const formattedTotal = `${totalPrice.toLocaleString('en-US')} د.ع`;
-
-      const countEl = document.getElementById('printCopiesValue');
-      const totalEl = document.getElementById('printTotalPriceLabel');
-      const printBtnLabel = document.getElementById('btnDirectPrintLabel');
-
-      if (countEl) countEl.textContent = String(copies);
-      if (totalEl) totalEl.textContent = `المجموع: ${formattedTotal}`;
-      if (printBtnLabel) printBtnLabel.textContent = `طباعة فورية حسب الطابعة (${copies}) — ${formattedTotal}`;
-    }
-
-    function changePrintCopies(delta) {
-      const next = Math.max(1, Math.min(20, (Number(STATE.printCopies) || 1) + Number(delta || 0)));
-      STATE.printCopies = next;
-      updatePrintCopiesUI();
-    }
-
-    async function downloadComposedImage() {
-      await renderSelphyComposition();
-      const canvas = document.getElementById('selphyCanvas');
-      if (!canvas) return;
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.98);
-      const link = document.createElement('a');
-      link.href = dataUrl;
-      link.download = `PRINTER_FIT_NO_CROP_${Date.now()}.jpg`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      announceKioskStatus('تم حفظ الصورة الكاملة بدون قص', true);
-    }
-
-    async function triggerDirectPrint() {
-      applyPrinterPageRule();
-      await renderSelphyComposition();
-      try {
-        window.print();
-      } catch (err) {}
-    }
-
-    function syncFullScreenPreviewMeta() {
-      const metaEl = document.getElementById('fullScreenPreviewMeta');
-      const fsPrintBtnLabel = document.getElementById('btnFullScreenPrintLabel');
-      const themeObj = THEMES[STATE.selectedTheme] || THEMES.kids;
-      const layoutLabel = STATE.printLayout === 'postcard' ? 'بوست كارت' : 'شريطين';
-      const copies = Math.max(1, Number(STATE.printCopies) || 1);
-      const total = copies * (Number(STATE.pricePerCopy) || 5000);
-      if (metaEl) metaEl.textContent = `${STATE.shotCount} صور • ${layoutLabel} • ثيم ${themeObj.label} • ${copies} نسخة`;
-      if (fsPrintBtnLabel) fsPrintBtnLabel.textContent = `طباعة فورية (${copies}) — ${total.toLocaleString('en-US')} د.ع`;
-    }
-
-    async function openFullScreenPreview() {
-      applyPrinterPageRule();
-      await renderSelphyComposition();
-      syncFullScreenPreviewMeta();
-      const modal = document.getElementById('fullScreenPreviewModal');
-      if (modal) modal.classList.remove('hidden');
-    }
-
-    function closeFullScreenPreview() {
-      const modal = document.getElementById('fullScreenPreviewModal');
-      if (modal) modal.classList.add('hidden');
-    }
-
-    async function resetToStartScreen() {
-      STATE.sessionId += 1;
-      STATE.isCaptureRunning = false;
-      STATE.isStartingSequence = false;
-      STATE.capturedPhotos = [];
-      STATE.printCopies = 1;
-      updatePrintCopiesUI();
-
-      const overlay = document.getElementById('countdownOverlay');
-      if (overlay) overlay.classList.add('hidden');
-
-      setActiveScreen('start');
-      syncHomeSelectionButtons();
-      await ensureCameraReady(false);
-    }
-
-    window.addEventListener('DOMContentLoaded', async () => {
-      installViewportLocks();
-      bindStartButtonEvents();
-      startSimulatedCameraLoop();
-      syncHomeSelectionButtons();
-      await selectTheme('kids');
-      updatePrintCopiesUI();
-      await ensureCameraReady(false);
-
-      document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) ensureCameraReady(!STATE.hasLiveVideoStream).catch(() => {});
-      });
-
-      const resumeVideoOnGesture = () => {
-        if (STATE.stream) {
-          attachStreamToVideos(STATE.stream);
-          unlockVideoPlaybackOnGesture().catch(() => {});
-        } else if (!STATE.hasLiveVideoStream) {
-          ensureCameraReady(false).catch(() => {});
-        }
-      };
-
-      document.addEventListener('pointerdown', resumeVideoOnGesture, { passive: true });
-      document.addEventListener('click', resumeVideoOnGesture, { passive: true });
-      window.addEventListener('resize', () => syncCameraVisualTargets());
-    });
-  </script>
+    </script>
 </body>
 </html>
