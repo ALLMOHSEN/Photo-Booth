@@ -1041,37 +1041,107 @@
       syncCameraVisualTargets();
     }
 
+    function computePageFrameGeometry(width, height) {
+      const safeInsetX = Math.max(44, Math.round(width * 0.05));
+      const safeInsetY = Math.max(48, Math.round(height * 0.032));
+      const frameX = safeInsetX;
+      const frameY = safeInsetY;
+      const frameW = Math.max(120, width - safeInsetX * 2);
+      const frameH = Math.max(220, height - safeInsetY * 2);
+
+      const footerInnerPad = Math.max(14, Math.round(height * 0.012));
+      const footerZoneH = Math.max(76, Math.min(126, Math.round(frameH * 0.072)));
+      const footerRect = {
+        x: frameX + Math.max(16, Math.round(frameW * 0.035)),
+        y: frameY + frameH - footerZoneH - footerInnerPad,
+        w: Math.max(80, frameW - Math.max(32, Math.round(frameW * 0.07))),
+        h: footerZoneH
+      };
+
+      return {
+        frameRect: { x: frameX, y: frameY, w: frameW, h: frameH },
+        footerRect
+      };
+    }
+
+    function computeCenteredPhotoSlots(width, height, count, isDualStrip = false) {
+      const safeCount = count === 4 ? 4 : 3;
+
+      if (isDualStrip) {
+        const stripW = width * 0.5;
+        const { frameRect, footerRect } = computePageFrameGeometry(stripW, height);
+        const padX = Math.max(24, Math.round(stripW * 0.085));
+        const topPad = frameRect.y + Math.round(height * 0.024);
+        const bottomLimit = footerRect.y - Math.round(height * 0.018);
+        const gap = Math.round(height * 0.014);
+        const availH = Math.max(90, bottomLimit - topPad - gap * (safeCount - 1));
+        const photoH = availH / safeCount;
+        const photoW = Math.max(60, stripW - padX * 2);
+        const totalStackH = photoH * safeCount + gap * (safeCount - 1);
+        const startY = topPad + Math.max(0, (availH - totalStackH) * 0.5);
+        const centeredX = Math.round((stripW - photoW) * 0.5);
+
+        return Array.from({ length: safeCount }, (_, i) => ({
+          x: centeredX,
+          y: startY + i * (photoH + gap),
+          w: photoW,
+          h: photoH
+        }));
+      }
+
+      const { frameRect, footerRect } = computePageFrameGeometry(width, height);
+      const topHeaderSpace = Math.round(height * 0.072);
+      const innerSidePad = Math.round(frameRect.w * 0.045);
+      const photosTopY = frameRect.y + topHeaderSpace + Math.round(height * 0.008);
+      const photosBottomY = footerRect.y - Math.round(height * 0.016);
+      const availPhotosH = Math.max(120, photosBottomY - photosTopY);
+      const fullContentW = Math.max(120, frameRect.w - innerSidePad * 2);
+
+      if (safeCount === 4) {
+        const cols = 2;
+        const rows = 2;
+        const gapX = Math.round(width * 0.024);
+        const gapY = Math.round(height * 0.018);
+        const cellW = (fullContentW - gapX) / cols;
+        const cellH = Math.max(60, (availPhotosH - gapY) / rows);
+        const gridTotalW = cellW * cols + gapX;
+        const gridTotalH = cellH * rows + gapY;
+        const gridStartX = Math.round((width - gridTotalW) * 0.5);
+        const gridStartY = Math.round(photosTopY + Math.max(0, (availPhotosH - gridTotalH) * 0.5));
+
+        return Array.from({ length: 4 }, (_, i) => {
+          const col = i % cols;
+          const row = Math.floor(i / cols);
+          return {
+            x: gridStartX + col * (cellW + gapX),
+            y: gridStartY + row * (cellH + gapY),
+            w: cellW,
+            h: cellH
+          };
+        });
+      }
+
+      const gap = Math.round(height * 0.016);
+      const cellH = Math.max(70, (availPhotosH - gap * (safeCount - 1)) / safeCount);
+      const cellW = fullContentW;
+      const totalStackH = cellH * safeCount + gap * (safeCount - 1);
+      const startY = Math.round(photosTopY + Math.max(0, (availPhotosH - totalStackH) * 0.5));
+      const centeredX = Math.round((width - cellW) * 0.5);
+
+      return Array.from({ length: safeCount }, (_, i) => ({
+        x: centeredX,
+        y: startY + i * (cellH + gap),
+        w: cellW,
+        h: cellH
+      }));
+    }
+
     function getActiveSlotAspectRatio() {
       const count = STATE.shotCount === 4 ? 4 : 3;
-      const W = 1200;
-      const H = 1800;
-      const topHeaderSpace = Math.round(H * 0.088);
-      const bottomCaptionSpace = Math.round(H * 0.082);
-      const sideMargin = Math.round(W * 0.085);
-
-      if (STATE.printLayout === 'dual_strip') {
-        const stripW = W * 0.5;
-        const padX = Math.round(stripW * 0.085);
-        const topPad = Math.round(H * 0.068);
-        const bottomSpace = Math.round(H * 0.125);
-        const gap = Math.round(H * 0.012);
-        const photoW = stripW - padX * 2;
-        const photoH = (H - topPad - bottomSpace - gap * (count - 1)) / count;
-        return Math.max(0.2, photoW / Math.max(1, photoH));
-      }
-
-      if (count === 4) {
-        const gapX = Math.round(W * 0.024);
-        const gapY = Math.round(H * 0.016);
-        const cellW = (W - sideMargin * 2 - gapX) / 2;
-        const cellH = (H - Math.round(H * 0.08) - topHeaderSpace - bottomCaptionSpace - gapY) / 2;
-        return Math.max(0.2, cellW / Math.max(1, cellH));
-      }
-
-      const gap = Math.round(H * 0.015);
-      const cellW = W - sideMargin * 2;
-      const cellH = (H - Math.round(H * 0.08) - topHeaderSpace - bottomCaptionSpace - gap * (count - 1)) / count;
-      return Math.max(0.2, cellW / Math.max(1, cellH));
+      const slots = computeCenteredPhotoSlots(1200, 1800, count, STATE.printLayout === 'dual_strip');
+      const primarySlot = slots[0];
+      if (!primarySlot || !primarySlot.w || !primarySlot.h) return 2 / 3;
+      return Math.max(0.2, primarySlot.w / primarySlot.h);
     }
 
     function computeCoverGuideRect(containerW, containerH, targetAspect) {
@@ -1079,8 +1149,7 @@
       const safeH = Math.max(1, containerH);
       const maxW = safeW * 0.72;
       const maxH = safeH * 0.68;
-      const defaultAspect = STATE.printLayout === 'postcard' ? (2 / 3) : (targetAspect || (2 / 3));
-      const safeAspect = Math.max(0.25, Math.min(4.0, defaultAspect));
+      const safeAspect = Math.max(0.25, Math.min(4.0, targetAspect || (2 / 3)));
 
       let w = maxW;
       let h = w / safeAspect;
@@ -1910,21 +1979,8 @@
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, width, height);
 
-      const safeInsetX = Math.max(44, Math.round(width * 0.05));
-      const safeInsetY = Math.max(48, Math.round(height * 0.032));
-      const frameX = safeInsetX;
-      const frameY = safeInsetY;
-      const frameW = Math.max(120, width - safeInsetX * 2);
-      const frameH = Math.max(220, height - safeInsetY * 2);
-
-      const footerInnerPad = Math.max(14, Math.round(height * 0.012));
-      const footerZoneH = Math.max(76, Math.min(126, Math.round(frameH * 0.072)));
-      const footerRect = {
-        x: frameX + Math.max(16, Math.round(frameW * 0.035)),
-        y: frameY + frameH - footerZoneH - footerInnerPad,
-        w: Math.max(80, frameW - Math.max(32, Math.round(frameW * 0.07))),
-        h: footerZoneH
-      };
+      const { frameRect, footerRect } = computePageFrameGeometry(width, height);
+      const { x: frameX, y: frameY, w: frameW, h: frameH } = frameRect;
 
       const puffCount = 5 + Math.floor(rng() * 4);
       for (let p = 0; p < puffCount; p++) {
@@ -1983,10 +2039,7 @@
       ctx.stroke();
       ctx.restore();
 
-      return {
-        frameRect: { x: frameX, y: frameY, w: frameW, h: frameH },
-        footerRect
-      };
+      return { frameRect, footerRect };
     }
 
     function drawFooterCaptionCleanly(ctx, theme, text, footerRect, baseFontSize) {
@@ -2065,28 +2118,22 @@
       tempCan.width = stripW;
       tempCan.height = stripH;
       const tctx = tempCan.getContext('2d');
-      const { frameRect, footerRect } = drawThemeBackground(tctx, theme, stripW, stripH, variantSeed);
+      const { footerRect } = drawThemeBackground(tctx, theme, stripW, stripH, variantSeed);
       ctx.drawImage(tempCan, stripX, stripY);
 
-      const padX = Math.max(24, Math.round(stripW * 0.085));
-      const topPad = frameRect.y + Math.round(stripH * 0.022);
-      const bottomLimit = stripY + footerRect.y - Math.round(stripH * 0.016);
-      const gap = Math.round(stripH * 0.012);
-      const count = images.length;
-      const availH = Math.max(90, bottomLimit - topPad - gap * (count - 1));
-      const photoH = availH / count;
-      const photoW = Math.max(60, stripW - padX * 2);
-      const centeredX = stripX + Math.round((stripW - photoW) * 0.5);
+      const slots = computeCenteredPhotoSlots(stripW, stripH, images.length, true);
       const drawnPhotoRects = [];
 
-      for (let i = 0; i < count; i++) {
-        const py = topPad + i * (photoH + gap);
-        drawPhotoFittedInRect(ctx, images[i], centeredX, py, photoW, photoH, {
+      for (let i = 0; i < images.length && i < slots.length; i++) {
+        const slot = slots[i];
+        const px = stripX + slot.x;
+        const py = stripY + slot.y;
+        drawPhotoFittedInRect(ctx, images[i], px, py, slot.w, slot.h, {
           borderColor: theme.accentColor,
           borderWidth: 3.5,
           radius: 16
         });
-        drawnPhotoRects.push({ x: centeredX, y: py, w: photoW, h: photoH });
+        drawnPhotoRects.push({ x: px, y: py, w: slot.w, h: slot.h });
       }
 
       drawThemeStickersOverPhotos(ctx, theme, drawnPhotoRects, variantSeed + 313);
@@ -2162,11 +2209,8 @@
         ctx.restore();
       } else {
         const { frameRect, footerRect } = drawThemeBackground(ctx, theme, W, H, variantSeed);
-
         const topHeaderSpace = Math.round(H * 0.072);
-        const innerSidePad = Math.round(frameRect.w * 0.045);
         const count = loadedImages.length;
-        const drawnPhotoRects = [];
 
         ctx.fillStyle = theme.textColor;
         const headerFontPx = Math.max(24, Math.round(W * 0.031));
@@ -2179,48 +2223,17 @@
           frameRect.y + topHeaderSpace * 0.55
         );
 
-        const photosTopY = frameRect.y + topHeaderSpace + Math.round(H * 0.008);
-        const photosBottomY = footerRect.y - Math.round(H * 0.016);
-        const availPhotosH = Math.max(120, photosBottomY - photosTopY);
-        const fullContentW = Math.max(120, frameRect.w - innerSidePad * 2);
+        const slots = computeCenteredPhotoSlots(W, H, count, false);
+        const drawnPhotoRects = [];
 
-        if (count === 4) {
-          const cols = 2;
-          const rows = 2;
-          const gapX = Math.round(W * 0.024);
-          const gapY = Math.round(H * 0.016);
-          const cellW = (fullContentW - gapX) / cols;
-          const cellH = Math.max(60, (availPhotosH - gapY) / rows);
-          const gridTotalW = cellW * cols + gapX;
-          const gridStartX = Math.round((W - gridTotalW) * 0.5);
-
-          for (let i = 0; i < 4; i++) {
-            const col = i % cols;
-            const row = Math.floor(i / cols);
-            const x = gridStartX + col * (cellW + gapX);
-            const y = photosTopY + row * (cellH + gapY);
-            drawPhotoFittedInRect(ctx, loadedImages[i], x, y, cellW, cellH, {
-              borderColor: theme.accentColor,
-              borderWidth: 4.5,
-              radius: 22
-            });
-            drawnPhotoRects.push({ x, y, w: cellW, h: cellH });
-          }
-        } else {
-          const gap = Math.round(H * 0.015);
-          const cellH = Math.max(70, (availPhotosH - gap * (count - 1)) / count);
-          const cellW = fullContentW;
-          const centeredX = Math.round((W - cellW) * 0.5);
-
-          for (let i = 0; i < count; i++) {
-            const y = photosTopY + i * (cellH + gap);
-            drawPhotoFittedInRect(ctx, loadedImages[i], centeredX, y, cellW, cellH, {
-              borderColor: theme.accentColor,
-              borderWidth: 4.5,
-              radius: 22
-            });
-            drawnPhotoRects.push({ x: centeredX, y, w: cellW, h: cellH });
-          }
+        for (let i = 0; i < count && i < slots.length; i++) {
+          const slot = slots[i];
+          drawPhotoFittedInRect(ctx, loadedImages[i], slot.x, slot.y, slot.w, slot.h, {
+            borderColor: theme.accentColor,
+            borderWidth: 4.5,
+            radius: 22
+          });
+          drawnPhotoRects.push({ x: slot.x, y: slot.y, w: slot.w, h: slot.h });
         }
 
         drawThemeStickersOverPhotos(ctx, theme, drawnPhotoRects, variantSeed + 509);
