@@ -2121,3 +2121,567 @@
         const py = cy + Math.sin(angle) * (r * 0.65);
         ctx.fillStyle = petalColor;
         ctx.beginPath();
+        ctx.arc(px, py, r * 0.45, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.fillStyle = centerColor;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.36, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawCuteSparkle(ctx, cx, cy, r, color) {
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - r);
+      ctx.quadraticCurveTo(cx, cy, cx + r, cy);
+      ctx.quadraticCurveTo(cx, cy, cx, cy + r);
+      ctx.quadraticCurveTo(cx, cy, cx - r, cy);
+      ctx.quadraticCurveTo(cx, cy, cx, cy - r);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawCuteBalloon(ctx, cx, cy, scale, fillColor, stringColor) {
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.scale(scale, scale);
+      ctx.strokeStyle = stringColor;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, 22);
+      ctx.quadraticCurveTo(-8, 34, 2, 46);
+      ctx.stroke();
+
+      ctx.fillStyle = fillColor;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 17, 22, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+      ctx.beginPath();
+      ctx.ellipse(-5, -7, 4.5, 7, -0.35, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawCuteCrown(ctx, cx, cy, scale, color) {
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.scale(scale, scale);
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.moveTo(-20, 10);
+      ctx.lineTo(-22, -10);
+      ctx.lineTo(-9, 1);
+      ctx.lineTo(0, -14);
+      ctx.lineTo(9, 1);
+      ctx.lineTo(22, -10);
+      ctx.lineTo(20, 10);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    /**
+     * Draw cute theme background illustrations + soft clouds/bokeh inside Borderless safe area
+     */
+    function drawThemeBackground(ctx, theme, width, height, variantSeed = 0) {
+      const rng = createSeededRng(variantSeed + theme.id.split('').reduce((a, b) => a + b.charCodeAt(0) * 31, 17));
+      const grad = ctx.createLinearGradient(0, 0, width * 0.25, height);
+      grad.addColorStop(0, theme.bgTop);
+      grad.addColorStop(1, theme.bgBottom);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, width, height);
+
+      const safeInsetX = Math.max(54, Math.round(width * 0.052));
+      const safeInsetY = Math.max(76, Math.round(height * 0.052));
+
+      const puffCount = 5 + Math.floor(rng() * 4);
+      for (let p = 0; p < puffCount; p++) {
+        const px = safeInsetX + rng() * Math.max(40, width - safeInsetX * 2);
+        const py = safeInsetY + rng() * Math.max(40, height - safeInsetY * 2);
+        const pr = Math.max(70, Math.min(width, height) * (0.12 + rng() * 0.12));
+        const puffGrad = ctx.createRadialGradient(px, py, 8, px, py, pr);
+        puffGrad.addColorStop(0, `${theme.borderColor}28`);
+        puffGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = puffGrad;
+        ctx.beginPath();
+        ctx.arc(px, py, pr, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      const itemCount = 14 + Math.floor(rng() * 8);
+      for (let i = 0; i < itemCount; i++) {
+        const x = safeInsetX + 18 + rng() * Math.max(40, width - (safeInsetX + 18) * 2);
+        const y = safeInsetY + 24 + rng() * Math.max(40, height - (safeInsetY + 24) * 2);
+        const scale = 0.68 + rng() * 0.82;
+        const rot = (rng() - 0.5) * 0.55;
+
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(rot);
+
+        if (theme.pattern === 'stars') {
+          const mode = i % 3;
+          if (mode === 0) {
+            drawCuteStar(ctx, 0, 0, 22 * scale, 10 * scale, 'rgba(245, 158, 11, 0.28)');
+          } else if (mode === 1) {
+            drawCuteBalloon(ctx, 0, 0, 0.85 * scale, 'rgba(56, 189, 248, 0.26)', 'rgba(245, 158, 11, 0.35)');
+          } else {
+            drawCuteSparkle(ctx, 0, 0, 18 * scale, 'rgba(251, 146, 60, 0.26)');
+          }
+        } else if (theme.pattern === 'hearts') {
+          if (i % 3 === 0) {
+            drawCuteHeart(ctx, 0, 0, 28 * scale, 'rgba(236, 72, 153, 0.25)');
+          } else if (i % 3 === 1) {
+            drawCuteFlower(ctx, 0, 0, 20 * scale, 'rgba(244, 114, 182, 0.25)', 'rgba(253, 224, 71, 0.35)');
+          } else {
+            drawCuteSparkle(ctx, 0, 0, 20 * scale, 'rgba(244, 63, 94, 0.24)');
+          }
+        } else if (theme.pattern === 'neon') {
+          if (i % 2 === 0) {
+            drawCuteSparkle(ctx, 0, 0, 22 * scale, 'rgba(34, 211, 238, 0.28)');
+          } else {
+            drawCuteStar(ctx, 0, 0, 19 * scale, 8.5 * scale, 'rgba(96, 165, 250, 0.26)');
+          }
+        } else if (theme.pattern === 'gold') {
+          if (i % 3 === 0) {
+            drawCuteCrown(ctx, 0, 0, 0.85 * scale, 'rgba(250, 204, 21, 0.25)');
+          } else {
+            drawCuteSparkle(ctx, 0, 0, 22 * scale, 'rgba(250, 204, 21, 0.25)');
+          }
+        } else if (theme.pattern === 'pastel') {
+          if (i % 2 === 0) {
+            drawCuteFlower(ctx, 0, 0, 24 * scale, 'rgba(192, 132, 252, 0.28)', 'rgba(251, 191, 36, 0.35)');
+          } else {
+            drawCuteHeart(ctx, 0, 0, 24 * scale, 'rgba(52, 211, 153, 0.24)');
+          }
+        } else {
+          if (i % 3 === 0) {
+            drawCuteCrown(ctx, 0, 0, 0.8 * scale, 'rgba(197, 160, 89, 0.24)');
+          } else {
+            drawCuteSparkle(ctx, 0, 0, 20 * scale, 'rgba(197, 160, 89, 0.26)');
+          }
+        }
+        ctx.restore();
+      }
+
+      ctx.save();
+      ctx.strokeStyle = theme.borderColor;
+      ctx.lineWidth = 10;
+      roundRectPath(ctx, safeInsetX, safeInsetY, width - safeInsetX * 2, height - safeInsetY * 2, 30);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    /**
+     * Draw cute stickers over photo corners/edges with randomized placement, scale, and tilt each time
+     */
+    function drawThemeStickersOverPhotos(ctx, theme, photoRects, variantSeed = 0) {
+      if (!ctx || !theme || !Array.isArray(photoRects) || photoRects.length === 0) return;
+
+      const palette = Array.isArray(theme.overlayStickers) && theme.overlayStickers.length > 0
+        ? theme.overlayStickers
+        : [theme.stickerLeft, theme.stickerRight, '✨'];
+
+      photoRects.forEach((rect, idx) => {
+        if (!rect || rect.w <= 20 || rect.h <= 20) return;
+        const rng = createSeededRng(variantSeed + idx * 977 + theme.id.charCodeAt(0) * 131);
+        const cornerChoices = [
+          { x: rect.x + 18, y: rect.y + 18 },
+          { x: rect.x + rect.w - 18, y: rect.y + 18 },
+          { x: rect.x + 18, y: rect.y + rect.h - 18 },
+          { x: rect.x + rect.w - 18, y: rect.y + rect.h - 18 }
+        ];
+
+        const firstIdx = Math.floor(rng() * cornerChoices.length);
+        let secondIdx = Math.floor(rng() * cornerChoices.length);
+        if (secondIdx === firstIdx) {
+          secondIdx = (firstIdx + 2) % cornerChoices.length;
+        }
+
+        [firstIdx, secondIdx].forEach((cIdx, sPos) => {
+          const spot = cornerChoices[cIdx];
+          const stickerChar = palette[Math.floor(rng() * palette.length)];
+          const fontPx = Math.max(26, Math.min(58, Math.round(Math.min(rect.w, rect.h) * (0.13 + rng() * 0.04))));
+          const angle = (rng() - 0.5) * 0.52;
+          const jitterX = (rng() - 0.5) * 8;
+          const jitterY = (rng() - 0.5) * 8;
+
+          ctx.save();
+          ctx.translate(spot.x + jitterX, spot.y + jitterY + (sPos === 1 ? 2 : 0));
+          ctx.rotate(angle);
+          ctx.font = `900 ${fontPx}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", Cairo, sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+
+          ctx.shadowColor = 'rgba(255, 255, 255, 0.85)';
+          ctx.shadowBlur = 10;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
+          ctx.fillText(stickerChar, 0, 0);
+          ctx.restore();
+        });
+      });
+    }
+
+    /**
+     * Render single 2x6 photo strip (600x1800 px) for dual-strip (شريطين) mode
+     */
+    function renderSingleStrip(ctx, theme, captions, images, stripX, stripY, stripW, stripH, variantSeed = 0) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(stripX, stripY, stripW, stripH);
+      ctx.clip();
+
+      const tempCan = document.createElement('canvas');
+      tempCan.width = stripW;
+      tempCan.height = stripH;
+      const tctx = tempCan.getContext('2d');
+      drawThemeBackground(tctx, theme, stripW, stripH, variantSeed);
+      ctx.drawImage(tempCan, stripX, stripY);
+
+      ctx.strokeStyle = theme.borderColor;
+      ctx.lineWidth = 6;
+      ctx.strokeRect(stripX + 26, stripY + 54, stripW - 52, stripH - 108);
+
+      const padX = 42;
+      const topPad = 76;
+      const bottomHeaderH = 186;
+      const gap = 22;
+      const count = images.length;
+      const availH = stripH - topPad - bottomHeaderH - gap * (count - 1);
+      const photoH = availH / count;
+      const photoW = stripW - padX * 2;
+      const drawnPhotoRects = [];
+
+      for (let i = 0; i < count; i++) {
+        const px = stripX + padX;
+        const py = topPad + i * (photoH + gap);
+        drawPhotoFittedInRect(
+          ctx,
+          images[i],
+          px,
+          py,
+          photoW,
+          photoH,
+          {
+            borderColor: theme.accentColor,
+            borderWidth: 3.5,
+            radius: 16
+          }
+        );
+        drawnPhotoRects.push({ x: px, y: py, w: photoW, h: photoH });
+      }
+
+      drawThemeStickersOverPhotos(ctx, theme, drawnPhotoRects, variantSeed + 313);
+
+      ctx.fillStyle = theme.textColor;
+      ctx.font = '800 25px Cairo, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`${theme.stickerLeft} ${captions.topCaption} ${theme.stickerRight}`, stripX + stripW / 2, stripY + stripH - 104);
+
+      ctx.restore();
+    }
+
+    /**
+     * Render 1200x1800 px (100mm x 148mm / Postcard 4x6 inch at 300 DPI) Canon SELPHY composition
+     * with built-in Borderless safe margins so top, bottom, and side edges never clip
+     */
+    async function renderSelphyComposition() {
+      const canvas = document.getElementById('selphyCanvas');
+      if (!canvas) return;
+      canvas.width = 1200;
+      canvas.height = 1800;
+
+      const ctx = canvas.getContext('2d');
+      const theme = THEMES[STATE.selectedTheme] || THEMES.kids;
+      const variantSeed = STATE.themeVariantSeed || 1;
+      const captions = getThemeCaptions(theme, variantSeed);
+
+      const sources = STATE.capturedPhotos.length > 0
+        ? STATE.capturedPhotos
+        : [captureFrameToDataUrl()];
+
+      const loadedImages = [];
+      for (let i = 0; i < sources.length; i++) {
+        try {
+          const img = await loadImageElement(sources[i]);
+          loadedImages.push(img);
+        } catch (err) {}
+      }
+
+      if (loadedImages.length === 0) {
+        const fallbackCanvas = document.createElement('canvas');
+        fallbackCanvas.width = 1200;
+        fallbackCanvas.height = 1800;
+        const fctx = fallbackCanvas.getContext('2d');
+        fctx.fillStyle = '#1e293b';
+        fctx.fillRect(0, 0, 1200, 1800);
+        const fallbackImg = await loadImageElement(fallbackCanvas.toDataURL('image/jpeg'));
+        loadedImages.push(fallbackImg);
+      }
+
+      const W = canvas.width;
+      const H = canvas.height;
+
+      if (STATE.printLayout === 'dual_strip') {
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, W, H);
+
+        renderSingleStrip(ctx, theme, captions, loadedImages, 0, 0, 600, H, variantSeed);
+        renderSingleStrip(ctx, theme, captions, loadedImages, 600, 0, 600, H, variantSeed + 97);
+
+        ctx.save();
+        ctx.setLineDash([12, 10]);
+        ctx.strokeStyle = 'rgba(100, 116, 139, 0.55)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(600, 64);
+        ctx.lineTo(600, H - 64);
+        ctx.stroke();
+        ctx.restore();
+      } else {
+        drawThemeBackground(ctx, theme, W, H, variantSeed);
+
+        const headerHeight = 204;
+        const footerHeight = 184;
+        const sideMargin = 96;
+        const count = loadedImages.length;
+        const drawnPhotoRects = [];
+
+        ctx.fillStyle = theme.textColor;
+        ctx.font = '900 40px Cairo, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`${theme.stickerLeft}  ${captions.topCaption}  ${theme.stickerRight}`, W / 2, 132);
+
+        if (count === 4) {
+          const cols = 2;
+          const rows = 2;
+          const gapX = 32;
+          const gapY = 32;
+          const availW = W - sideMargin * 2 - gapX * (cols - 1);
+          const availH = H - headerHeight - footerHeight - gapY * (rows - 1);
+          const cellW = availW / cols;
+          const cellH = availH / rows;
+
+          for (let i = 0; i < 4; i++) {
+            const col = i % cols;
+            const row = Math.floor(i / cols);
+            const x = sideMargin + col * (cellW + gapX);
+            const y = headerHeight + row * (cellH + gapY);
+            drawPhotoFittedInRect(
+              ctx,
+              loadedImages[i],
+              x,
+              y,
+              cellW,
+              cellH,
+              {
+                borderColor: theme.accentColor,
+                borderWidth: 4.5,
+                radius: 22
+              }
+            );
+            drawnPhotoRects.push({ x, y, w: cellW, h: cellH });
+          }
+        } else {
+          const gap = countGapForShots(count);
+          const availH = H - headerHeight - footerHeight - gap * (count - 1);
+          const cellH = availH / count;
+          const cellW = W - sideMargin * 2;
+
+          for (let i = 0; i < count; i++) {
+            const y = headerHeight + i * (cellH + gap);
+            drawPhotoFittedInRect(
+              ctx,
+              loadedImages[i],
+              sideMargin,
+              y,
+              cellW,
+              cellH,
+              {
+                borderColor: theme.accentColor,
+                borderWidth: 4.5,
+                radius: 22
+              }
+            );
+            drawnPhotoRects.push({ x: sideMargin, y, w: cellW, h: cellH });
+          }
+        }
+
+        drawThemeStickersOverPhotos(ctx, theme, drawnPhotoRects, variantSeed + 509);
+
+        ctx.fillStyle = theme.textColor;
+        ctx.font = '800 34px Cairo, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`${theme.stickerLeft}  ${captions.bottomCaption}  ${theme.stickerRight}`, W / 2, H - 102);
+      }
+
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.96);
+      const previewImg = document.getElementById('composedPreviewImg');
+      const fullScreenImg = document.getElementById('fullScreenComposedImg');
+      const printImg = document.getElementById('printOnlyImg');
+      if (previewImg) previewImg.src = dataUrl;
+      if (fullScreenImg) fullScreenImg.src = dataUrl;
+      if (printImg) printImg.src = dataUrl;
+      syncFullScreenPreviewMeta();
+    }
+
+    function countGapForShots(shotCount) {
+      return shotCount >= 4 ? 22 : 28;
+    }
+
+    /**
+     * One-tap theme selection: rotates captions and layout/sticker variation on every press
+     */
+    async function selectTheme(themeId) {
+      if (!THEMES[themeId]) return;
+      STATE.selectedTheme = themeId;
+      const prevClick = Number(STATE.themeCaptionClickIndex[themeId] || 0);
+      STATE.themeCaptionClickIndex[themeId] = prevClick + 1;
+      STATE.themeVariantSeed = ((Number(STATE.themeVariantSeed) || 1) + 7919 + Math.floor(Math.random() * 997)) % 1000000;
+
+      document.querySelectorAll('.theme-pill-btn').forEach((btn) => {
+        const isSelected = btn.getAttribute('data-theme') === themeId;
+        btn.className = isSelected
+          ? 'theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-indigo-600/35 border-amber-300 text-white shadow'
+          : 'theme-pill-btn p-2.5 sm:p-3 rounded-2xl border-2 text-right transition flex items-center gap-2.5 bg-slate-900/75 border-white/15 hover:border-white/35 text-slate-200';
+      });
+
+      if (STATE.screen === 'print') {
+        await renderSelphyComposition();
+      }
+    }
+
+    /**
+     * Print copies counter UI
+     */
+    function updatePrintCopiesUI() {
+      const copies = Math.max(1, Number(STATE.printCopies) || 1);
+      const unitPrice = Number(STATE.pricePerCopy) || 5000;
+      const totalPrice = copies * unitPrice;
+      const formattedTotal = `${totalPrice.toLocaleString('en-US')} د.ع`;
+
+      const countEl = document.getElementById('printCopiesValue');
+      const totalEl = document.getElementById('printTotalPriceLabel');
+      const printBtnLabel = document.getElementById('btnDirectPrintLabel');
+
+      if (countEl) countEl.textContent = String(copies);
+      if (totalEl) totalEl.textContent = `المجموع: ${formattedTotal}`;
+      if (printBtnLabel) printBtnLabel.textContent = `طباعة فورية (${copies}) — ${formattedTotal}`;
+    }
+
+    function changePrintCopies(delta) {
+      const next = Math.max(1, Math.min(20, (Number(STATE.printCopies) || 1) + Number(delta || 0)));
+      STATE.printCopies = next;
+      updatePrintCopiesUI();
+    }
+
+    /**
+     * Direct print trigger calibrated for Canon SELPHY Postcard (4in x 6in / 100mm x 148mm)
+     */
+    async function triggerDirectPrint() {
+      await renderSelphyComposition();
+      setTimeout(() => {
+        try {
+          window.print();
+        } catch (err) {}
+      }, 100);
+    }
+
+    function syncFullScreenPreviewMeta() {
+      const metaEl = document.getElementById('fullScreenPreviewMeta');
+      const fsPrintBtnLabel = document.getElementById('btnFullScreenPrintLabel');
+      const themeObj = THEMES[STATE.selectedTheme] || THEMES.kids;
+      const layoutLabel = STATE.printLayout === 'postcard' ? 'بوست كارت' : 'شريطين';
+      const copies = Math.max(1, Number(STATE.printCopies) || 1);
+      const total = copies * (Number(STATE.pricePerCopy) || 5000);
+      if (metaEl) {
+        metaEl.textContent = `${STATE.shotCount} صور • ${layoutLabel} • ثيم ${themeObj.label} • ${copies} نسخة`;
+      }
+      if (fsPrintBtnLabel) {
+        fsPrintBtnLabel.textContent = `طباعة فورية (${copies}) — ${total.toLocaleString('en-US')} د.ع`;
+      }
+    }
+
+    async function openFullScreenPreview() {
+      await renderSelphyComposition();
+      syncFullScreenPreviewMeta();
+      const modal = document.getElementById('fullScreenPreviewModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+      }
+    }
+
+    function closeFullScreenPreview() {
+      const modal = document.getElementById('fullScreenPreviewModal');
+      if (modal) {
+        modal.classList.add('hidden');
+      }
+    }
+
+    /**
+     * Return cleanly to Screen 1 (Start Kiosk)
+     */
+    async function resetToStartScreen() {
+      STATE.sessionId += 1;
+      STATE.isCaptureRunning = false;
+      STATE.isStartingSequence = false;
+      STATE.capturedPhotos = [];
+      STATE.printCopies = 1;
+      updatePrintCopiesUI();
+
+      const overlay = document.getElementById('countdownOverlay');
+      if (overlay) {
+        overlay.classList.add('hidden');
+      }
+
+      setActiveScreen('start');
+      syncHomeSelectionButtons();
+      await ensureCameraReady(false);
+    }
+
+    /**
+     * Initialize Kiosk on Load
+     */
+    window.addEventListener('DOMContentLoaded', async () => {
+      installViewportLocks();
+      bindStartButtonEvents();
+      startSimulatedCameraLoop();
+      syncHomeSelectionButtons();
+      await selectTheme('kids');
+      updatePrintCopiesUI();
+      await ensureCameraReady(false);
+
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+          ensureCameraReady(!STATE.hasLiveVideoStream).catch(() => {});
+        }
+      });
+
+      const resumeVideoOnGesture = () => {
+        if (STATE.stream) {
+          attachStreamToVideos(STATE.stream);
+          unlockVideoPlaybackOnGesture().catch(() => {});
+        } else if (!STATE.hasLiveVideoStream) {
+          ensureCameraReady(false).catch(() => {});
+        }
+      };
+
+      document.addEventListener('pointerdown', resumeVideoOnGesture, { passive: true });
+      document.addEventListener('click', resumeVideoOnGesture, { passive: true });
+      window.addEventListener('resize', () => {
+        syncCameraVisualTargets();
+      });
+    });
+  </script>
+</body>
+</html>
