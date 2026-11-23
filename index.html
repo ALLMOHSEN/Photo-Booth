@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>فوتو بوث الذكريات | Canon SELPHY CP1500</title>
+  <title>فوتو بوث الذكريات | طباعة متوافقة مع قياس الطابعة</title>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -12,6 +12,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style id="dynamicPageStyle">
+    @page {
+      size: 100mm 148mm;
+      margin: 0mm;
+    }
+  </style>
 
   <style>
     /* Strict Kiosk Viewport & Touch Lock */
@@ -159,12 +166,6 @@
       display: none;
     }
 
-    /* Canon SELPHY CP1500 Postcard (100mm x 148mm / 4x6 in) Calibrated Print Rules */
-    @page {
-      size: 100mm 148mm;
-      margin: 0mm;
-    }
-
     @media print {
       * {
         -webkit-print-color-adjust: exact !important;
@@ -212,7 +213,7 @@
         height: 100vh !important;
         max-width: 100vw !important;
         max-height: 100vh !important;
-        object-fit: contain !important;
+        object-fit: cover !important;
         margin: 0 !important;
         padding: 0 !important;
         page-break-inside: avoid !important;
@@ -222,9 +223,9 @@
   </style>
 </head>
 <body>
-  <!-- Print-only full-bleed container outside #app for exact CP1500 100x148mm output -->
+  <!-- Full-bleed print container matching selected printer paper size -->
   <div id="printOnlyContainer" aria-hidden="true">
-    <img id="printOnlyImg" alt="Canon SELPHY CP1500 Postcard Print" />
+    <img id="printOnlyImg" alt="Borderless Print Output" />
   </div>
 
   <div id="app" class="relative w-full h-full overflow-hidden">
@@ -284,7 +285,7 @@
     </div>
 
     <!-- ===================================================================== -->
-    <!-- SCREEN 1: START SCREEN (BLURRED BG + SEPARATE 3/4 + POSTCARD/STRIP)  -->
+    <!-- SCREEN 1: START SCREEN                                                -->
     <!-- ===================================================================== -->
     <section id="homeScreen" class="relative w-full h-full flex items-center justify-center p-6 overflow-hidden">
       <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
@@ -328,8 +329,8 @@
           </button>
         </div>
 
-        <!-- Postcard (بوست كارت 10x15) or Dual Strip (شريطين) Picker -->
-        <div class="w-full grid grid-cols-2 gap-3 glass-panel p-2 rounded-3xl" role="group" aria-label="قياس الصورة">
+        <!-- Layout Mode Picker (Postcard or Dual Strip) -->
+        <div class="w-full grid grid-cols-2 gap-3 glass-panel p-2 rounded-3xl" role="group" aria-label="تخطيط الصور">
           <button
             id="btnStartFullFrame"
             type="button"
@@ -389,7 +390,7 @@
         <div id="framingGuideClearWindow">
           <video id="framingGuideClearVideo" autoplay playsinline webkit-playsinline="true" muted class="hidden"></video>
           <canvas id="framingGuideClearCanvas" width="1280" height="720" class="hidden"></canvas>
-          <div id="framingGuideBadge">بوست كارت 10×15 سم</div>
+          <div id="framingGuideBadge">100×148 مم (4×6)</div>
         </div>
       </div>
 
@@ -407,14 +408,14 @@
     </section>
 
     <!-- ===================================================================== -->
-    <!-- SCREEN 3: THEMES + DIRECT PRINT (CP1500 POSTCARD 100mm x 148mm)     -->
+    <!-- SCREEN 3: PAPER SIZE + THEMES + BORDERLESS PRINT                    -->
     <!-- ===================================================================== -->
     <section id="editorScreen" class="hidden relative w-full h-full p-3 sm:p-5 lg:p-6 flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch justify-center overflow-hidden">
       <!-- Left / Top Preview Column -->
       <div class="lg:w-1/2 h-[42%] lg:h-full glass-panel rounded-3xl p-3 sm:p-5 flex flex-col items-center justify-center gap-2 relative overflow-hidden">
         <img
           id="composedPreviewImg"
-          alt="معاينة البوست كارت النهائي"
+          alt="معاينة الطباعة النهائية"
           style="aspect-ratio: 100 / 148;"
           class="max-h-full w-auto rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.85)] border-2 border-white/20 object-contain"
         />
@@ -424,10 +425,38 @@
       <div class="lg:w-1/2 h-[58%] lg:h-full glass-panel rounded-3xl p-3.5 sm:p-5 lg:p-6 flex flex-col justify-between gap-2.5 overflow-hidden">
         <div class="flex flex-col gap-2.5 overflow-y-auto pr-0.5">
           <div class="flex items-center justify-between gap-2">
-            <h2 class="text-base sm:text-xl font-black text-white">الثيم</h2>
+            <h2 class="text-base sm:text-xl font-black text-white">قياس الطابعة والثيم</h2>
             <span id="editorModeBadge" class="px-3 py-1 rounded-xl bg-slate-900/90 border border-white/15 text-xs sm:text-sm font-black text-amber-300">
-              3 صور • بوست كارت
+              3 صور • 100×148 مم
             </span>
+          </div>
+
+          <!-- Printer Paper Size Selector (Postcard / A4 / Card Size) -->
+          <div class="grid grid-cols-3 gap-2" role="group" aria-label="قياس ورق الطابعة">
+            <button
+              type="button"
+              data-action="select-paper"
+              data-paper="postcard"
+              class="paper-size-btn py-2 px-2.5 rounded-2xl border-2 text-center transition font-black text-xs sm:text-sm bg-emerald-600/35 border-emerald-300 text-white shadow"
+            >
+              100×148 مم (4×6)
+            </button>
+            <button
+              type="button"
+              data-action="select-paper"
+              data-paper="a4"
+              class="paper-size-btn py-2 px-2.5 rounded-2xl border-2 text-center transition font-black text-xs sm:text-sm bg-slate-900/75 border-white/15 hover:border-emerald-300/60 text-slate-200"
+            >
+              ورقة A4 (210×297)
+            </button>
+            <button
+              type="button"
+              data-action="select-paper"
+              data-paper="card"
+              class="paper-size-btn py-2 px-2.5 rounded-2xl border-2 text-center transition font-black text-xs sm:text-sm bg-slate-900/75 border-white/15 hover:border-emerald-300/60 text-slate-200"
+            >
+              بطاقة 54×86 مم
+            </button>
           </div>
 
           <!-- Simple One-Tap Themes Grid -->
@@ -498,7 +527,7 @@
         <div class="flex flex-col gap-2 pt-2 border-t border-white/10 shrink-0">
           <div class="w-full flex items-center justify-between gap-3 bg-slate-900/85 border border-white/15 rounded-2xl px-3.5 py-2">
             <div class="flex flex-col text-right">
-              <span class="text-xs font-bold text-slate-300">عدد الطبعات (5,000 د.ع للطبعة • CP1500)</span>
+              <span id="paperSpecsSubLabel" class="text-xs font-bold text-slate-300">5,000 د.ع للطبعة • بدون حواف • 100×148 مم</span>
               <span id="printTotalPriceLabel" class="text-sm sm:text-base font-black text-amber-300">المجموع: 5,000 د.ع</span>
             </div>
 
@@ -543,7 +572,7 @@
               data-action="download-image"
               class="py-2.5 px-3 rounded-2xl bg-sky-600/85 hover:bg-sky-500 active:scale-[0.98] border border-sky-300/40 text-white font-black text-xs sm:text-sm shadow-lg transition flex items-center justify-center gap-1.5"
             >
-              <span>حفظ الصورة (100×148)</span>
+              <span id="btnDownloadImageLabel">حفظ الصورة (100×148)</span>
             </button>
           </div>
 
@@ -553,7 +582,7 @@
             data-action="direct-print"
             class="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 active:scale-[0.98] text-white font-black text-base sm:text-lg shadow-xl transition flex items-center justify-center gap-2"
           >
-            <span id="btnDirectPrintLabel">طباعة فورية CP1500 — 5,000 د.ع</span>
+            <span id="btnDirectPrintLabel">طباعة فورية بدون حواف — 5,000 د.ع</span>
           </button>
 
           <button
@@ -579,8 +608,8 @@
     <div id="fullScreenPreviewModal" class="hidden fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-xl flex flex-col items-center justify-between p-3 sm:p-5 select-none">
       <div class="w-full max-w-5xl flex items-center justify-between gap-3 shrink-0">
         <div class="flex items-center gap-2.5">
-          <span class="px-3.5 py-1.5 rounded-2xl bg-indigo-600/35 border border-amber-300/60 text-amber-200 text-xs sm:text-sm font-black">
-            معاينة Canon SELPHY CP1500 (100×148 مم)
+          <span id="fullScreenPaperBadge" class="px-3.5 py-1.5 rounded-2xl bg-indigo-600/35 border border-amber-300/60 text-amber-200 text-xs sm:text-sm font-black">
+            معاينة بدون حواف • 100×148 مم
           </span>
           <span id="fullScreenPreviewMeta" class="text-xs sm:text-sm font-bold text-slate-300"></span>
         </div>
@@ -608,22 +637,55 @@
       <div class="flex-1 w-full max-w-5xl min-h-0 flex items-center justify-center py-3 overflow-hidden">
         <img
           id="fullScreenComposedImg"
-          alt="معاينة البوست كارت كاملة قبل الطباعة"
+          alt="معاينة كاملة قبل الطباعة"
           style="aspect-ratio: 100 / 148;"
           class="max-w-full max-h-full w-auto h-auto rounded-3xl shadow-[0_24px_70px_rgba(0,0,0,0.9)] border-2 border-white/25 object-contain"
         />
       </div>
 
-      <div class="text-xs font-bold text-slate-400 shrink-0 text-center">
-        معاير لـ Canon SELPHY CP1500: 1200×1800 بكسل (100×148 مم) مع منطقة أمان داخلية لتعويض تمدد Borderless
+      <div id="fullScreenPaperHint" class="text-xs font-bold text-slate-400 shrink-0 text-center">
+        اختر نفس مقاس الورق في نافذة الطباعة واجعل Margins: None و Scale: 100% للطباعة بدون حواف
       </div>
     </div>
 
-    <!-- 1200x1800 px (100mm x 148mm / Postcard 4x6 inch at 300 DPI) Canon SELPHY CP1500 Canvas -->
+    <!-- Dynamic Printer-Matched Canvas -->
     <canvas id="selphyCanvas" width="1200" height="1800" class="hidden"></canvas>
   </div>
 
   <script>
+    const PAPER_PRESETS = {
+      postcard: {
+        id: 'postcard',
+        label: '100×148 مم',
+        shortLabel: '100×148 مم (4×6)',
+        pageCssSize: '100mm 148mm',
+        widthMm: 100,
+        heightMm: 148,
+        canvasW: 1200,
+        canvasH: 1800
+      },
+      a4: {
+        id: 'a4',
+        label: 'A4 (210×297 مم)',
+        shortLabel: 'ورقة A4',
+        pageCssSize: '210mm 297mm',
+        widthMm: 210,
+        heightMm: 297,
+        canvasW: 1488,
+        canvasH: 2105
+      },
+      card: {
+        id: 'card',
+        label: '54×86 مم',
+        shortLabel: 'بطاقة 54×86 مم',
+        pageCssSize: '54mm 86mm',
+        widthMm: 54,
+        heightMm: 86,
+        canvasW: 944,
+        canvasH: 1504
+      }
+    };
+
     const STATE = {
       screen: 'start',
       shotCount: 3,
@@ -631,6 +693,7 @@
       betweenShotsSec: 3,
       selectedTheme: 'kids',
       printLayout: 'postcard',
+      paperSize: 'postcard',
       printCopies: 1,
       pricePerCopy: 5000,
       facingMode: 'user',
@@ -814,6 +877,68 @@
       }
     };
 
+    function getActivePaperPreset() {
+      return PAPER_PRESETS[STATE.paperSize] || PAPER_PRESETS.postcard;
+    }
+
+    function applyPaperSizeToDomAndStyle() {
+      const preset = getActivePaperPreset();
+      const dynStyle = document.getElementById('dynamicPageStyle');
+      if (dynStyle) {
+        dynStyle.textContent = `@page { size: ${preset.pageCssSize}; margin: 0mm; }`;
+      }
+
+      document.querySelectorAll('.paper-size-btn').forEach((btn) => {
+        const isActive = btn.getAttribute('data-paper') === preset.id;
+        btn.className = isActive
+          ? 'paper-size-btn py-2 px-2.5 rounded-2xl border-2 text-center transition font-black text-xs sm:text-sm bg-emerald-600/35 border-emerald-300 text-white shadow'
+          : 'paper-size-btn py-2 px-2.5 rounded-2xl border-2 text-center transition font-black text-xs sm:text-sm bg-slate-900/75 border-white/15 hover:border-emerald-300/60 text-slate-200';
+      });
+
+      const aspectVal = `${preset.widthMm} / ${preset.heightMm}`;
+      const previewImg = document.getElementById('composedPreviewImg');
+      const fullScreenImg = document.getElementById('fullScreenComposedImg');
+      if (previewImg) previewImg.style.aspectRatio = aspectVal;
+      if (fullScreenImg) fullScreenImg.style.aspectRatio = aspectVal;
+
+      const subLabel = document.getElementById('paperSpecsSubLabel');
+      if (subLabel) {
+        subLabel.textContent = `5,000 د.ع للطبعة • بدون حواف • ${preset.label}`;
+      }
+
+      const dlLabel = document.getElementById('btnDownloadImageLabel');
+      if (dlLabel) {
+        dlLabel.textContent = `حفظ الصورة (${preset.shortLabel})`;
+      }
+
+      const fsBadge = document.getElementById('fullScreenPaperBadge');
+      if (fsBadge) {
+        fsBadge.textContent = `معاينة بدون حواف • ${preset.label}`;
+      }
+
+      const badge = document.getElementById('editorModeBadge');
+      if (badge) {
+        const countText = STATE.shotCount === 4 ? '4 صور' : '3 صور';
+        badge.textContent = `${countText} • ${preset.label}`;
+      }
+
+      const guideBadge = document.getElementById('framingGuideBadge');
+      if (guideBadge) {
+        guideBadge.textContent = preset.label;
+      }
+
+      syncCameraVisualTargets();
+    }
+
+    async function selectPaperSize(paperId) {
+      if (!PAPER_PRESETS[paperId]) return;
+      STATE.paperSize = paperId;
+      applyPaperSizeToDomAndStyle();
+      if (STATE.screen === 'print') {
+        await renderSelphyComposition();
+      }
+    }
+
     function getThemeCaptions(theme, variantSeed = 0) {
       const topList = Array.isArray(theme.topCaptions) && theme.topCaptions.length > 0
         ? theme.topCaptions
@@ -855,14 +980,7 @@
           : 'home-layout-btn py-2.5 px-3 rounded-2xl border-2 flex items-center justify-center gap-2 transition bg-slate-900/70 border-white/15 text-slate-200 hover:border-white/35';
       });
 
-      const modeBadge = document.getElementById('editorModeBadge');
-      if (modeBadge) {
-        const countText = shots === 4 ? '4 صور' : '3 صور';
-        const layoutText = layout === 'postcard' ? 'بوست كارت' : 'شريطين';
-        modeBadge.textContent = `${countText} • ${layoutText}`;
-      }
-
-      syncCameraVisualTargets();
+      applyPaperSizeToDomAndStyle();
     }
 
     function selectShotCount(count) {
@@ -1048,45 +1166,47 @@
     }
 
     function getActiveSlotAspectRatio() {
+      const preset = getActivePaperPreset();
       const count = STATE.shotCount === 4 ? 4 : 3;
+      const W = preset.canvasW;
+      const H = preset.canvasH;
+      const headerHeight = Math.round(H * 0.11);
+      const footerHeight = Math.round(H * 0.14);
+      const sideMargin = Math.round(W * 0.085);
+
       if (STATE.printLayout === 'dual_strip') {
-        const stripW = 600;
-        const stripH = 1800;
-        const padX = 48;
-        const topPad = 84;
-        const bottomHeaderH = 194;
-        const gap = 22;
+        const stripW = W * 0.5;
+        const padX = Math.round(stripW * 0.075);
+        const topPad = Math.round(H * 0.048);
+        const bottomSpace = Math.round(H * 0.145);
+        const gap = Math.round(H * 0.012);
         const photoW = stripW - padX * 2;
-        const photoH = (stripH - topPad - bottomHeaderH - gap * (count - 1)) / count;
+        const photoH = (H - topPad - bottomSpace - gap * (count - 1)) / count;
         return Math.max(0.2, photoW / Math.max(1, photoH));
-      } else {
-        const W = 1200;
-        const H = 1800;
-        const headerHeight = 212;
-        const footerHeight = 192;
-        const sideMargin = 104;
-        if (count === 4) {
-          const cols = 2;
-          const rows = 2;
-          const gapX = 32;
-          const gapY = 32;
-          const cellW = (W - sideMargin * 2 - gapX * (cols - 1)) / cols;
-          const cellH = (H - headerHeight - footerHeight - gapY * (rows - 1)) / rows;
-          return Math.max(0.2, cellW / Math.max(1, cellH));
-        }
-        const gap = 28;
-        const cellW = W - sideMargin * 2;
-        const cellH = (H - headerHeight - footerHeight - gap * (count - 1)) / count;
+      }
+
+      if (count === 4) {
+        const gapX = Math.round(W * 0.026);
+        const gapY = Math.round(H * 0.018);
+        const cellW = (W - sideMargin * 2 - gapX) / 2;
+        const cellH = (H - headerHeight - footerHeight - gapY) / 2;
         return Math.max(0.2, cellW / Math.max(1, cellH));
       }
+
+      const gap = Math.round(H * 0.016);
+      const cellW = W - sideMargin * 2;
+      const cellH = (H - headerHeight - footerHeight - gap * (count - 1)) / count;
+      return Math.max(0.2, cellW / Math.max(1, cellH));
     }
 
     function computeCoverGuideRect(containerW, containerH, targetAspect) {
+      const preset = getActivePaperPreset();
       const safeW = Math.max(1, containerW);
       const safeH = Math.max(1, containerH);
       const maxW = safeW * 0.72;
       const maxH = safeH * 0.68;
-      const effectiveAspect = STATE.printLayout === 'postcard' ? (100 / 148) : (targetAspect || 1.2);
+      const paperAspect = preset.widthMm / preset.heightMm;
+      const effectiveAspect = STATE.printLayout === 'postcard' ? paperAspect : (targetAspect || paperAspect);
       const safeAspect = Math.max(0.25, Math.min(4.0, effectiveAspect));
 
       let w = maxW;
@@ -1132,7 +1252,7 @@
       clearWin.style.borderRadius = '28px';
 
       if (badge) {
-        badge.textContent = STATE.printLayout === 'postcard' ? 'CP1500 بوست كارت 100×148 مم' : 'CP1500 شريطين 100×148 مم';
+        badge.textContent = getActivePaperPreset().label;
       }
 
       if (clearVid) {
@@ -1720,6 +1840,15 @@
         return;
       }
 
+      if (explicitAction === 'select-paper' || buttonEl.classList.contains('paper-size-btn')) {
+        const paperId = buttonEl.getAttribute('data-paper');
+        if (paperId && PAPER_PRESETS[paperId]) {
+          selectPaperSize(paperId);
+          announceKioskStatus(`تم ضبط القياس على ${PAPER_PRESETS[paperId].label}`, true);
+        }
+        return;
+      }
+
       if (explicitAction === 'start-capture' || btnId === 'startCaptureBtn') {
         handleStartBoothClick(event);
         return;
@@ -1743,7 +1872,7 @@
       }
 
       if (explicitAction === 'open-fullscreen-preview' || btnId === 'btnOpenFullScreenPreview') {
-        announceKioskStatus('فتح معاينة البوست كارت', true);
+        announceKioskStatus('فتح معاينة الطباعة بدون حواف', true);
         openFullScreenPreview();
         return;
       }
@@ -1759,7 +1888,7 @@
       }
 
       if (explicitAction === 'direct-print' || btnId === 'btnDirectPrint') {
-        announceKioskStatus('جاري إرسال الطباعة إلى Canon SELPHY CP1500', true);
+        announceKioskStatus(`جاري إرسال الطباعة بدون حواف (${getActivePaperPreset().label})`, true);
         triggerDirectPrint();
         return;
       }
@@ -1915,7 +2044,8 @@
     }
 
     /**
-     * Draw full-bleed background + CP1500 Borderless safe frame (4.5% outer bleed compensation)
+     * Draw full-bleed background and frame cleanly separated from the bottom caption zone.
+     * Returns { frameRect, footerRect } so text never overlaps or touches the frame border.
      */
     function drawThemeBackground(ctx, theme, width, height, variantSeed = 0) {
       const rng = createSeededRng(variantSeed + theme.id.split('').reduce((a, b) => a + b.charCodeAt(0) * 31, 17));
@@ -1925,17 +2055,30 @@
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, width, height);
 
-      // CP1500 Borderless over-spray safe zone (~5% inset on all sides)
-      const safeInsetX = Math.max(58, Math.round(width * 0.052));
-      const safeInsetY = Math.max(88, Math.round(height * 0.052));
+      const safeInsetX = Math.max(44, Math.round(width * 0.05));
+      const safeInsetY = Math.max(54, Math.round(height * 0.036));
+      const footerZoneH = Math.max(105, Math.round(height * 0.088));
+      const gapBetweenFrameAndFooter = Math.max(18, Math.round(height * 0.015));
+
+      const frameX = safeInsetX;
+      const frameY = safeInsetY;
+      const frameW = width - safeInsetX * 2;
+      const frameH = Math.max(160, height - safeInsetY - footerZoneH - gapBetweenFrameAndFooter - Math.round(height * 0.025));
+
+      const footerRect = {
+        x: safeInsetX,
+        y: frameY + frameH + gapBetweenFrameAndFooter,
+        w: frameW,
+        h: footerZoneH
+      };
 
       const puffCount = 5 + Math.floor(rng() * 4);
       for (let p = 0; p < puffCount; p++) {
-        const px = safeInsetX + rng() * Math.max(40, width - safeInsetX * 2);
-        const py = safeInsetY + rng() * Math.max(40, height - safeInsetY * 2);
-        const pr = Math.max(70, Math.min(width, height) * (0.12 + rng() * 0.12));
+        const px = frameX + rng() * Math.max(40, frameW);
+        const py = frameY + rng() * Math.max(40, frameH);
+        const pr = Math.max(60, Math.min(width, height) * (0.11 + rng() * 0.11));
         const puffGrad = ctx.createRadialGradient(px, py, 8, px, py, pr);
-        puffGrad.addColorStop(0, `${theme.borderColor}28`);
+        puffGrad.addColorStop(0, `${theme.borderColor}26`);
         puffGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
         ctx.fillStyle = puffGrad;
         ctx.beginPath();
@@ -1943,11 +2086,11 @@
         ctx.fill();
       }
 
-      const itemCount = 14 + Math.floor(rng() * 8);
+      const itemCount = 12 + Math.floor(rng() * 6);
       for (let i = 0; i < itemCount; i++) {
-        const x = safeInsetX + 18 + rng() * Math.max(40, width - (safeInsetX + 18) * 2);
-        const y = safeInsetY + 24 + rng() * Math.max(40, height - (safeInsetY + 24) * 2);
-        const scale = 0.68 + rng() * 0.82;
+        const x = frameX + 20 + rng() * Math.max(40, frameW - 40);
+        const y = frameY + 24 + rng() * Math.max(40, frameH - 48);
+        const scale = 0.65 + rng() * 0.75;
         const rot = (rng() - 0.5) * 0.55;
 
         ctx.save();
@@ -1956,34 +2099,64 @@
 
         if (theme.pattern === 'stars') {
           const mode = i % 3;
-          if (mode === 0) drawCuteStar(ctx, 0, 0, 22 * scale, 10 * scale, 'rgba(245, 158, 11, 0.28)');
-          else if (mode === 1) drawCuteBalloon(ctx, 0, 0, 0.85 * scale, 'rgba(56, 189, 248, 0.26)', 'rgba(245, 158, 11, 0.35)');
-          else drawCuteSparkle(ctx, 0, 0, 18 * scale, 'rgba(251, 146, 60, 0.26)');
+          if (mode === 0) drawCuteStar(ctx, 0, 0, 20 * scale, 9 * scale, 'rgba(245, 158, 11, 0.28)');
+          else if (mode === 1) drawCuteBalloon(ctx, 0, 0, 0.8 * scale, 'rgba(56, 189, 248, 0.26)', 'rgba(245, 158, 11, 0.35)');
+          else drawCuteSparkle(ctx, 0, 0, 17 * scale, 'rgba(251, 146, 60, 0.26)');
         } else if (theme.pattern === 'hearts') {
-          if (i % 3 === 0) drawCuteHeart(ctx, 0, 0, 28 * scale, 'rgba(236, 72, 153, 0.25)');
-          else if (i % 3 === 1) drawCuteFlower(ctx, 0, 0, 20 * scale, 'rgba(244, 114, 182, 0.25)', 'rgba(253, 224, 71, 0.35)');
-          else drawCuteSparkle(ctx, 0, 0, 20 * scale, 'rgba(244, 63, 94, 0.24)');
+          if (i % 3 === 0) drawCuteHeart(ctx, 0, 0, 26 * scale, 'rgba(236, 72, 153, 0.25)');
+          else if (i % 3 === 1) drawCuteFlower(ctx, 0, 0, 19 * scale, 'rgba(244, 114, 182, 0.25)', 'rgba(253, 224, 71, 0.35)');
+          else drawCuteSparkle(ctx, 0, 0, 19 * scale, 'rgba(244, 63, 94, 0.24)');
         } else if (theme.pattern === 'neon') {
-          if (i % 2 === 0) drawCuteSparkle(ctx, 0, 0, 22 * scale, 'rgba(34, 211, 238, 0.28)');
-          else drawCuteStar(ctx, 0, 0, 19 * scale, 8.5 * scale, 'rgba(96, 165, 250, 0.26)');
+          if (i % 2 === 0) drawCuteSparkle(ctx, 0, 0, 20 * scale, 'rgba(34, 211, 238, 0.28)');
+          else drawCuteStar(ctx, 0, 0, 18 * scale, 8 * scale, 'rgba(96, 165, 250, 0.26)');
         } else if (theme.pattern === 'gold') {
-          if (i % 3 === 0) drawCuteCrown(ctx, 0, 0, 0.85 * scale, 'rgba(250, 204, 21, 0.25)');
-          else drawCuteSparkle(ctx, 0, 0, 22 * scale, 'rgba(250, 204, 21, 0.25)');
+          if (i % 3 === 0) drawCuteCrown(ctx, 0, 0, 0.8 * scale, 'rgba(250, 204, 21, 0.25)');
+          else drawCuteSparkle(ctx, 0, 0, 20 * scale, 'rgba(250, 204, 21, 0.25)');
         } else if (theme.pattern === 'pastel') {
-          if (i % 2 === 0) drawCuteFlower(ctx, 0, 0, 24 * scale, 'rgba(192, 132, 252, 0.28)', 'rgba(251, 191, 36, 0.35)');
-          else drawCuteHeart(ctx, 0, 0, 24 * scale, 'rgba(52, 211, 153, 0.24)');
+          if (i % 2 === 0) drawCuteFlower(ctx, 0, 0, 22 * scale, 'rgba(192, 132, 252, 0.28)', 'rgba(251, 191, 36, 0.35)');
+          else drawCuteHeart(ctx, 0, 0, 22 * scale, 'rgba(52, 211, 153, 0.24)');
         } else {
-          if (i % 3 === 0) drawCuteCrown(ctx, 0, 0, 0.8 * scale, 'rgba(197, 160, 89, 0.24)');
-          else drawCuteSparkle(ctx, 0, 0, 20 * scale, 'rgba(197, 160, 89, 0.26)');
+          if (i % 3 === 0) drawCuteCrown(ctx, 0, 0, 0.76 * scale, 'rgba(197, 160, 89, 0.24)');
+          else drawCuteSparkle(ctx, 0, 0, 18 * scale, 'rgba(197, 160, 89, 0.26)');
         }
         ctx.restore();
       }
 
+      // Main card border stops cleanly above the footer caption zone
       ctx.save();
       ctx.strokeStyle = theme.borderColor;
-      ctx.lineWidth = 10;
-      roundRectPath(ctx, safeInsetX, safeInsetY, width - safeInsetX * 2, height - safeInsetY * 2, 30);
+      ctx.lineWidth = Math.max(6, Math.round(width * 0.0075));
+      roundRectPath(ctx, frameX, frameY, frameW, frameH, 28);
       ctx.stroke();
+      ctx.restore();
+
+      return {
+        frameRect: { x: frameX, y: frameY, w: frameW, h: frameH },
+        footerRect
+      };
+    }
+
+    function drawFooterCaptionCleanly(ctx, theme, text, footerRect, baseFontSize) {
+      if (!ctx || !footerRect || footerRect.w <= 10 || footerRect.h <= 10) return;
+      ctx.save();
+      roundRectPath(ctx, footerRect.x + 8, footerRect.y + 4, footerRect.w - 16, footerRect.h - 8, 20);
+      ctx.fillStyle = theme.matColor || 'rgba(255, 255, 255, 0.65)';
+      ctx.globalAlpha = 0.55;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      const maxTextW = Math.max(60, footerRect.w - 40);
+      let fontSize = Math.min(baseFontSize, Math.round(footerRect.h * 0.44));
+      ctx.font = `800 ${fontSize}px Cairo, sans-serif`;
+      while (fontSize > 16 && ctx.measureText(text).width > maxTextW) {
+        fontSize -= 2;
+        ctx.font = `800 ${fontSize}px Cairo, sans-serif`;
+      }
+
+      ctx.fillStyle = theme.textColor;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, footerRect.x + footerRect.w * 0.5, footerRect.y + footerRect.h * 0.5 + 2);
       ctx.restore();
     }
 
@@ -2010,7 +2183,7 @@
         [firstIdx, secondIdx].forEach((cIdx, sPos) => {
           const spot = cornerChoices[cIdx];
           const stickerChar = palette[Math.floor(rng() * palette.length)];
-          const fontPx = Math.max(26, Math.min(58, Math.round(Math.min(rect.w, rect.h) * (0.13 + rng() * 0.04))));
+          const fontPx = Math.max(24, Math.min(54, Math.round(Math.min(rect.w, rect.h) * (0.12 + rng() * 0.04))));
           const angle = (rng() - 0.5) * 0.52;
           const jitterX = (rng() - 0.5) * 8;
           const jitterY = (rng() - 0.5) * 8;
@@ -2039,21 +2212,17 @@
       tempCan.width = stripW;
       tempCan.height = stripH;
       const tctx = tempCan.getContext('2d');
-      drawThemeBackground(tctx, theme, stripW, stripH, variantSeed);
+      const { frameRect, footerRect } = drawThemeBackground(tctx, theme, stripW, stripH, variantSeed);
       ctx.drawImage(tempCan, stripX, stripY);
 
-      ctx.strokeStyle = theme.borderColor;
-      ctx.lineWidth = 6;
-      ctx.strokeRect(stripX + 30, stripY + 64, stripW - 60, stripH - 128);
-
-      const padX = 48;
-      const topPad = 84;
-      const bottomHeaderH = 194;
-      const gap = 22;
+      const padX = Math.round(stripW * 0.085);
+      const topPad = Math.round(frameRect.y + stripH * 0.025);
+      const bottomLimit = frameRect.y + frameRect.h - Math.round(stripH * 0.025);
+      const gap = Math.round(stripH * 0.012);
       const count = images.length;
-      const availH = stripH - topPad - bottomHeaderH - gap * (count - 1);
+      const availH = Math.max(90, bottomLimit - topPad - gap * (count - 1));
       const photoH = availH / count;
-      const photoW = stripW - padX * 2;
+      const photoW = Math.max(60, stripW - padX * 2);
       const drawnPhotoRects = [];
 
       for (let i = 0; i < count; i++) {
@@ -2069,20 +2238,28 @@
 
       drawThemeStickersOverPhotos(ctx, theme, drawnPhotoRects, variantSeed + 313);
 
-      ctx.fillStyle = theme.textColor;
-      ctx.font = '800 24px Cairo, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(`${theme.stickerLeft} ${captions.topCaption} ${theme.stickerRight}`, stripX + stripW / 2, stripY + stripH - 114);
+      drawFooterCaptionCleanly(
+        ctx,
+        theme,
+        `${theme.stickerLeft} ${captions.bottomCaption} ${theme.stickerRight}`,
+        {
+          x: stripX + footerRect.x,
+          y: stripY + footerRect.y,
+          w: footerRect.w,
+          h: footerRect.h
+        },
+        Math.round(stripW * 0.044)
+      );
 
       ctx.restore();
     }
 
     async function renderSelphyComposition() {
+      const preset = getActivePaperPreset();
       const canvas = document.getElementById('selphyCanvas');
       if (!canvas) return;
-      canvas.width = 1200;
-      canvas.height = 1800;
+      canvas.width = preset.canvasW;
+      canvas.height = preset.canvasH;
 
       const ctx = canvas.getContext('2d');
       const theme = THEMES[STATE.selectedTheme] || THEMES.kids;
@@ -2103,11 +2280,11 @@
 
       if (loadedImages.length === 0) {
         const fallbackCanvas = document.createElement('canvas');
-        fallbackCanvas.width = 1200;
-        fallbackCanvas.height = 1800;
+        fallbackCanvas.width = preset.canvasW;
+        fallbackCanvas.height = preset.canvasH;
         const fctx = fallbackCanvas.getContext('2d');
         fctx.fillStyle = '#1e293b';
-        fctx.fillRect(0, 0, 1200, 1800);
+        fctx.fillRect(0, 0, preset.canvasW, preset.canvasH);
         const fallbackImg = await loadImageElement(fallbackCanvas.toDataURL('image/jpeg'));
         loadedImages.push(fallbackImg);
       }
@@ -2119,48 +2296,55 @@
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, W, H);
 
-        renderSingleStrip(ctx, theme, captions, loadedImages, 0, 0, 600, H, variantSeed);
-        renderSingleStrip(ctx, theme, captions, loadedImages, 600, 0, 600, H, variantSeed + 97);
+        renderSingleStrip(ctx, theme, captions, loadedImages, 0, 0, W * 0.5, H, variantSeed);
+        renderSingleStrip(ctx, theme, captions, loadedImages, W * 0.5, 0, W * 0.5, H, variantSeed + 97);
 
         ctx.save();
         ctx.setLineDash([12, 10]);
         ctx.strokeStyle = 'rgba(100, 116, 139, 0.55)';
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(600, 72);
-        ctx.lineTo(600, H - 72);
+        ctx.moveTo(W * 0.5, Math.round(H * 0.04));
+        ctx.lineTo(W * 0.5, H - Math.round(H * 0.04));
         ctx.stroke();
         ctx.restore();
       } else {
-        drawThemeBackground(ctx, theme, W, H, variantSeed);
+        const { frameRect, footerRect } = drawThemeBackground(ctx, theme, W, H, variantSeed);
 
-        const headerHeight = 212;
-        const footerHeight = 192;
-        const sideMargin = 104;
+        const topHeaderSpace = Math.round(H * 0.088);
+        const sideMargin = frameRect.x + Math.round(W * 0.032);
         const count = loadedImages.length;
         const drawnPhotoRects = [];
 
         ctx.fillStyle = theme.textColor;
-        ctx.font = '900 40px Cairo, sans-serif';
+        const headerFontPx = Math.max(24, Math.round(W * 0.032));
+        ctx.font = `900 ${headerFontPx}px Cairo, sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(`${theme.stickerLeft}  ${captions.topCaption}  ${theme.stickerRight}`, W / 2, 142);
+        ctx.fillText(
+          `${theme.stickerLeft}  ${captions.topCaption}  ${theme.stickerRight}`,
+          W * 0.5,
+          frameRect.y + topHeaderSpace * 0.56
+        );
+
+        const photosTopY = frameRect.y + topHeaderSpace;
+        const photosBottomY = frameRect.y + frameRect.h - Math.round(H * 0.024);
+        const availPhotosH = Math.max(120, photosBottomY - photosTopY);
 
         if (count === 4) {
           const cols = 2;
           const rows = 2;
-          const gapX = 32;
-          const gapY = 32;
-          const availW = W - sideMargin * 2 - gapX * (cols - 1);
-          const availH = H - headerHeight - footerHeight - gapY * (rows - 1);
+          const gapX = Math.round(W * 0.024);
+          const gapY = Math.round(H * 0.016);
+          const availW = Math.max(80, (frameRect.x + frameRect.w - sideMargin) - sideMargin - gapX);
           const cellW = availW / cols;
-          const cellH = availH / rows;
+          const cellH = Math.max(60, (availPhotosH - gapY) / rows);
 
           for (let i = 0; i < 4; i++) {
             const col = i % cols;
             const row = Math.floor(i / cols);
             const x = sideMargin + col * (cellW + gapX);
-            const y = headerHeight + row * (cellH + gapY);
+            const y = photosTopY + row * (cellH + gapY);
             drawPhotoFittedInRect(ctx, loadedImages[i], x, y, cellW, cellH, {
               borderColor: theme.accentColor,
               borderWidth: 4.5,
@@ -2169,13 +2353,12 @@
             drawnPhotoRects.push({ x, y, w: cellW, h: cellH });
           }
         } else {
-          const gap = countGapForShots(count);
-          const availH = H - headerHeight - footerHeight - gap * (count - 1);
-          const cellH = availH / count;
-          const cellW = W - sideMargin * 2;
+          const gap = Math.round(H * 0.015);
+          const cellH = Math.max(70, (availPhotosH - gap * (count - 1)) / count);
+          const cellW = Math.max(80, (frameRect.x + frameRect.w - sideMargin) - sideMargin);
 
           for (let i = 0; i < count; i++) {
-            const y = headerHeight + i * (cellH + gap);
+            const y = photosTopY + i * (cellH + gap);
             drawPhotoFittedInRect(ctx, loadedImages[i], sideMargin, y, cellW, cellH, {
               borderColor: theme.accentColor,
               borderWidth: 4.5,
@@ -2187,11 +2370,13 @@
 
         drawThemeStickersOverPhotos(ctx, theme, drawnPhotoRects, variantSeed + 509);
 
-        ctx.fillStyle = theme.textColor;
-        ctx.font = '800 34px Cairo, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(`${theme.stickerLeft}  ${captions.bottomCaption}  ${theme.stickerRight}`, W / 2, H - 114);
+        drawFooterCaptionCleanly(
+          ctx,
+          theme,
+          `${theme.stickerLeft}  ${captions.bottomCaption}  ${theme.stickerRight}`,
+          footerRect,
+          Math.max(22, Math.round(W * 0.029))
+        );
       }
 
       const dataUrl = canvas.toDataURL('image/jpeg', 0.96);
@@ -2202,10 +2387,6 @@
       if (fullScreenImg) fullScreenImg.src = dataUrl;
       if (printImg) printImg.src = dataUrl;
       syncFullScreenPreviewMeta();
-    }
-
-    function countGapForShots(shotCount) {
-      return shotCount >= 4 ? 22 : 28;
     }
 
     async function selectTheme(themeId) {
@@ -2239,7 +2420,7 @@
 
       if (countEl) countEl.textContent = String(copies);
       if (totalEl) totalEl.textContent = `المجموع: ${formattedTotal}`;
-      if (printBtnLabel) printBtnLabel.textContent = `طباعة فورية CP1500 (${copies}) — ${formattedTotal}`;
+      if (printBtnLabel) printBtnLabel.textContent = `طباعة فورية بدون حواف (${copies}) — ${formattedTotal}`;
     }
 
     function changePrintCopies(delta) {
@@ -2250,19 +2431,21 @@
 
     async function downloadComposedImage() {
       await renderSelphyComposition();
+      const preset = getActivePaperPreset();
       const canvas = document.getElementById('selphyCanvas');
       if (!canvas) return;
       const dataUrl = canvas.toDataURL('image/jpeg', 0.98);
       const link = document.createElement('a');
       link.href = dataUrl;
-      link.download = `CP1500_100x148mm_${STATE.printLayout}_${Date.now()}.jpg`;
+      link.download = `PRINT_${preset.id.toUpperCase()}_${preset.widthMm}x${preset.heightMm}mm_${Date.now()}.jpg`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      announceKioskStatus('تم حفظ الصورة بدقة 1200×1800 (100×148 مم) لـ CP1500', true);
+      announceKioskStatus(`تم حفظ الصورة بقياس ${preset.label} بدون حواف`, true);
     }
 
     async function triggerDirectPrint() {
+      applyPaperSizeToDomAndStyle();
       await renderSelphyComposition();
       setTimeout(() => {
         try {
@@ -2272,17 +2455,19 @@
     }
 
     function syncFullScreenPreviewMeta() {
+      const preset = getActivePaperPreset();
       const metaEl = document.getElementById('fullScreenPreviewMeta');
       const fsPrintBtnLabel = document.getElementById('btnFullScreenPrintLabel');
       const themeObj = THEMES[STATE.selectedTheme] || THEMES.kids;
       const layoutLabel = STATE.printLayout === 'postcard' ? 'بوست كارت' : 'شريطين';
       const copies = Math.max(1, Number(STATE.printCopies) || 1);
       const total = copies * (Number(STATE.pricePerCopy) || 5000);
-      if (metaEl) metaEl.textContent = `${STATE.shotCount} صور • ${layoutLabel} • ثيم ${themeObj.label} • ${copies} نسخة`;
+      if (metaEl) metaEl.textContent = `${preset.label} • ${STATE.shotCount} صور • ${layoutLabel} • ثيم ${themeObj.label} • ${copies} نسخة`;
       if (fsPrintBtnLabel) fsPrintBtnLabel.textContent = `طباعة فورية (${copies}) — ${total.toLocaleString('en-US')} د.ع`;
     }
 
     async function openFullScreenPreview() {
+      applyPaperSizeToDomAndStyle();
       await renderSelphyComposition();
       syncFullScreenPreviewMeta();
       const modal = document.getElementById('fullScreenPreviewModal');
