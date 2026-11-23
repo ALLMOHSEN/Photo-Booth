@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>فوتو بوث الذكريات | Canon SELPHY</title>
+  <title>فوتو بوث الذكريات | Canon SELPHY CP1500</title>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -40,7 +40,6 @@
       -webkit-tap-highlight-color: rgba(255, 255, 255, 0.14);
     }
 
-    /* Blurred live camera background on home screen */
     .blurred-camera-bg {
       filter: blur(14px) brightness(0.74);
       transform: scale(1.08);
@@ -50,18 +49,6 @@
       transform: scaleX(-1) scale(1.08);
     }
 
-    /* Unblurred live camera feed inside capture window */
-    .live-camera-feed {
-      filter: blur(0px) brightness(1);
-      transform: scale(1);
-      transform-origin: center center;
-    }
-
-    .live-camera-feed.mirrored {
-      transform: scaleX(-1);
-    }
-
-    /* Clean single-layer capture stage: blurred surround + single sharp output window */
     #framingGuideOverlay {
       position: fixed;
       inset: 0;
@@ -77,7 +64,6 @@
       backdrop-filter: blur(18px) saturate(0.85) brightness(0.56);
       -webkit-backdrop-filter: blur(18px) saturate(0.85) brightness(0.56);
       background: rgba(2, 6, 23, 0.36);
-      transition: mask-image 0.22s ease, -webkit-mask-image 0.22s ease;
     }
 
     #framingGuideClearWindow {
@@ -90,7 +76,7 @@
         0 24px 70px rgba(0, 0, 0, 0.65),
         0 0 0 1px rgba(255, 255, 255, 0.14),
         inset 0 0 24px rgba(255, 255, 255, 0.1);
-      transition: left 0.2s ease, top 0.2s ease, width 0.2s ease, height 0.2s ease, border-radius 0.2s ease;
+      transition: left 0.2s ease, top 0.2s ease, width 0.2s ease, height 0.2s ease;
     }
 
     #framingGuideClearVideo,
@@ -126,7 +112,6 @@
       box-shadow: 0 6px 18px rgba(2, 6, 23, 0.4);
     }
 
-    /* Gentle central button pulse */
     @keyframes capturePulse {
       0%, 100% {
         box-shadow: 0 0 36px rgba(99, 102, 241, 0.55), 0 0 72px rgba(236, 72, 153, 0.28);
@@ -142,7 +127,6 @@
       animation: capturePulse 2.8s infinite ease-in-out;
     }
 
-    /* White camera flash animation */
     @keyframes flashBurst {
       0% { opacity: 0.96; }
       100% { opacity: 0; }
@@ -152,7 +136,6 @@
       animation: flashBurst 0.42s ease-out forwards;
     }
 
-    /* Countdown number entrance */
     @keyframes countPop {
       0% { transform: scale(0.45); opacity: 0; }
       35% { transform: scale(1.12); opacity: 1; }
@@ -176,10 +159,10 @@
       display: none;
     }
 
-    /* Universal Postcard 100mm x 148mm (4x6 in) Print Rules for Mobile & Windows */
+    /* Canon SELPHY CP1500 Postcard (100mm x 148mm / 4x6 in) Calibrated Print Rules */
     @page {
       size: 100mm 148mm;
-      margin: 0;
+      margin: 0mm;
     }
 
     @media print {
@@ -209,25 +192,28 @@
         align-items: center !important;
         justify-content: center !important;
         position: fixed !important;
-        inset: 0 !important;
-        width: 100% !important;
-        height: 100% !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
         margin: 0 !important;
         padding: 0 !important;
         overflow: hidden !important;
         background: #ffffff !important;
+        page-break-before: avoid !important;
+        page-break-after: avoid !important;
         page-break-inside: avoid !important;
         break-inside: avoid !important;
       }
 
       #printOnlyImg {
         display: block !important;
-        width: 100% !important;
-        height: 100% !important;
+        width: 100vw !important;
+        height: 100vh !important;
         max-width: 100vw !important;
         max-height: 100vh !important;
         object-fit: contain !important;
-        margin: 0 auto !important;
+        margin: 0 !important;
         padding: 0 !important;
         page-break-inside: avoid !important;
         break-inside: avoid !important;
@@ -236,9 +222,9 @@
   </style>
 </head>
 <body>
-  <!-- Print-only container outside #app so mobile & Windows print engines never inherit viewport height locks -->
+  <!-- Print-only full-bleed container outside #app for exact CP1500 100x148mm output -->
   <div id="printOnlyContainer" aria-hidden="true">
-    <img id="printOnlyImg" alt="Canon SELPHY Postcard Borderless Print" />
+    <img id="printOnlyImg" alt="Canon SELPHY CP1500 Postcard Print" />
   </div>
 
   <div id="app" class="relative w-full h-full overflow-hidden">
@@ -246,7 +232,7 @@
     <!-- Full-screen flash overlay on photo capture -->
     <div id="flashOverlay" class="fixed inset-0 bg-white pointer-events-none opacity-0 z-50"></div>
 
-    <!-- Non-intrusive Camera Status Pill & Diagnostic Modal (shown only when fallback/issue occurs) -->
+    <!-- Non-intrusive Camera Status Pill & Diagnostic Modal -->
     <div id="cameraStatusBadge" class="hidden fixed top-3 left-3 z-40 max-w-[82vw]">
       <button
         id="btnOpenCameraDiag"
@@ -301,14 +287,12 @@
     <!-- SCREEN 1: START SCREEN (BLURRED BG + SEPARATE 3/4 + POSTCARD/STRIP)  -->
     <!-- ===================================================================== -->
     <section id="homeScreen" class="relative w-full h-full flex items-center justify-center p-6 overflow-hidden">
-      <!-- Blurred Camera Background -->
       <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         <video id="bgVideo" autoplay playsinline webkit-playsinline="true" muted class="w-full h-full object-cover blurred-camera-bg mirrored hidden"></video>
         <canvas id="bgSimCanvas" width="1280" height="720" class="w-full h-full object-cover blurred-camera-bg"></canvas>
         <div class="fixed inset-0 bg-slate-950/35"></div>
       </div>
 
-      <!-- Center Stack -->
       <div class="relative z-10 w-full max-w-md flex flex-col items-center justify-center gap-3">
         <!-- Separate 3 or 4 Shots Picker -->
         <div class="w-full grid grid-cols-2 gap-3 glass-panel p-2 rounded-3xl" role="group" aria-label="عدد الصور">
@@ -423,7 +407,7 @@
     </section>
 
     <!-- ===================================================================== -->
-    <!-- SCREEN 3: THEMES + DIRECT PRINT (POSTCARD 100mm x 148mm)            -->
+    <!-- SCREEN 3: THEMES + DIRECT PRINT (CP1500 POSTCARD 100mm x 148mm)     -->
     <!-- ===================================================================== -->
     <section id="editorScreen" class="hidden relative w-full h-full p-3 sm:p-5 lg:p-6 flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch justify-center overflow-hidden">
       <!-- Left / Top Preview Column -->
@@ -514,7 +498,7 @@
         <div class="flex flex-col gap-2 pt-2 border-t border-white/10 shrink-0">
           <div class="w-full flex items-center justify-between gap-3 bg-slate-900/85 border border-white/15 rounded-2xl px-3.5 py-2">
             <div class="flex flex-col text-right">
-              <span class="text-xs font-bold text-slate-300">عدد الطبعات (5,000 د.ع للطبعة • 10×15 سم)</span>
+              <span class="text-xs font-bold text-slate-300">عدد الطبعات (5,000 د.ع للطبعة • CP1500)</span>
               <span id="printTotalPriceLabel" class="text-sm sm:text-base font-black text-amber-300">المجموع: 5,000 د.ع</span>
             </div>
 
@@ -559,7 +543,7 @@
               data-action="download-image"
               class="py-2.5 px-3 rounded-2xl bg-sky-600/85 hover:bg-sky-500 active:scale-[0.98] border border-sky-300/40 text-white font-black text-xs sm:text-sm shadow-lg transition flex items-center justify-center gap-1.5"
             >
-              <span>حفظ الصورة (10×15)</span>
+              <span>حفظ الصورة (100×148)</span>
             </button>
           </div>
 
@@ -569,7 +553,7 @@
             data-action="direct-print"
             class="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 active:scale-[0.98] text-white font-black text-base sm:text-lg shadow-xl transition flex items-center justify-center gap-2"
           >
-            <span id="btnDirectPrintLabel">طباعة فورية — 5,000 د.ع</span>
+            <span id="btnDirectPrintLabel">طباعة فورية CP1500 — 5,000 د.ع</span>
           </button>
 
           <button
@@ -584,7 +568,6 @@
       </div>
     </section>
 
-    <!-- Accessible live status announcer & subtle print confirmation toast -->
     <div id="kioskLiveStatus" role="status" aria-live="polite" class="sr-only"></div>
 
     <div
@@ -597,7 +580,7 @@
       <div class="w-full max-w-5xl flex items-center justify-between gap-3 shrink-0">
         <div class="flex items-center gap-2.5">
           <span class="px-3.5 py-1.5 rounded-2xl bg-indigo-600/35 border border-amber-300/60 text-amber-200 text-xs sm:text-sm font-black">
-            معاينة بوست كارت (10×15 سم)
+            معاينة Canon SELPHY CP1500 (100×148 مم)
           </span>
           <span id="fullScreenPreviewMeta" class="text-xs sm:text-sm font-bold text-slate-300"></span>
         </div>
@@ -632,11 +615,11 @@
       </div>
 
       <div class="text-xs font-bold text-slate-400 shrink-0 text-center">
-        قياس 1200×1800 بكسل (100×148 مم) — في الهاتف اختر مقاس 4×6 / Postcard، وفي Windows فعّل Borderless و Margins: None
+        معاير لـ Canon SELPHY CP1500: 1200×1800 بكسل (100×148 مم) مع منطقة أمان داخلية لتعويض تمدد Borderless
       </div>
     </div>
 
-    <!-- 1200x1800 px (100mm x 148mm / Postcard 4x6 inch at 300 DPI) Canon SELPHY Canvas -->
+    <!-- 1200x1800 px (100mm x 148mm / Postcard 4x6 inch at 300 DPI) Canon SELPHY CP1500 Canvas -->
     <canvas id="selphyCanvas" width="1200" height="1800" class="hidden"></canvas>
   </div>
 
@@ -1069,9 +1052,9 @@
       if (STATE.printLayout === 'dual_strip') {
         const stripW = 600;
         const stripH = 1800;
-        const padX = 42;
-        const topPad = 56;
-        const bottomHeaderH = 172;
+        const padX = 48;
+        const topPad = 84;
+        const bottomHeaderH = 194;
         const gap = 22;
         const photoW = stripW - padX * 2;
         const photoH = (stripH - topPad - bottomHeaderH - gap * (count - 1)) / count;
@@ -1079,9 +1062,9 @@
       } else {
         const W = 1200;
         const H = 1800;
-        const headerHeight = 196;
-        const footerHeight = 176;
-        const sideMargin = 96;
+        const headerHeight = 212;
+        const footerHeight = 192;
+        const sideMargin = 104;
         if (count === 4) {
           const cols = 2;
           const rows = 2;
@@ -1149,7 +1132,7 @@
       clearWin.style.borderRadius = '28px';
 
       if (badge) {
-        badge.textContent = STATE.printLayout === 'postcard' ? 'بوست كارت 10×15 سم' : 'شريطين 10×15 سم';
+        badge.textContent = STATE.printLayout === 'postcard' ? 'CP1500 بوست كارت 100×148 مم' : 'CP1500 شريطين 100×148 مم';
       }
 
       if (clearVid) {
@@ -1776,7 +1759,7 @@
       }
 
       if (explicitAction === 'direct-print' || btnId === 'btnDirectPrint') {
-        announceKioskStatus('جاري تجهيز طباعة البوست كارت — الاستلام من الكاشير', true);
+        announceKioskStatus('جاري إرسال الطباعة إلى Canon SELPHY CP1500', true);
         triggerDirectPrint();
         return;
       }
@@ -1931,6 +1914,9 @@
       ctx.restore();
     }
 
+    /**
+     * Draw full-bleed background + CP1500 Borderless safe frame (4.5% outer bleed compensation)
+     */
     function drawThemeBackground(ctx, theme, width, height, variantSeed = 0) {
       const rng = createSeededRng(variantSeed + theme.id.split('').reduce((a, b) => a + b.charCodeAt(0) * 31, 17));
       const grad = ctx.createLinearGradient(0, 0, width * 0.25, height);
@@ -1939,8 +1925,9 @@
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, width, height);
 
-      const safeInsetX = Math.max(54, Math.round(width * 0.052));
-      const safeInsetY = Math.max(76, Math.round(height * 0.052));
+      // CP1500 Borderless over-spray safe zone (~5% inset on all sides)
+      const safeInsetX = Math.max(58, Math.round(width * 0.052));
+      const safeInsetY = Math.max(88, Math.round(height * 0.052));
 
       const puffCount = 5 + Math.floor(rng() * 4);
       for (let p = 0; p < puffCount; p++) {
@@ -2057,11 +2044,11 @@
 
       ctx.strokeStyle = theme.borderColor;
       ctx.lineWidth = 6;
-      ctx.strokeRect(stripX + 26, stripY + 54, stripW - 52, stripH - 108);
+      ctx.strokeRect(stripX + 30, stripY + 64, stripW - 60, stripH - 128);
 
-      const padX = 42;
-      const topPad = 76;
-      const bottomHeaderH = 186;
+      const padX = 48;
+      const topPad = 84;
+      const bottomHeaderH = 194;
       const gap = 22;
       const count = images.length;
       const availH = stripH - topPad - bottomHeaderH - gap * (count - 1);
@@ -2083,10 +2070,10 @@
       drawThemeStickersOverPhotos(ctx, theme, drawnPhotoRects, variantSeed + 313);
 
       ctx.fillStyle = theme.textColor;
-      ctx.font = '800 25px Cairo, sans-serif';
+      ctx.font = '800 24px Cairo, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(`${theme.stickerLeft} ${captions.topCaption} ${theme.stickerRight}`, stripX + stripW / 2, stripY + stripH - 104);
+      ctx.fillText(`${theme.stickerLeft} ${captions.topCaption} ${theme.stickerRight}`, stripX + stripW / 2, stripY + stripH - 114);
 
       ctx.restore();
     }
@@ -2140,16 +2127,16 @@
         ctx.strokeStyle = 'rgba(100, 116, 139, 0.55)';
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(600, 64);
-        ctx.lineTo(600, H - 64);
+        ctx.moveTo(600, 72);
+        ctx.lineTo(600, H - 72);
         ctx.stroke();
         ctx.restore();
       } else {
         drawThemeBackground(ctx, theme, W, H, variantSeed);
 
-        const headerHeight = 204;
-        const footerHeight = 184;
-        const sideMargin = 96;
+        const headerHeight = 212;
+        const footerHeight = 192;
+        const sideMargin = 104;
         const count = loadedImages.length;
         const drawnPhotoRects = [];
 
@@ -2157,7 +2144,7 @@
         ctx.font = '900 40px Cairo, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(`${theme.stickerLeft}  ${captions.topCaption}  ${theme.stickerRight}`, W / 2, 132);
+        ctx.fillText(`${theme.stickerLeft}  ${captions.topCaption}  ${theme.stickerRight}`, W / 2, 142);
 
         if (count === 4) {
           const cols = 2;
@@ -2204,7 +2191,7 @@
         ctx.font = '800 34px Cairo, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(`${theme.stickerLeft}  ${captions.bottomCaption}  ${theme.stickerRight}`, W / 2, H - 102);
+        ctx.fillText(`${theme.stickerLeft}  ${captions.bottomCaption}  ${theme.stickerRight}`, W / 2, H - 114);
       }
 
       const dataUrl = canvas.toDataURL('image/jpeg', 0.96);
@@ -2252,7 +2239,7 @@
 
       if (countEl) countEl.textContent = String(copies);
       if (totalEl) totalEl.textContent = `المجموع: ${formattedTotal}`;
-      if (printBtnLabel) printBtnLabel.textContent = `طباعة فورية (${copies}) — ${formattedTotal}`;
+      if (printBtnLabel) printBtnLabel.textContent = `طباعة فورية CP1500 (${copies}) — ${formattedTotal}`;
     }
 
     function changePrintCopies(delta) {
@@ -2268,11 +2255,11 @@
       const dataUrl = canvas.toDataURL('image/jpeg', 0.98);
       const link = document.createElement('a');
       link.href = dataUrl;
-      link.download = `SELPHY_10x15_${STATE.printLayout}_${Date.now()}.jpg`;
+      link.download = `CP1500_100x148mm_${STATE.printLayout}_${Date.now()}.jpg`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      announceKioskStatus('تم حفظ الصورة بدقة 1200×1800 (10×15 سم)', true);
+      announceKioskStatus('تم حفظ الصورة بدقة 1200×1800 (100×148 مم) لـ CP1500', true);
     }
 
     async function triggerDirectPrint() {
