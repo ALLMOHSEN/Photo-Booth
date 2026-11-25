@@ -114,7 +114,7 @@ input{font:inherit;font-size:24px;padding:12px 16px;border-radius:14px;border:3p
 .gear{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));right:14px;z-index:20;width:46px;height:46px;border-radius:50%;display:none;place-items:center;padding:0;border:1px solid rgba(124,108,242,.28);background:rgba(255,255,255,.42);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:var(--ink);opacity:.5;cursor:pointer;-webkit-touch-callout:none}
 .ishome .gear{display:grid}.gear:hover,.gear:focus-visible{opacity:1}
 #cfg{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(30,20,60,.4);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);overflow:auto}
-.cmenu{display:flex;flex-wrap:wrap;gap:22px;justify-content:center;max-width:640px}
+.cmenu{display:flex;flex-wrap:wrap;gap:22px;justify-content:center;max-width:720px}
 .cb{display:flex;flex-direction:column;align-items:center;gap:8px;background:none;border:0;color:#fff;font:600 15px/1.25 'Tajawal',sans-serif;cursor:pointer;width:96px;padding:0;animation:cpop .35s both;text-shadow:0 1px 6px rgba(0,0,0,.45)}
 .cb .c{width:76px;height:76px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.6);box-shadow:0 8px 24px rgba(0,0,0,.22);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);transition:transform .15s}
 .cb:active .c{transform:scale(.92)}.cb .ic{width:46%;height:46%;stroke:#fff}
@@ -124,7 +124,7 @@ input{font:inherit;font-size:24px;padding:12px 16px;border-radius:14px;border:3p
 .cpanel h3{margin:0;font:700 24px 'Baloo Bhaijaan 2',sans-serif}
 .cpanel p,.cpanel small{margin:0;font-size:16px;color:var(--muted)}
 .cpanel .btn{padding:10px 28px;font-size:22px}
-.cpanel input[type=text],.cpanel input[type=url],.cpanel select{width:100%;font:inherit;font-size:18px;padding:10px 12px;border-radius:12px;border:2px solid var(--soft);background:#fff;color:var(--ink)}
+.cpanel input[type=text],.cpanel input[type=url],.cpanel input[type=password],.cpanel select{width:100%;font:inherit;font-size:18px;padding:10px 12px;border-radius:12px;border:2px solid var(--soft);background:#fff;color:var(--ink)}
 .opt{display:flex;align-items:center;gap:10px;padding:10px 12px;border:2px solid var(--soft);border-radius:14px;background:#fff;cursor:pointer;font-size:18px;text-align:right}
 .opt.sel{border-color:var(--amber);background:#F3EFFF}.opt input{accent-color:var(--amber);width:auto;flex:none;padding:0;margin:0}.srow span{white-space:nowrap}.srow select{flex:1;min-width:0}
 #camPrev{width:100%;max-height:26vh;border-radius:14px;background:#000;object-fit:cover}
@@ -138,6 +138,8 @@ input{font:inherit;font-size:24px;padding:12px 16px;border-radius:14px;border:3p
 .qcard{background:#fff;border-radius:24px;padding:18px 22px;display:flex;flex-direction:column;gap:10px;align-items:center;max-width:92vw;color:var(--ink)}
 .qcard b{font:700 22px 'Baloo Bhaijaan 2',sans-serif}.qcard small{max-width:260px;overflow-wrap:anywhere;color:var(--muted);direction:ltr}
 .qcard .btn{padding:8px 26px;font-size:20px}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+.shake{animation:shake .35s}
 #toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:50;background:rgba(43,36,80,.92);color:#fff;padding:10px 20px;border-radius:999px;font-size:17px;max-width:92vw;text-align:center}
 .promo{position:relative;margin-top:18px;padding:14px 8px 6px;max-width:94vw}
 .pfloat{position:relative;z-index:2;display:inline-flex;align-items:center;gap:10px;padding:10px 22px;border-radius:999px;background:rgba(255,255,255,.55);border:1.5px solid rgba(124,108,242,.35);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);box-shadow:0 10px 26px rgba(124,108,242,.2);font:700 clamp(17px,2.4vw,24px) 'Baloo Bhaijaan 2','Tajawal',sans-serif;color:var(--ink);animation:bob 3s ease-in-out infinite}
@@ -1680,6 +1682,7 @@ const IC={
  smile:'<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>',
  sparkle:'<path d="M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z"/>',
  dot:'<circle cx="12" cy="12" r="2.5"/>',
+ lock:'<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
  printer:'<polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>',
  camera:'<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>',
  tag:'<path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>',
@@ -1698,7 +1701,7 @@ const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 const SOCIAL=[['instagram','إنستغرام'],['facebook','فيسبوك'],['tiktok','تيك توك'],['snapchat','سناب شات'],['whatsapp','واتساب'],['telegram','تيليغرام'],['youtube','يوتيوب'],['x','إكس (تويتر)'],['globe','موقع إلكتروني']];
 const SYMS=['sliders','gear','star','heart','moon','sun','smile','sparkle','dot'];
 
-const CFG_DEF={cam:{mode:'front',id:'',mirror:'auto'},price:5000,links:{},sym:'sliders'};
+const CFG_DEF={cam:{mode:'front',id:'',mirror:'auto'},price:5000,links:{},sym:'sliders',pass:''};
 function loadCfg(){try{const j=JSON.parse(localStorage.getItem('galaxy_cfg')||'{}');return {...CFG_DEF,...j,cam:{...CFG_DEF.cam,...(j.cam||{})},links:{...(j.links||{})}}}catch(e){return JSON.parse(JSON.stringify(CFG_DEF))}}
 let CFG=loadCfg();
 function saveCfg(){try{localStorage.setItem('galaxy_cfg',JSON.stringify(CFG))}catch(e){}}
@@ -1717,17 +1720,17 @@ function applyCfgUI(){$('gear').innerHTML=svg(CFG.sym);renderPromo();renderSocia
 // قائمة الأزرار الدائرية الشفافة (تظهر فوق الصفحة الرئيسية ولا تفتح صفحة جديدة)
 let prevStream=null;
 function stopPrev(){if(prevStream){prevStream.getTracks().forEach(t=>t.stop());prevStream=null}}
-function cfgOpen(){$('cfg').hidden=false;cfgMenu()}
+function cfgOpen(){$('cfg').hidden=false;askPass()}
 function cfgClose(){stopPrev();$('cfg').hidden=true}
 function cfgMenu(){stopPrev();$('cpanel').hidden=true;const m=$('cmenu');m.hidden=false;m.innerHTML='';
- [['printer','إضافة الطابعة','printer'],['camera','الكاميرا','camera'],['price','سعر الطباعة','tag'],['social','مواقع التواصل','link'],['symbol','رمز الإعدادات',CFG.sym]].forEach(([k,t,i],n)=>{
+ [['printer','إضافة الطابعة','printer'],['camera','الكاميرا','camera'],['price','سعر الطباعة','tag'],['social','مواقع التواصل','link'],['symbol','رمز الإعدادات',CFG.sym],['pass','كلمة المرور','lock']].forEach(([k,t,i],n)=>{
   const b=document.createElement('button');b.className='cb';b.style.animationDelay=(n*60)+'ms';b.innerHTML='<span class="c">'+svg(i)+'</span>'+t;b.onclick=()=>cfgAction(k);m.appendChild(b)})}
 function panel(title,html,onSave){stopPrev();$('cmenu').hidden=true;const p=$('cpanel');p.hidden=false;
  p.innerHTML='<h3>'+title+'</h3>'+html+'<div class="row"><button class="btn alt" id="pBack">رجوع</button>'+(onSave?'<button class="btn" id="pSave">حفظ</button>':'')+'</div>';
  $('pBack').onclick=cfgMenu;if(onSave)$('pSave').onclick=onSave}
 function cfgAction(k){
  if(k==='printer'){const B=window.AndroidBridge;if(B&&B.configurePrinter){cfgClose();B.configurePrinter()}else toast('إضافة الطابعة متاحة في التطبيق فقط. في المتصفح تظهر نافذة الطباعة.');return}
- if(k==='camera')return camPanel();if(k==='price')return pricePanel();if(k==='social')return socialPanel();if(k==='symbol')return symPanel()}
+ if(k==='camera')return camPanel();if(k==='price')return pricePanel();if(k==='social')return socialPanel();if(k==='symbol')return symPanel();if(k==='pass')return passPanel()}
 
 async function camPanel(){
  stopCamera();let devs=[];
@@ -1760,6 +1763,28 @@ function socialPanel(){
 function symPanel(){
  panel('رمز الإعدادات','<p>الرمز الذي يظهر في الشاشة الرئيسية (اضغط عليه مطولاً لفتح الإعدادات).</p><div class="symgrid">'+SYMS.map(k=>'<button data-s="'+k+'" class="'+(k===CFG.sym?'sel':'')+'" aria-label="'+k+'">'+svg(k)+'</button>').join('')+'</div>',null);
  document.querySelectorAll('.symgrid button').forEach(b=>b.onclick=()=>{CFG.sym=b.dataset.s;saveCfg();applyCfgUI();document.querySelectorAll('.symgrid button').forEach(x=>x.classList.toggle('sel',x===b));toast('تم تغيير الرمز ✓')})}
+
+// ---- كلمة مرور الإعدادات (الافتراضية 1234، وتُغيَّر من زر كلمة المرور داخل الإعدادات) ----
+async function hashPw(p){const t='galaxy:'+p;
+ try{if(window.crypto&&crypto.subtle){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}}catch(e){}
+ let h=5381;for(const c of t)h=((h<<5)+h+c.charCodeAt(0))|0;return 'x'+(h>>>0).toString(16)}
+let PW_FAILS=0,PW_LOCK=0;
+function askPass(){stopPrev();$('cmenu').hidden=true;const p=$('cpanel');p.hidden=false;
+ p.innerHTML='<h3>كلمة مرور الإعدادات</h3><input id="pw" type="password" autocomplete="off" placeholder="أدخل كلمة المرور"><small id="pwMsg"></small><div class="row"><button class="btn alt" id="pwNo">إلغاء</button><button class="btn" id="pwOk">دخول</button></div>';
+ const inp=$('pw'),msg=$('pwMsg');
+ const tryIt=async()=>{const left=Math.ceil((PW_LOCK-Date.now())/1000);
+  if(left>0){msg.textContent='محاولات كثيرة، انتظر '+left+' ثانية';return}
+  const ok=(await hashPw(inp.value))===(CFG.pass||await hashPw('1234'));
+  if(ok){PW_FAILS=0;cfgMenu();return}
+  PW_FAILS++;inp.value='';p.classList.remove('shake');void p.offsetWidth;p.classList.add('shake');
+  if(PW_FAILS>=5){PW_FAILS=0;PW_LOCK=Date.now()+30000;msg.textContent='تم القفل 30 ثانية'}else msg.textContent='كلمة المرور غير صحيحة'};
+ $('pwOk').onclick=tryIt;$('pwNo').onclick=cfgClose;inp.addEventListener('keydown',e=>{if(e.key==='Enter')tryIt()});setTimeout(()=>inp.focus(),60)}
+function passPanel(){
+ panel('تغيير كلمة المرور',(CFG.pass?'':'<p>كلمة المرور الحالية هي الافتراضية 1234، يُنصح بتغييرها.</p>')+'<input id="np1" type="password" autocomplete="new-password" placeholder="كلمة المرور الجديدة"><input id="np2" type="password" autocomplete="new-password" placeholder="أعد كتابتها"><small id="npMsg">4 رموز على الأقل</small>',async()=>{
+  const a=$('np1').value,b=$('np2').value,m=$('npMsg');
+  if(a.length<4){m.textContent='يجب أن تكون 4 رموز على الأقل';return}
+  if(a!==b){m.textContent='الكلمتان غير متطابقتين';return}
+  CFG.pass=await hashPw(a);saveCfg();toast('تم تغيير كلمة المرور ✓');cfgMenu()})}
 
 // فتح الإعدادات بالضغط المطول على الرمز (أو على الشعار) فقط
 (()=>{const hold=(el,ms)=>{if(!el)return;let t;el.addEventListener('pointerdown',()=>{t=setTimeout(cfgOpen,ms)});['pointerup','pointerleave','pointercancel'].forEach(e=>el.addEventListener(e,()=>clearTimeout(t)));el.addEventListener('contextmenu',e=>e.preventDefault())};
